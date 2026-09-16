@@ -28,17 +28,22 @@ const CATEGORIES: Category[] = [
   "pendant",
 ];
 
-async function uploadPhoto(file: File, target: string) {
+type Paths = { main: string; thumb: string };
+type FileResult = { name: string; ok: boolean; message: string };
+type MatchGroup = { boothSaleId: string; thumbPath: string; candidates: Candidate[] };
+
+async function uploadPhoto(file: File, target: string): Promise<Paths> {
   const { main, thumb } = await resizeImage(file);
   const form = new FormData();
   form.append("main", main, "main.jpg");
   form.append("thumb", thumb, "thumb.jpg");
   form.append("target", target);
   const res = await fetch("/api/photos", { method: "POST", body: form });
-  if (!res.ok) {
-    const body = (await res.json().catch(() => ({}))) as { error?: string };
+  const body = (await res.json().catch(() => ({}))) as { error?: string; paths?: Paths };
+  if (!res.ok || !body.paths) {
     throw new Error(body.error ?? `Upload failed (${res.status})`);
   }
+  return body.paths;
 }
 
 // Client half of the dev harness page (Phase 3 step 5). Exposes
@@ -51,8 +56,12 @@ export function EmbedDevClient() {
   const [signInError, setSignInError] = useState<string | null>(null);
   const [category, setCategory] = useState<Category>("ring");
   const [status, setStatus] = useState<string | null>(null);
-  const [boothSaleId, setBoothSaleId] = useState<string | null>(null);
-  const [candidates, setCandidates] = useState<Candidate[] | null>(null);
+  const [catalogResults, setCatalogResults] = useState<FileResult[]>([]);
+  const [boothResults, setBoothResults] = useState<FileResult[]>([]);
+  // Every booth sale created this session (across however many "Booth
+  // photo" selections), so "Find matches" can cover all of them at once.
+  const [boothPhotos, setBoothPhotos] = useState<{ id: string; thumbPath: string }[]>([]);
+  const [matches, setMatches] = useState<MatchGroup[] | null>(null);
 
   useEffect(() => {
     window.__awendaResize = resizeImage;
@@ -78,41 +87,52 @@ export function EmbedDevClient() {
     await createClient().auth.signOut();
   }
 
-  async function handleCatalogPhoto(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
+  // Sequential, not parallel — simple, and avoids hammering Voyage with a
+  // burst of embed calls when someone picks a whole folder of photos.
+  async function handleCatalogPhotos(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? []);
     e.target.value = "";
-    if (!file) return;
-    setStatus("Uploading catalog photo…");
-    try {
-      const { id } = await createDevDesign(category);
-      await uploadPhoto(file, `design:${id}`);
-      setStatus(`Catalog photo uploaded for design ${id}.`);
-    } catch (err) {
-      setStatus(`Catalog upload failed: ${(err as Error).message}`);
+    for (const [i, file] of files.entries()) {
+      setStatus(`Uploading catalog photo ${i + 1}/${files.length}…`);
+      try {
+        const { id } = await createDevDesign(category);
+        await uploadPhoto(file, `design:${id}`);
+        setCatalogResults((prev) => [...prev, { name: file.name, ok: true, message: `design ${id}` }]);
+      } catch (err) {
+        setCatalogResults((prev) => [...prev, { name: file.name, ok: false, message: (err as Error).message }]);
+      }
     }
+    setStatus(null);
   }
 
-  async function handleBoothPhoto(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
+  async function handleBoothPhotos(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? []);
     e.target.value = "";
-    if (!file) return;
-    setStatus("Uploading booth photo…");
-    try {
-      const { id } = await createDevBoothSale(category);
-      await uploadPhoto(file, `booth:${id}`);
-      setBoothSaleId(id);
-      setCandidates(null);
-      setStatus(`Booth photo uploaded for booth sale ${id}.`);
-    } catch (err) {
-      setStatus(`Booth upload failed: ${(err as Error).message}`);
+    for (const [i, file] of files.entries()) {
+      setStatus(`Uploading booth photo ${i + 1}/${files.length}…`);
+      try {
+        const { id } = await createDevBoothSale(category);
+        const paths = await uploadPhoto(file, `booth:${id}`);
+        setBoothResults((prev) => [...prev, { name: file.name, ok: true, message: `booth sale ${id}` }]);
+        setBoothPhotos((prev) => [...prev, { id, thumbPath: paths.thumb }]);
+        setMatches(null);
+      } catch (err) {
+        setBoothResults((prev) => [...prev, { name: file.name, ok: false, message: (err as Error).message }]);
+      }
     }
+    setStatus(null);
   }
 
   async function handleFindMatches() {
-    if (!boothSaleId) return;
+    if (boothPhotos.length === 0) return;
     setStatus("Finding matches…");
     try {
-      setCandidates(await devFindCandidates(boothSaleId));
+      const results: MatchGroup[] = [];
+      for (const booth of boothPhotos) {
+        const candidates = await devFindCandidates(booth.id);
+        results.push({ boothSaleId: booth.id, thumbPath: booth.thumbPath, candidates });
+      }
+      setMatches(results);
       setStatus(null);
     } catch (err) {
       setStatus(`Find matches failed: ${(err as Error).message}`);
@@ -185,9 +205,11 @@ export function EmbedDevClient() {
             type="file"
             accept="image/*"
             capture="environment"
-            onChange={handleCatalogPhoto}
+            multiple
+            onChange={handleCatalogPhotos}
             className="mt-1"
           />
+          <ResultList results={catalogResults} />
         </label>
 
         <label className="block">
@@ -196,14 +218,16 @@ export function EmbedDevClient() {
             type="file"
             accept="image/*"
             capture="environment"
-            onChange={handleBoothPhoto}
+            multiple
+            onChange={handleBoothPhotos}
             className="mt-1"
           />
+          <ResultList results={boothResults} />
         </label>
 
         <button
           onClick={handleFindMatches}
-          disabled={!boothSaleId}
+          disabled={boothPhotos.length === 0}
           className="rounded bg-black px-3 py-2 text-white disabled:opacity-40"
         >
           Find matches
@@ -212,32 +236,60 @@ export function EmbedDevClient() {
 
       {status && <p className="mt-4 text-sm text-gray-600">{status}</p>}
 
-      {candidates && (
-        <ul className="mt-4 flex flex-col gap-3">
-          {candidates.map((c) => (
-            <li
-              key={c.design.id}
-              className="flex items-center gap-3 rounded border border-gray-200 p-2"
-            >
-              {c.design.thumb_image_path && (
-                // eslint-disable-next-line @next/next/no-img-element -- dev-only harness, not worth next/image config
+      {matches && (
+        <div className="mt-4 flex flex-col gap-6">
+          {matches.map((group) => (
+            <section key={group.boothSaleId}>
+              <div className="flex items-center gap-2">
+                {/* eslint-disable-next-line @next/next/no-img-element -- dev-only harness, not worth next/image config */}
                 <img
-                  src={publicPhotoUrl(c.design.thumb_image_path)}
+                  src={publicPhotoUrl(group.thumbPath)}
                   alt=""
-                  className="h-16 w-16 rounded object-cover"
+                  className="h-12 w-12 rounded object-cover"
                 />
-              )}
-              <div className="text-sm">
-                <p className="font-medium">{c.design.name_en}</p>
-                <p className="text-gray-600">
-                  {c.design.category} · distance {c.distance.toFixed(4)}
-                  {c.crossCategory ? " · cross-category" : ""}
-                </p>
+                <p className="text-sm font-medium">Booth sale {group.boothSaleId}</p>
               </div>
-            </li>
+              <ul className="mt-2 flex flex-col gap-3">
+                {group.candidates.map((c) => (
+                  <li
+                    key={c.design.id}
+                    className="flex items-center gap-3 rounded border border-gray-200 p-2"
+                  >
+                    {c.design.thumb_image_path && (
+                      // eslint-disable-next-line @next/next/no-img-element -- dev-only harness, not worth next/image config
+                      <img
+                        src={publicPhotoUrl(c.design.thumb_image_path)}
+                        alt=""
+                        className="h-16 w-16 rounded object-cover"
+                      />
+                    )}
+                    <div className="text-sm">
+                      <p className="font-medium">{c.design.name_en}</p>
+                      <p className="text-gray-600">
+                        {c.design.category} · distance {c.distance.toFixed(4)}
+                        {c.crossCategory ? " · cross-category" : ""}
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </section>
           ))}
-        </ul>
+        </div>
       )}
     </main>
+  );
+}
+
+function ResultList({ results }: { results: FileResult[] }) {
+  if (results.length === 0) return null;
+  return (
+    <ul className="mt-1 text-sm">
+      {results.map((r, i) => (
+        <li key={i} className={r.ok ? "text-green-700" : "text-red-600"}>
+          {r.name}: {r.ok ? r.message : `error — ${r.message}`}
+        </li>
+      ))}
+    </ul>
   );
 }

@@ -54,13 +54,13 @@ export const DIMS = 1024;
   booth sale; `match_designs(booth.embedding)` returns that design at rank 1 with distance ≈ 0.
 
 ### 4. `match_designs` wrapper (`src/lib/embeddings/search.ts`)
-- `findCandidates(boothSaleId, k = 3)` → calls RPC (service client — `match_designs` is service-role-only) with the booth sale's embedding and category filter, joins design name/thumb/variants, returns `[{design, distance, rank}]`.
+- `findCandidates(boothSaleId, k = 5)` → calls RPC (service client — `match_designs` is service-role-only) with the booth sale's embedding and category filter, joins design name/thumb/variants, returns `[{design, distance, rank}]`.
 - Category filter is applied first; if fewer than `k` results, fall back to no category filter and mark those candidates `crossCategory: true`.
 - **Verify:** integration test with seed data: same-category preference; fallback path exercised.
 
 ### 5. Dev harness page (`/admin/dev/embed`, only when `NODE_ENV !== 'production'`)
 - Includes a dev-only email/password sign-in (no login UI until Phase 4): create the user in Supabase Studio (`localhost:54323`) with an `ADMIN_EMAILS` address and run `pnpm seed:admins`.
-- Upload a photo as "catalog", upload another as "booth", show top-3 with distances.
+- Upload a photo as "catalog", upload another as "booth", show top-5 with distances.
 - **Verify (manual, owner or agent with a real key):** photograph one real item twice on the
   gray tray; rank 1 is correct. Record the distance in `DECISIONS.md` as a baseline.
 

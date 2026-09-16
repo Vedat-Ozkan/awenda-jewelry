@@ -197,9 +197,58 @@ $0.60 per billion pixels, $0.0012/image cap, 150 B free pixels.
 - `/api/photos` rejects bodies over 5 MB via `content-length` (413) before parsing.
 - Production Worker: `EMBEDDINGS_PROVIDER=voyage` in `wrangler.jsonc` vars; `VOYAGE_API_KEY`
   and `SUPABASE_SERVICE_ROLE_KEY` are Worker secrets.
-- Voyage baseline distance for a real item photographed twice: **pending owner's manual check**
-  (record here when done).
+- Voyage baseline (2026-09-16, owner, *uncontrolled backgrounds*: wood desk, hand, red book):
+  booth photo of ring A → rank 1 ring A 0.4677, rank 2 ring B **0.4685**, rank 3 ring A (other
+  background) 0.5202. Rank 1 correct, but the margin to a different ring is ~0.001 — the
+  embedding is dominated by background. Confirms (a) the pipeline works end-to-end and (b) the
+  top-3 + human-confirm design is essential. Controlled gray-tray baseline: see Open #16.
 **Affects:** Phase 3; Phase 4 (login reuses `requireAdmin`); Phase 5 (similar styles via server).
+
+### Top-5 candidates; multi-file photo selection                        (2026-09-16, owner)
+**Decision:** Reconciliation shows the **top 5** catalog matches (was top 3): `findCandidates`
+default `k = 5`, dev harness and Phase 8 UI show five, `matched_rank` is 1..5. Photo inputs
+accept **multiple files** (`multiple` attribute): in the dev harness each catalog file becomes
+its own design and each booth file its own booth sale; Phase 4 cataloging must support the same
+"pick many from a folder → one draft design per photo, then fill in details" flow.
+**Why:** Owner request after the Phase 3 manual check showed small margins between candidates —
+more candidates on screen makes the human confirm step more forgiving; bulk selection matches
+how photos actually arrive (a folder from the phone).
+**Affects:** Phase 3 (search default, dev page), Phase 4 step 2/3 (bulk import), Phase 8 (UI, rank
+metric range), `00-overview.md` §1 wording "top-3" → "top-5".
+
+### Separate online stock at launch; booth integration deferred        (2026-09-16, owner)
+**Decision:** The website sells from its **own, physically separate stock**. Nothing sold at the
+market touches the site, so **Phases 7 (booth logging) and 8 (reconciliation) are deferred** —
+files moved to `docs/plan/deferred/`. No SKU tags, no photo matching, no oversell-vs-booth
+logic for now. Fulfilment stays **Ship + Pick up at market** (the owner brings the ordered
+item). "Mark as picked up" moves into the Orders admin (Phase 6). `booth_sales` and the
+`booth_sale`/`reconcile_undo` movement reasons remain in the schema unused.
+**If/when stock is merged** (decided by traffic/sales, see Analytics): identification will be by
+**SKU tags**, not photos — auto-assigned `category letter + 3 digits` (`R-047`; R ring · N
+necklace · B bracelet · A anklet · E earring · G bangle · C chain · P pendant), size printed
+separately, sold tags kept in a jar and entered in the evening. Embeddings stay for storefront
+"similar styles" only either way.
+**Why:** Simplest possible launch; the market side is staffed by the owner's parents and has no
+identifiers today. The Phase 3 manual check showed photo matching alone is not reliable enough
+to be the primary path (background-dominated embeddings, ~0.001 margins). Deciding on tags
+before there is online demand is premature.
+**Affects:** Phases 4 (no SKU/label sheet; multi-file import kept), 5 (no market-day notice),
+6 (pickup status in Orders admin), 7 (now Analytics & leads), 9 (test day, README framing).
+Open #14, #16, #17 superseded/deferred.
+
+### Analytics and lead capture                                          (2026-09-16, owner)
+**Decision:** (1) **Cloudflare Web Analytics** (free, cookieless, no consent banner) for
+visitors, referrers, countries, top pages, Web Vitals. (2) **First-party funnel events** in an
+`analytics_events` table (`page_view`, `design_view`, `add_to_cart`, `begin_checkout`; orders
+come from `orders`) written via a validated `POST /api/track` route, anonymous session id in
+`sessionStorage`, no PII. (3) **`/admin/analytics`** page: funnel and conversion, revenue by
+week, ship/pickup split, top viewed designs, views of sold-out designs (demand signal), leads.
+(4) **Leads:** "Notify me when back in stock" on sold-out designs (`stock_notifications`) and a
+footer newsletter signup (`newsletter_subscribers`), both EN/FR, with unsubscribe links; CSV
+export from admin. No GA4 (cookies → consent banner, extra vendor).
+**Why:** The owner wants to see whether the site gets traffic and converts before investing in
+merged stock; first-party data is enough and keeps the $0 / no-banner posture.
+**Affects:** New Phase 7 `07-analytics.md` (depends on 5, 6); Phase 9 README uses these numbers.
 
 ---
 
@@ -230,6 +279,10 @@ $0.60 per billion pixels, $0.0012/image cap, 150 B free pixels.
 12. ~~Voyage model version~~ **Resolved 2026-09-16** — `voyage-multimodal-3.5`, 1024 dims (see Locked).
 13. **Market details** — name, address, weekday, hours, pickup instructions (EN). Seeded as
     placeholders in Phase 2 (owner, 2026-09-16); real values needed at Phase 9 step 1.
-14. **Market-day oversell notice** — show a storefront banner during market hours saying
-    "Orders placed during market hours are confirmed by email this evening"? Ask before Phase 5 step 8.
+14. ~~Market-day oversell notice~~ **Moot 2026-09-16** — separate online stock; no booth oversells.
 15. ~~When to create the hosted Supabase project~~ **Resolved 2026-09-16** — created at Phase 3 (see Locked).
+16. ~~Matching margin on the gray tray~~ **Superseded 2026-09-16** — photo matching dropped; booth integration deferred.
+17. **Physical tag / label choice** — deferred with Phases 7–8 (only needed when stock is merged).
+18. **Cloudflare Web Analytics site token** — owner creates the site in the Cloudflare dashboard
+    (Analytics & Logs → Web Analytics → Add site, hostname `awendajewelry.com` + the workers.dev
+    URL) and provides the token for `NEXT_PUBLIC_CF_BEACON_TOKEN`. Needed at Phase 7 step 1.

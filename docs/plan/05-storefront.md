@@ -10,7 +10,6 @@ persists in `localStorage`; sold-out designs appear greyed with similar styles; 
 mobile performance ≥ 90 on the catalog page; e2e covers browsing, language switch, cart.
 
 > **STOP — ask the owner** before step 1: logo files and brand colours (Open #10).
-> Before step 8: market-day oversell banner (Open #14).
 
 ---
 
@@ -60,9 +59,7 @@ mobile performance ≥ 90 on the catalog page; e2e covers browsing, language swi
 - `/[locale]/about` (parents' story — placeholder copy, owner supplies text in Phase 9), `/[locale]/pickup` (market info + `pickup_instructions`), `/[locale]/policies` (shipping/returns/privacy — placeholder until Open #4).
 - **Verify:** pages render in both locales.
 
-### 8. Market-day notice (if approved in Open #14)
-- During market hours on market day, show a dismissible banner: "Orders placed during market hours are confirmed by email this evening."
-- **Verify:** unit test for the time-window predicate; e2e with a mocked clock.
+### 8. ~~Market-day notice~~ — dropped 2026-09-16 (separate online stock; Open #14 moot). Sold-out product pages get a **"Notify me when back in stock"** email form in Phase 7; leave a clear slot for it here.
 
 ### 9. SEO and performance
 - `sitemap.ts` (all active + archived product URLs, both locales), `robots.ts`, canonical + hreflang, Open Graph images (main photo).

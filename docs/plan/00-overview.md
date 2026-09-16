@@ -16,14 +16,16 @@ surgical changes, verify every step) apply to every phase here.
 |---|---|---|
 | **Storefront** (`/en`, `/fr`) | Customers | Browse catalog, add to cart, pay with Stripe, choose **Ship** or **Pick up at market**. Sold-out designs stay visible, greyed, with "similar styles". |
 | **Admin: Catalog** (`/admin/catalog`) | Owner | Photograph new stock on a gray backdrop, enter name/category/price/variants, publish. Bulk ops (archive, restock, reprice). Photo generates a Voyage image embedding stored in pgvector. |
-| **Admin: Booth** (`/admin/booth`) | Owner, at the market | Two tabs: **Log sale** (photo → category → variant → done, <10 s) and **Pickups** (mark online orders as collected). |
-| **Admin: Reconcile** (`/admin/reconcile`) | Owner, evening after market | For each booth photo, show top-3 catalog matches via vector search; owner taps the right one; inventory decrements. Flags oversells vs. online orders. |
-| **Admin: Orders** (`/admin/orders`) | Owner | View paid orders, mark shipped (with tracking), refund. |
+| **Admin: Analytics** (`/admin/analytics`) | Owner | Traffic (Cloudflare Web Analytics), funnel views → carts → orders, revenue, top and sold-out designs, leads (notify-me, newsletter). |
+| **Admin: Orders** (`/admin/orders`) | Owner | View paid orders, mark shipped (with tracking) or picked up, refund. |
 
 Business facts that shape the design:
 - 200–500 unique designs, 2–3 units each (~600–1,500 pieces). Every category has variants
   (ring sizes, chain/bracelet/anklet lengths); earrings are "one size".
 - One fixed weekly market (same place, same day). Pickup happens there.
+- **Online stock is separate from market stock** (decided 2026-09-16). No booth logging or
+  reconciliation at launch; those phases are deferred to `docs/plan/deferred/` until traffic
+  justifies merging stock (then via SKU tags).
 - The owner (a developer) operates all admin surfaces. The owner's parents own the business
   and only touch the public site.
 - Jewelry is light and small: **one flat shipping rate**, no live carrier rates.
@@ -38,14 +40,15 @@ Business facts that shape the design:
 | Framework | TypeScript, Next.js (App Router), React, Tailwind. Package manager: `pnpm`. Node 22. |
 | Hosting | **Cloudflare Workers** via `@opennextjs/cloudflare` (free tier; commercial use allowed). |
 | Database | **Supabase Free** — Postgres + pgvector + Auth + Storage. A Cloudflare Cron Trigger pings it every 3 days to prevent idle-pausing. |
-| Embeddings | **Voyage AI multimodal** (`voyage-multimodal-3` family). Effectively $0 at our volume. Fake deterministic provider in tests. |
+| Embeddings | **Voyage AI multimodal** (`voyage-multimodal-3.5`). Used for storefront "similar styles" only (booth photo matching deferred, 2026-09-16). Fake deterministic provider in tests. |
 | Payments | Stripe Checkout (hosted). Webhook `checkout.session.completed` creates the order and decrements inventory. |
 | Email | Resend (free tier) for order confirmations / shipping notices, EN + FR. |
 | i18n | `next-intl`, locales `en` and `fr`, path prefix routing. UI chrome fully translated; product names/descriptions have optional FR with EN fallback. |
 | Images | Resized **client-side** (canvas) to 1024px main + 400px thumb before upload. No server image processing (Sharp does not run on Workers; Supabase image transforms are Pro-only). |
 | Variants | Every design has ≥1 variant row (`label`, `qty_on_hand`). "One size" is a variant. Size is never inferred from photos. |
-| Reconciliation | AI proposes top-3, human confirms. Never auto-match. Record the rank of the confirmed candidate (real accuracy metric). |
-| Testing | Vitest unit + integration (against local Supabase), Playwright e2e for cataloging, booth, reconciliation, checkout. GitHub Actions CI on every PR. |
+| Stock model | Online stock separate from market stock; no reconciliation at launch. Deferred design: SKU tags (`R-047`). |
+| Analytics | Cloudflare Web Analytics (cookieless) + first-party funnel events + `/admin/analytics`; leads via notify-me and newsletter. No GA4. |
+| Testing | Vitest unit + integration (against local Supabase), Playwright e2e for cataloging, storefront, checkout, analytics. GitHub Actions CI on every PR. |
 | Repo | Public GitHub repo, code only. Secrets in env, data only in Supabase. README doubles as a case study. |
 | Brand | "Awenda Jewelry". Logo exists (owner will provide files). Domain `awendajewelry.com` already owned (registered via Etsy Pattern / Tucows) — recovery + DNS move in Phase 9. |
 | Budget | $0/mo hosting + domain (~$10/yr) + Stripe per-transaction fees. |
@@ -78,7 +81,7 @@ Business facts that shape the design:
 Core inventory rule: **`variants.qty_on_hand` is the single source of truth**, changed only
 through the Postgres function `adjust_inventory()` which also appends to the
 `inventory_movements` ledger. Callers: catalog publish/restock, Stripe webhook (online sale),
-reconciliation confirm (booth sale), refund.
+refund. (Booth-sale callers arrive only if stock is merged later.)
 
 ---
 
@@ -94,9 +97,9 @@ Each phase is one branch and one PR. Do them in order; later phases assume earli
 | 4 | `04-admin-cataloging.md` | Admin auth, catalog CRUD, variant entry, bulk ops | 3 |
 | 5 | `05-storefront.md` | Bilingual catalog + product pages, cart, sold-out behaviour, similar styles, SEO | 3 |
 | 6 | `06-checkout-orders.md` | Stripe Checkout (ship/pickup), webhook → order + inventory, emails, orders admin | 4, 5 |
-| 7 | `07-booth-logging.md` | Booth PWA: log sale, pickups tab, sold-online-today banner | 4, 6 |
-| 8 | `08-reconciliation.md` | Top-3 matching UI, confirm/decrement, oversell → refund flow, accuracy metric | 7 |
-| 9 | `09-launch.md` | Domain, DNS, Stripe live mode, policies pages, backups, monitoring, README case study | 1–8 |
+| 7 | `07-analytics.md` | Cloudflare Web Analytics, first-party funnel events, `/admin/analytics`, notify-me + newsletter leads | 5, 6 |
+| — | `deferred/07-booth-logging.md`, `deferred/08-reconciliation.md` | **Deferred** until stock is merged (SKU tags) | — |
+| 9 | `09-launch.md` | Domain, DNS, Stripe live mode, policies pages, backups, monitoring, README case study | 1–7 |
 
 ---
 
@@ -141,6 +144,7 @@ Each phase is one branch and one PR. Do them in order; later phases assume earli
 | `EMAIL_FROM` | server | e.g. `Awenda Jewelry <orders@…>` (needs verified domain — Phase 9) |
 | `NEXT_PUBLIC_SITE_URL` | both | `http://localhost:3000` locally |
 | `CRON_SECRET` | server | protects the keepalive endpoint |
+| `NEXT_PUBLIC_CF_BEACON_TOKEN` | client | Cloudflare Web Analytics site token (Phase 7) |
 
 ---
 
@@ -148,7 +152,6 @@ Each phase is one branch and one PR. Do them in order; later phases assume earli
 
 - **Design** — a unique jewelry item as listed (one photo, one price). Has 1+ variants.
 - **Variant** — a size/length option of a design with its own `qty_on_hand`. "One size" is a variant.
-- **Booth sale** — a photo + category + variant logged at the market; not yet tied to a design.
-- **Reconciliation** — matching booth sales to designs and decrementing inventory.
-- **Oversell** — the same last unit was sold both online and at the booth; resolved by refunding the online order.
+- **Booth sale / Reconciliation / Oversell / SKU** — deferred concepts (see `deferred/`); not part of the launch scope.
+- **Lead** — an email captured via "notify me when back in stock" (per design) or the newsletter signup.
 - **Movement** — one row in `inventory_movements`; the audit ledger of every quantity change.

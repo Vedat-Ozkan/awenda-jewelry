@@ -73,7 +73,7 @@ auto-refund path; admin can mark shipped/picked up/refund.
 - **Verify:** snapshot tests render both locales; e2e reads the captured confirmation.
 
 ### 6. Orders admin (`/admin/orders`)
-- List with status filters; badges for pickup vs ship; search by email/name.
+- List with status filters; badges for pickup vs ship; search by email/name. A **Pickups** filter/tab with a one-tap **Picked up** action (this replaces the deferred booth tab; the owner is the one at the market with the order).
 - Detail: items, customer, address, Stripe links (`https://dashboard.stripe.com/test/payments/<pi>`), movement ledger entries.
 - Actions: **Mark shipped** (tracking number + carrier select → builds `tracking_url`; sends `shipped` email), **Mark picked up**, **Refund** (full or per line; calls Stripe, `adjust_inventory(+qty,'refund')` for refunded lines, sends `refund-notice`), **Resend email**.
 - **Verify:** e2e: mark shipped sends email with tracking; refund restores qty and writes a `refund` movement.

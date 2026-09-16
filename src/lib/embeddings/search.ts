@@ -21,7 +21,7 @@ export interface Candidate {
 // the booth sale's own category; if that yields fewer than k, fills the rest
 // from any category and flags those `crossCategory: true`. Must run
 // server-side only (uses the service-role client).
-export async function findCandidates(boothSaleId: string, k = 3): Promise<Candidate[]> {
+export async function findCandidates(boothSaleId: string, k = 5): Promise<Candidate[]> {
   const supabase = createAdminClient();
 
   const { data: boothSale, error: boothSaleError } = await supabase
