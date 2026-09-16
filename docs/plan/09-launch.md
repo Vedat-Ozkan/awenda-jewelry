@@ -5,7 +5,7 @@ case study. After this phase the site is the family business's online presence a
 resume-ready.
 
 **Branch:** `phase-9-launch` (several small PRs are fine)
-**Depends on:** Phases 1–8.
+**Depends on:** Phases 1–7.
 **Definition of done:** `https://<domain>` serves the storefront with a valid certificate;
 a real $1 test purchase in live mode succeeds and is refunded; weekly backup workflow has run
 once successfully; README case study reviewed by the owner.
@@ -76,24 +76,24 @@ Tucows/OpenSRS and exposes management through Hover. **All sub-steps below are o
 - **Verify:** links resolve.
 
 ### 9. Manual test day
-- Owner runs one full market cycle with the real tooling: catalog ≥ 20 real designs, log real sales at the booth, reconcile that evening, fulfil at least one online pickup order. Capture friction in `docs/plan/DECISIONS.md` Open items and the top-1/top-3 stats from `/admin/reconcile/stats`.
-- **Verify:** no `oversold` left unresolved; stats page has data.
+- Owner runs one full week with the real tooling: catalog ≥ 20 real designs, receive at least one real test order of each fulfilment type, fulfil the pickup at the market and mark it picked up, ship the other with tracking. Capture friction in `docs/plan/DECISIONS.md` Open items; check `/admin/analytics` shows the funnel for the week.
+- **Verify:** both orders reach a terminal status; analytics page has data.
 
 ### 10. README as case study
 Structure:
-1. One-line pitch: "Bilingual e-commerce + AI-assisted inventory reconciliation PWA for a family jewelry business selling online and at a weekly market."
-2. Problem: dual-channel overselling with 2–3 units per design; 200–500 SKUs; must cost ~$0/mo.
+1. One-line pitch: "Bilingual (EN/FR) e-commerce for a family jewelry business on a $0/month stack, with first-party analytics driving the decision to merge online and market inventory."
+2. Problem: a market-only business wanting an online channel with 2–3 units per design, 200–500 designs, no budget for hosting, and a non-technical family running the physical side.
 3. Architecture diagram (from `00-overview.md §3`) and stack.
-4. Key design decisions with the *why* (from `DECISIONS.md`): variants as counts not listings; gray-backdrop photos; AI proposes/human confirms; decrement-on-webhook with refund path; client-side image processing for Workers; keepalive cron.
-5. Reconciliation accuracy numbers from the stats page (update quarterly).
+4. Key design decisions with the *why* (from `DECISIONS.md`): variants as counts not listings; separate online stock first, SKU tags later; decrement-on-webhook with refund path; client-side image processing for Workers; cookieless analytics; keepalive cron; why photo matching was built, measured, and set aside.
+5. Traffic and conversion numbers from `/admin/analytics` (update quarterly).
 6. Testing strategy and CI.
 7. Local setup.
 8. What I'd do next.
 - **Verify:** owner approves; no customer/business-sensitive data or secrets in the README or repo history (`git log -p | grep -i "sk_live\|service_role"` returns nothing).
 
 ### 11. Handoff to the family
-- One-page printable "How to hand over a pickup" for the parents (EN/FR): open `/admin/booth` → Pickups → tap name → Picked up. (Even though the owner operates admin, the parents may be at the booth alone.)
-- **Verify:** parents complete a pickup unaided during the manual test day.
+- One-page printable "How to hand over a pickup" for the parents (EN/FR): check the customer's name against the pickup list the owner prints/shares for the day; the owner marks it picked up in `/admin/orders`.
+- **Verify:** parents complete a pickup unaided during the manual test week.
 
 ---
 
@@ -102,6 +102,7 @@ Structure:
 - Discount codes
 - Text search on the storefront
 - Auto-translate product names with an LLM
-- Soft-hold table for cart reservations if oversells become common
+- Soft-hold table for cart reservations if online-vs-online oversells become common
+- Merge market stock with online stock: un-defer `deferred/07`–`08` around SKU tags
 - International shipping
 - Supabase Pro upgrade if storage > 800 MB or DB > 400 MB

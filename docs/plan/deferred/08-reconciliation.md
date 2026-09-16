@@ -1,7 +1,12 @@
 # Phase 8 — Reconciliation
 
+> **DEFERRED (2026-09-16):** the store launches with **separate online stock**, so there is no
+> booth logging or reconciliation. This file is kept for the day stock is merged; when that
+> happens it must be redrafted around **SKU tags** (see `DECISIONS.md` "Separate online stock at
+> launch; booth integration deferred"), not photo matching. Do not implement.
+
 **Goal:** In the evening the owner walks through the day's booth photos; for each, the system
-proposes the top-3 catalog matches and the owner confirms with one tap. Confirming decrements
+proposes the top-5 catalog matches and the owner confirms with one tap. Confirming decrements
 inventory. Conflicts with online orders are surfaced and resolved (refund). The confirmed
 candidate's rank is recorded to measure real matching accuracy.
 
@@ -9,7 +14,7 @@ candidate's rank is recorded to measure real matching accuracy.
 **Depends on:** Phase 7.
 **Definition of done:** e2e reconciles three pending booth sales (rank-1 confirm, rank-3
 confirm, manual search), one oversell produces a refund flow, and `/admin/reconcile/stats`
-shows top-1/top-3 hit rates.
+shows top-1/top-5 hit rates.
 
 ---
 
@@ -47,11 +52,11 @@ shows top-1/top-3 hit rates.
 - **Verify:** e2e: seed an online order for the last unit, log a booth sale for it, confirm → oversell panel → refund → booth sale becomes `matched`, order line refunded, customer refund email captured.
 
 ### 5. Batch summary
-- After the last pending card: summary — matched N (top-1: a, top-2: b, top-3: c, search: d), unmatched M, oversold resolved K, with a list of designs that just hit 0 stock (so the owner can decide to restock/archive).
+- After the last pending card: summary — matched N (top-1: a, top-2: b, top-3–5: c, search: d), unmatched M, oversold resolved K, with a list of designs that just hit 0 stock (so the owner can decide to restock/archive).
 - **Verify:** e2e summary numbers.
 
 ### 6. Accuracy stats (`/admin/reconcile/stats`)
-- Aggregates over `booth_sales` where `status = 'matched'`: top-1 hit rate, top-3 hit rate, search rate; by month. Also mean distance of confirmed matches vs rejected candidates (useful for the README case study).
+- Aggregates over `booth_sales` where `status = 'matched'`: top-1 hit rate, top-5 hit rate, search rate; by month. Also mean distance of confirmed matches vs rejected candidates (useful for the README case study).
 - **Verify:** SQL view `reconcile_stats` + unit test on a seeded set.
 
 ### 7. Unmatched follow-up

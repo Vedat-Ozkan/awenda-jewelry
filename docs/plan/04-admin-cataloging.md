@@ -12,6 +12,9 @@ for anonymous and non-allowlisted users.
 > **STOP — ask the owner** before step 1: the admin email(s) for `ADMIN_EMAILS` (Open #9).
 > Before step 6: how French product names are handled (Open #5).
 
+> **Amended 2026-09-16:** eight categories; step 4 supports multi-file import. No SKU/label
+> sheet — booth integration is deferred (`DECISIONS.md` "Separate online stock at launch").
+
 ---
 
 ## Steps
@@ -26,7 +29,7 @@ for anonymous and non-allowlisted users.
 - **Verify:** e2e — anonymous → redirected; allowlisted user → sees `/admin`; non-allowlisted email gets "not allowed" without an email being sent (assert via Inbucket API).
 
 ### 2. Admin shell
-- `/admin` layout: mobile-first, bottom nav with **Catalog · Booth · Reconcile · Orders · Settings**. Booth/Reconcile/Orders are placeholders until their phases.
+- `/admin` layout: mobile-first, bottom nav with **Catalog · Orders · Analytics · Settings**. Orders/Analytics are placeholders until their phases.
 - PWA manifest `start_url` = `/admin`.
 - **Verify:** renders on a 390 px wide viewport without horizontal scroll.
 
@@ -36,9 +39,10 @@ for anonymous and non-allowlisted users.
 - **Verify:** seed data renders; filters and search work (e2e).
 
 ### 4. New design flow (`/admin/catalog/new`) — optimised for speed
-1. **Photo** first: camera input; show reminder "Gray tray, item centered, no hands".
-   Preview immediately from the resized `main` blob.
-2. **Category** (5 big buttons) → **Variants**: presets for the category appear as toggle chips
+1. **Photo** first: camera input, `multiple` allowed (select many from a folder → one draft
+   design per file, then step through details for each); show reminder "Gray tray, item
+   centered, no hands". Preview immediately from the resized `main` blob.
+2. **Category** (8 big buttons) → **Variants**: presets for the category appear as toggle chips
    with a stepper each (default 1 when toggled on); "+ custom" adds a free-text label.
 3. **Name (EN)**, **Price** (numeric keypad, USD), optional **Description (EN)**.
 4. **Save as draft** or **Publish**.
@@ -76,4 +80,4 @@ for anonymous and non-allowlisted users.
 ---
 
 ## Out of scope
-Storefront, orders, booth, reconciliation. Any auth beyond magic link.
+Storefront, orders, analytics. Any auth beyond magic link.

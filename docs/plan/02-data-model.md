@@ -88,7 +88,7 @@ create table booth_sales (
   photo_main_path text not null, photo_thumb_path text not null,
   price_paid_cents int,                  -- optional
   status booth_sale_status not null default 'pending',
-  matched_variant_id uuid references variants, matched_rank smallint, -- 1..3 or null (manual search)
+  matched_variant_id uuid references variants, matched_rank smallint, -- 1..5 or null (manual search)
   candidates jsonb,                      -- cached top-k at reconcile time [{design_id, distance}]
   embedding vector(1024), embedded_at timestamptz,
   reconciled_at timestamptz, note text, created_at

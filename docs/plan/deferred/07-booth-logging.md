@@ -1,5 +1,10 @@
 # Phase 7 — Booth Mode
 
+> **DEFERRED (2026-09-16):** the store launches with **separate online stock**, so there is no
+> booth logging or reconciliation. This file is kept for the day stock is merged; when that
+> happens it must be redrafted around **SKU tags** (see `DECISIONS.md` "Separate online stock at
+> launch; booth integration deferred"), not photo matching. Do not implement.
+
 **Goal:** At the market, on a phone, the owner logs a sale in under 10 seconds and hands over
 online pickups with one tap. No catalog lookup during the day.
 
