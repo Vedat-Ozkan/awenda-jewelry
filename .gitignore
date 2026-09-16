@@ -25,6 +25,8 @@ next-env.d.ts
 # Wrangler / Cloudflare
 .dev.vars
 .wrangler/
+.open-next/
+cloudflare-env.d.ts
 
 # Supabase
 supabase/.temp/
