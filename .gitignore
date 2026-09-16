@@ -2,6 +2,20 @@
 node_modules/
 npm-debug.log*
 pnpm-debug.log*
+.pnpm-debug.log*
+
+# Next.js
+/.next/
+/out/
+/build
+*.tsbuildinfo
+next-env.d.ts
+
+# misc
+.DS_Store
+*.pem
+/coverage
+.vercel
 
 # Env
 .env
