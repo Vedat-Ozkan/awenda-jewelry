@@ -28,9 +28,14 @@ jobs:
 
       - uses: supabase/setup-cli@v1
         with:
-          version: latest
+          version: 2.117.0
 
       - run: supabase start
+
+      - name: Check generated DB types are committed
+        run: |
+          pnpm db:types
+          git diff --exit-code -- src/lib/supabase/database.types.ts
 
       - run: pnpm test
 
