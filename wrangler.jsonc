@@ -9,7 +9,10 @@
     "binding": "ASSETS"
   },
   "vars": {
-    "NEXT_PUBLIC_SITE_URL": "https://awenda-jewelry.awenda.workers.dev"
+    "NEXT_PUBLIC_SITE_URL": "https://awenda-jewelry.awenda.workers.dev",
+    "NEXT_PUBLIC_SUPABASE_URL": "https://hperhbuskneblwuyeowq.supabase.co",
+    "EMBEDDINGS_PROVIDER": "voyage",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhwZXJoYnVza25lYmx3dXllb3dxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk1NTY1MDgsImV4cCI6MjEwNTEzMjUwOH0.hDbv6A0gs4Q33hDB6Ar8R83GIgWxMSYz8YdcrwAFswg"
   },
   "triggers": {
     "crons": ["0 6 */3 * *"]

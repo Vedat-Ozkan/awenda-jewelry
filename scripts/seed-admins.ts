@@ -31,16 +31,21 @@ const supabase = createClient(
   { auth: { autoRefreshToken: false, persistSession: false } },
 );
 
-const { error } = await supabase
-  .from("admin_emails")
-  .upsert(
-    emails.map((email) => ({ email })),
-    { onConflict: "email" },
-  );
+// tsx compiles this as CommonJS, which has no top-level await.
+async function main() {
+  const { error } = await supabase
+    .from("admin_emails")
+    .upsert(
+      emails.map((email) => ({ email })),
+      { onConflict: "email" },
+    );
 
-if (error) {
-  console.error("Failed to seed admin emails:", error.message);
-  process.exit(1);
+  if (error) {
+    console.error("Failed to seed admin emails:", error.message);
+    process.exit(1);
+  }
+
+  console.log(`Seeded ${emails.length} admin email(s): ${emails.join(", ")}`);
 }
 
-console.log(`Seeded ${emails.length} admin email(s): ${emails.join(", ")}`);
+void main();
