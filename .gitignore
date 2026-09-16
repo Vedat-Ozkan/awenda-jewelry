@@ -1,0 +1,23 @@
+# Node
+node_modules/
+npm-debug.log*
+pnpm-debug.log*
+
+# Env
+.env
+.env.*
+!.env.example
+
+# Wrangler / Cloudflare
+.dev.vars
+.wrangler/
+
+# Supabase
+supabase/.temp/
+
+# Test artifacts
+test-results/
+playwright-report/
+
+# Claude Code local settings
+.claude/settings.local.json

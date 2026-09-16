@@ -1,0 +1,95 @@
+{
+  "model": "opus",
+  "permissions": {
+    "allow": [
+      "Bash(pnpm install*)",
+      "Bash(pnpm add *)",
+      "Bash(pnpm dev*)",
+      "Bash(pnpm build*)",
+      "Bash(pnpm preview*)",
+      "Bash(pnpm test*)",
+      "Bash(pnpm e2e*)",
+      "Bash(pnpm lint*)",
+      "Bash(pnpm typecheck*)",
+      "Bash(pnpm format*)",
+      "Bash(pnpm db:*)",
+      "Bash(pnpm exec vitest *)",
+      "Bash(pnpm exec playwright *)",
+      "Bash(pnpm exec tsc *)",
+      "Bash(pnpm exec eslint *)",
+      "Bash(pnpm exec prettier *)",
+      "Bash(pnpm exec tsx *)",
+      "Bash(pnpm --version)",
+      "Bash(node --version)",
+      "Bash(supabase start*)",
+      "Bash(supabase stop*)",
+      "Bash(supabase status*)",
+      "Bash(supabase db reset*)",
+      "Bash(supabase db diff*)",
+      "Bash(supabase db lint*)",
+      "Bash(supabase gen types*)",
+      "Bash(supabase migration new*)",
+      "Bash(supabase migration list*)",
+      "Bash(wrangler dev*)",
+      "Bash(wrangler whoami*)",
+      "Bash(wrangler deployments list*)",
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git show*)",
+      "Bash(git blame*)",
+      "Bash(git branch)",
+      "Bash(git branch --list*)",
+      "Bash(git branch --show-current)",
+      "Bash(git remote -v)",
+      "Bash(git stash list*)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git checkout -b *)",
+      "Bash(git switch -c *)",
+      "Bash(git switch *)",
+      "Bash(curl -s http://localhost*)",
+      "Bash(curl -sS http://localhost*)",
+      "Bash(curl -i http://localhost*)",
+      "Bash(curl -I http://localhost*)",
+      "Bash(curl -sL https://rdap.verisign.com/*)",
+      "Bash(docker ps*)",
+      "Bash(ls*)",
+      "Bash(wc *)",
+      "Bash(tree*)"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.local)",
+      "Read(./.env.*.local)",
+      "Read(./.env.production)",
+      "Read(./.dev.vars)",
+      "Edit(./.env)",
+      "Edit(./.env.local)",
+      "Edit(./.env.*.local)",
+      "Edit(./.env.production)",
+      "Edit(./.dev.vars)",
+      "Bash(supabase db push*)",
+      "Bash(supabase link*)",
+      "Bash(wrangler deploy*)",
+      "Bash(wrangler secret *)",
+      "Bash(git push --force*)",
+      "Bash(git push -f*)",
+      "Bash(git reset --hard*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/block-env-edits.sh\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}
