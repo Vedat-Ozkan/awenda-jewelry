@@ -12,13 +12,19 @@ export default {
   async scheduled(_event, env, ctx) {
     const { CRON_SECRET } = env as EnvWithCronSecret;
     ctx.waitUntil(
-      handler.fetch(
-        new Request("https://awenda-jewelry.internal/api/keepalive", {
-          headers: { "x-cron-secret": CRON_SECRET },
+      handler
+        .fetch(
+          new Request("https://awenda-jewelry.internal/api/keepalive", {
+            headers: { "x-cron-secret": CRON_SECRET },
+          }),
+          env,
+          ctx,
+        )
+        .then((response: Response) => {
+          if (!response.ok) {
+            console.error(`Keepalive ping failed: ${response.status}`);
+          }
         }),
-        env,
-        ctx,
-      ),
     );
   },
 } satisfies ExportedHandler<CloudflareEnv>;

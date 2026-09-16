@@ -20,7 +20,13 @@ const envSchema = z.object({
   EMAIL_FROM: z.string().optional(),
 });
 
-function parseEnv() {
+type Env = z.infer<typeof envSchema>;
+
+let cached: Env | undefined;
+
+function parseEnv(): Env {
+  if (cached) return cached;
+
   const result = envSchema.safeParse(process.env);
   if (!result.success) {
     const messages = result.error.issues.map(
@@ -30,7 +36,15 @@ function parseEnv() {
       `Invalid environment variables:\n${messages.join("\n")}`,
     );
   }
-  return result.data;
+  cached = result.data;
+  return cached;
 }
 
-export const env = parseEnv();
+// Lazy: validated on first property access, not at import time, so `next
+// build` (which imports every route module to collect page data) doesn't
+// require secrets to be set.
+export const env = new Proxy({} as Env, {
+  get(_target, prop: keyof Env) {
+    return parseEnv()[prop];
+  },
+});
