@@ -105,10 +105,26 @@ needed anyway for booth oversells.
 **Why:** Sharp is unavailable on Cloudflare Workers; Supabase image transforms require Pro.
 Keeps storage well under the 1 GB free limit (~500 designs × ~250 KB ≈ 125 MB).
 
-### GitHub repo: `vkozkan/awenda-jewelry`                                 (2026-09-15, owner)
-**Decision:** Public repository at `github.com/vkozkan/awenda-jewelry`, default branch `main`.
-**Why:** Owner confirmed the plan's proposed name; owner's existing GitHub account.
+### GitHub repo: `Vedat-Ozkan/awenda-jewelry`                             (2026-09-15, owner)
+**Decision:** Public repository at `github.com/Vedat-Ozkan/awenda-jewelry`, default branch `main`.
+**Why:** Owner confirmed the plan's proposed name. Originally recorded as `vkozkan/…` (the git
+author name); corrected at Phase 1 close to the owner's actual GitHub account (`gh auth` login).
 **Affects:** Phase 1 step 1 (create + push), step 7 (CI workflows, `CLOUDFLARE_*` repo secrets).
+
+### Phase 1 plan drift                                                  (2026-09-15, agent)
+**Decision:** Corrections applied to `01-foundation.md` in the Phase 1 PR:
+- `pnpm deploy` is shadowed by pnpm's built-in `deploy`; the script keeps its name and is run as
+  `pnpm run deploy` (README, `deploy.yml`).
+- `next build` typechecks `custom-worker.ts`, which needs the gitignored `cloudflare-env.d.ts`, so
+  the `build` script runs `wrangler types` first; CI also runs `pnpm build` so build-only failures
+  surface on PRs.
+- `src/lib/env.ts` validates lazily on first access, not at import — `next build` imports every
+  route module and must not require secrets.
+- `supabase status -o env` emits `API_URL`/`ANON_KEY`, not `SUPABASE_URL`.
+- Lighthouse ≥ 12 has no PWA audit; step 8 is verified via DevTools → Application → Manifest.
+- Production worker: `https://awenda-jewelry.awenda.workers.dev` (workers.dev subdomain `awenda`,
+  temporary until Phase 9).
+**Affects:** Phase 1 steps 3, 5, 6, 7, 8; Phase 9 (domain cutover replaces the workers.dev URL).
 
 ---
 
