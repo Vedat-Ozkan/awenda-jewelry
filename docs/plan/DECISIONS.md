@@ -126,6 +126,39 @@ author name); corrected at Phase 1 close to the owner's actual GitHub account (`
   temporary until Phase 9).
 **Affects:** Phase 1 steps 3, 5, 6, 7, 8; Phase 9 (domain cutover replaces the workers.dev URL).
 
+### Categories and default variant presets                             (2026-09-16, owner)
+**Decision:** `category` enum = `necklace, bracelet, anklet, ring, earring, bangle, chain, pendant`.
+Default `settings.variant_presets` (loose; edited in settings, never in code):
+`ring` 5–10 · `necklace`, `chain` 16"/18"/20"/24" · `bracelet` 6.5"/7"/7.5"/8" · `anklet` 9"/10" ·
+`bangle` Small/Medium/Large · `earring`, `pendant` One size.
+**Why:** Owner's stock spans more product types than the proposed five. Presets are only
+quick-tap defaults — the variant `label` is free text, so any sizing can be entered; the owner
+did not want to finalise sizes now. Adding an enum value later is a migration; removing is hard.
+**Affects:** Phase 2 schema/seed, Phase 4 entry UI, Phase 7 booth picker. Resolves Open #6.
+
+### Market details: placeholders until Phase 9                          (2026-09-16, owner)
+**Decision:** Seed `settings` with `market_name='Weekly Market'`, `market_address='TBD'`,
+Saturday (`market_weekday=6`) 09:00–14:00, pickup instructions 'TBD' (EN/FR). Real details
+are collected at Phase 9 step 1.
+**Affects:** Phase 2 step 2. Open #13 stays open for the real values.
+
+### Phase 2 plan drift and review findings                               (2026-09-16, agent)
+**Decision:**
+- `settings.market_timezone` (IANA, default `America/New_York`) added; `next_market_date()`
+  compares in that zone (Supabase server time is UTC) and returns `null` when unconfigured
+  instead of looping. Owner confirms the real timezone with the market details at Phase 9.
+- `adjust_inventory()` and `match_designs()` have EXECUTE revoked from `public`/`anon`/
+  `authenticated` (Supabase grants it by default); only `service_role` calls them until Phase 3/4
+  decide otherwise. `next_market_date()` stays public for the storefront.
+- Views `public_designs`/`public_settings`: `revoke all` then `grant select` — a simple view is
+  auto-updatable and would otherwise let anon write `settings` through it.
+- `design_images` public policy uses a `security definer` helper `design_is_published()`.
+- `match_designs()` is not yet `security definer`; Phase 3 must add it (or a policy) before the
+  storefront calls it.
+- Seed image paths (`seed/<slug>.svg`) are served from `public/seed/`, not Storage; Phase 3 replaces.
+- CI pins `supabase/setup-cli` to the `supabase` devDependency version.
+**Affects:** Phase 2 migrations/tests; Phase 3 step 5 (`match_designs` grants); Phase 9 (timezone).
+
 ---
 
 ## Open — ask the owner before the referenced step
@@ -143,7 +176,7 @@ author name); corrected at Phase 1 close to the owner's actual GitHub account (`
 4. **Return / exchange policy text** (Phase 9). Needs owner-written EN text; agent translates to FR for review.
 5. **French product names**: (a) owner types both, (b) FR optional with EN fallback (current
    default), or (c) auto-translate at catalog time with an LLM (adds a vendor). Ask before Phase 4 step 6.
-6. **Category list final?** Proposed: `necklace, bracelet, anklet, ring, earring`. Ask before Phase 2.
+6. ~~Category list final?~~ **Resolved 2026-09-16** — see Locked "Categories and default variant presets".
 7. **Confirm inventory decrement timing** (Locked-proposed above). Ask before Phase 6.
 8. **Email sender**: transactional email needs a verified domain in Resend, which needs the
    domain from #1. Until then use Resend's onboarding sender for tests only. Ask at Phase 9.
@@ -155,7 +188,7 @@ author name); corrected at Phase 1 close to the owner's actual GitHub account (`
 12. **Voyage model version** — `voyage-multimodal-3` (1024 dims) vs the newer `3.5`. Agent verifies
     current docs in Phase 3 step 2 and picks the newest stable; owner does not need to be asked
     unless dimension or pricing differs from this plan.
-13. **Market details** — name, address, weekday, hours, pickup instructions (EN). Needed to seed
-    `settings` in Phase 2; can be placeholders until Phase 9.
+13. **Market details** — name, address, weekday, hours, pickup instructions (EN). Seeded as
+    placeholders in Phase 2 (owner, 2026-09-16); real values needed at Phase 9 step 1.
 14. **Market-day oversell notice** — show a storefront banner during market hours saying
     "Orders placed during market hours are confirmed by email this evening"? Ask before Phase 5 step 8.

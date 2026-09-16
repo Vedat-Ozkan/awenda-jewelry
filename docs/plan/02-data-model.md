@@ -10,9 +10,9 @@ invariants.
 types with no diff in CI; integration tests for inventory pass; anon role can read only
 published designs and nothing else.
 
-> **STOP — ask the owner** (before step 2): confirm the category list
-> (`necklace, bracelet, anklet, ring, earring`) and the default variant presets below.
-> See `DECISIONS.md` Open #6 and #13.
+> **STOP — ask the owner** (before step 2): ~~confirm the category list and the default variant presets~~
+> **Resolved 2026-09-16** — eight categories and presets below; market details are placeholders
+> (see `DECISIONS.md` Locked entries of that date).
 
 ---
 
@@ -22,7 +22,7 @@ All tables: `id uuid primary key default gen_random_uuid()`, `created_at timesta
 `updated_at` maintained by a trigger.
 
 ```sql
-create type category as enum ('necklace','bracelet','anklet','ring','earring');
+create type category as enum ('necklace','bracelet','anklet','ring','earring','bangle','chain','pendant');
 create type design_status as enum ('draft','active','archived');
 create type fulfillment_type as enum ('ship','pickup');
 create type order_status as enum ('paid','awaiting_pickup','picked_up','awaiting_shipment','shipped','refunded','cancelled');
@@ -98,6 +98,7 @@ create table settings (                  -- single row, id = 1
   id int primary key check (id = 1),
   market_name text, market_address text, market_weekday smallint, -- 0=Sunday
   market_open_time time, market_close_time time,
+  market_timezone text not null default 'America/New_York',  -- IANA; market times are local
   market_closed_until date, market_closed_note_en text, market_closed_note_fr text,
   pickup_instructions_en text, pickup_instructions_fr text,
   shipping_enabled boolean not null default false,
@@ -109,13 +110,16 @@ create table settings (                  -- single row, id = 1
 );
 ```
 
-Default `variant_presets` (confirm with owner):
+Default `variant_presets` (confirmed by owner 2026-09-16 — loose defaults, edited in settings later):
 ```json
 { "ring": ["5","6","7","8","9","10"],
   "necklace": ["16\"","18\"","20\"","24\""],
+  "chain": ["16\"","18\"","20\"","24\""],
   "bracelet": ["6.5\"","7\"","7.5\"","8\""],
   "anklet": ["9\"","10\""],
-  "earring": ["One size"] }
+  "bangle": ["Small","Medium","Large"],
+  "earring": ["One size"],
+  "pendant": ["One size"] }
 ```
 
 ## Functions (migration `0003_functions.sql`)
@@ -138,16 +142,23 @@ returns table (design_id uuid, distance float) …
 --   where embedding is not null and status <> 'draft' and (p_category is null or category = p_category)
 --   order by 2 limit match_count;
 
--- Next market date, honouring market_closed_until.
+-- Next market date, honouring market_closed_until. Compares against now() in
+-- settings.market_timezone (server time is UTC); returns null if unconfigured.
 create function next_market_date() returns date …;
+
+-- Revoke EXECUTE from public/anon/authenticated on adjust_inventory and match_designs:
+-- Supabase grants EXECUTE on new public functions to everyone by default.
 ```
 
 ## Views and RLS (migration `0004_rls.sql`)
 
 - `public_designs` view: active + archived designs (archived shown greyed), no `embedding`,
   plus `total_qty` = sum of variant qty and a `variants` json array `[{id,label,qty_on_hand}]`.
-- Enable RLS on every table. Policies:
-  - `anon` / `authenticated`: `select` on `public_designs`, `design_images` (for non-draft), `settings` (read-only columns only via a `public_settings` view — exclude nothing sensitive, but keep the pattern).
+- Enable RLS on every table. Views: `revoke all … from anon, authenticated` then `grant select` —
+  simple views are auto-updatable and default privileges would let anon write through them. Policies:
+  - `anon` / `authenticated`: `select` on `public_designs`, `design_images` (for non-draft — via a
+    `security definer` helper `design_is_published()`; a bare `exists(select … from designs)` in a
+    policy is itself filtered by `designs`' RLS and matches nothing), `settings` (read-only columns only via a `public_settings` view — exclude nothing sensitive, but keep the pattern).
   - Admin (`auth.jwt() ->> 'email'` in the `admin_emails` table — a tiny table seeded from `ADMIN_EMAILS` by a script) : full access on all tables.
   - Service role bypasses RLS (webhook, cron, embeddings).
 - Storage: bucket `photos` (public read, admin write) with paths `designs/<id>/main.jpg|thumb.jpg`, `designs/<id>/extra/<n>-…`, `booth/<date>/<id>-main.jpg|thumb.jpg`.
@@ -155,9 +166,9 @@ create function next_market_date() returns date …;
 ## Steps
 
 1. Write migrations `0002`–`0004` as above. **Verify:** `pnpm db:reset` clean; `pnpm db:types` succeeds.
-2. Seed script `supabase/seed.sql`: settings row with placeholders, 12 designs across all
+2. Seed script `supabase/seed.sql`: settings row with placeholders, 16 designs across all eight
    categories (using placeholder images from `public/seed/` — plain gray squares with a label,
-   not real product photos), each with 1–3 variants, some at qty 0. **Verify:** `select count(*) from designs` = 12.
+   not real product photos), each with 1–3 variants, some at qty 0. **Verify:** `select count(*) from designs` = 16.
 3. `scripts/seed-admins.ts` reading `ADMIN_EMAILS` → upsert into `admin_emails`. **Verify:** row present.
 4. Integration tests (`tests/integration/inventory.test.ts`) against local Supabase using the service client:
    - `adjust_inventory` decrements and writes a movement.

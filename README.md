@@ -47,6 +47,10 @@ In production (Cloudflare Workers), secret values are set with `wrangler secret 
 | `pnpm typecheck` | Generate Next.js + Cloudflare types, then `tsc --noEmit` |
 | `pnpm db:reset` | Re-apply migrations to the local Supabase database |
 | `pnpm db:types` | Regenerate `src/lib/supabase/database.types.ts` from the local database |
+| `pnpm seed:admins` | Upsert `ADMIN_EMAILS` into `admin_emails` |
+
+`pnpm db:reset` re-seeds from `supabase/seed.sql`, which does not include `admin_emails` — run
+`pnpm seed:admins` again after every reset.
 
 ## Preview and deploy
 

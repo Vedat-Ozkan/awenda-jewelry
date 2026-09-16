@@ -1,15 +1,15 @@
 import { z } from "zod";
 
-// Only the vars Phase 1 actually uses (the keepalive route) are required.
-// Later phases tighten the optional ones to required as each feature lands:
-// Supabase (Phase 2), Voyage (Phase 3), Stripe (Phase 6), Resend (Phase 9).
+// Vars required by the phases landed so far (Phase 1: keepalive; Phase 2:
+// Supabase) are required here. Later phases tighten the remaining optional
+// ones as each feature lands: Voyage (Phase 3), Stripe (Phase 6), Resend (Phase 9).
 const envSchema = z.object({
   NEXT_PUBLIC_SITE_URL: z.string().url(),
   CRON_SECRET: z.string().min(1),
 
-  NEXT_PUBLIC_SUPABASE_URL: z.string().optional(),
-  NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().optional(),
-  SUPABASE_SERVICE_ROLE_KEY: z.string().optional(),
+  NEXT_PUBLIC_SUPABASE_URL: z.string().url(),
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1),
+  SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
   ADMIN_EMAILS: z.string().optional(),
   VOYAGE_API_KEY: z.string().optional(),
   EMBEDDINGS_PROVIDER: z.enum(["voyage", "fake"]).optional(),

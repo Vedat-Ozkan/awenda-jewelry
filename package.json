@@ -15,7 +15,8 @@
     "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
     "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
     "db:reset": "supabase db reset",
-    "db:types": "supabase gen types typescript --local > src/lib/supabase/database.types.ts"
+    "db:types": "supabase gen types typescript --local > src/lib/supabase/database.types.ts",
+    "seed:admins": "node --env-file=.env.local --experimental-strip-types scripts/seed-admins.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
