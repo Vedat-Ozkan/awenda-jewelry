@@ -28,6 +28,7 @@ Business facts that shape the design:
   justifies merging stock (then via SKU tags).
 - The owner (a developer) operates all admin surfaces. The owner's parents own the business
   and only touch the public site.
+- The business is in **Canada**: prices in **CAD**, shipping within Canada only at launch (US duties since the end of de minimis make small parcels uneconomic — see `DECISIONS.md`).
 - Jewelry is light and small: **one flat shipping rate**, no live carrier rates.
 
 ---
@@ -36,14 +37,14 @@ Business facts that shape the design:
 
 | Area | Decision |
 |---|---|
-| Sales model | Hybrid: pay online via Stripe Checkout; fulfillment = **Ship** (flat rate) or **Pick up at market** (free). Shipping can be disabled by a settings toggle at launch. |
+| Sales model | Hybrid: pay online via Stripe Checkout (**CAD**); fulfillment = **Ship** (flat rate, Canada only) or **Pick up at market** (free). Shipping can be disabled by a settings toggle at launch. |
 | Framework | TypeScript, Next.js (App Router), React, Tailwind. Package manager: `pnpm`. Node 22. |
 | Hosting | **Cloudflare Workers** via `@opennextjs/cloudflare` (free tier; commercial use allowed). |
 | Database | **Supabase Free** — Postgres + pgvector + Auth + Storage. A Cloudflare Cron Trigger pings it every 3 days to prevent idle-pausing. |
 | Embeddings | **Voyage AI multimodal** (`voyage-multimodal-3.5`). Used for storefront "similar styles" only (booth photo matching deferred, 2026-09-16). Fake deterministic provider in tests. |
 | Payments | Stripe Checkout (hosted). Webhook `checkout.session.completed` creates the order and decrements inventory. |
 | Email | Resend (free tier) for order confirmations / shipping notices, EN + FR. |
-| i18n | `next-intl`, locales `en` and `fr`, path prefix routing. UI chrome fully translated; product names/descriptions have optional FR with EN fallback. |
+| i18n | `next-intl`, locales `en` and `fr` (`en-CA`/`fr-CA` formatting), path prefix routing. UI chrome fully translated; product names/descriptions have optional FR with EN fallback. |
 | Images | Resized **client-side** (canvas) to 1024px main + 400px thumb before upload. No server image processing (Sharp does not run on Workers; Supabase image transforms are Pro-only). |
 | Variants | Every design has ≥1 variant row (`label`, `qty_on_hand`). "One size" is a variant. Size is never inferred from photos. |
 | Stock model | Online stock separate from market stock; no reconciliation at launch. Deferred design: SKU tags (`R-047`). |
@@ -52,6 +53,7 @@ Business facts that shape the design:
 | Repo | Public GitHub repo, code only. Secrets in env, data only in Supabase. README doubles as a case study. |
 | Brand | "Awenda Jewelry". Logo exists (owner will provide files). Domain `awendajewelry.com` already owned (registered via Etsy Pattern / Tucows) — recovery + DNS move in Phase 9. |
 | Budget | $0/mo hosting + domain (~$10/yr) + Stripe per-transaction fees. |
+| Design references | luzzojewellery.com (home), nazzar.ca (product page) — inspired, not copied. See `DECISIONS.md`. |
 
 ---
 

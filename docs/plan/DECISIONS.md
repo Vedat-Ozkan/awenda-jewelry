@@ -19,7 +19,7 @@ Template for a new entry:
 
 ### Sales model: hybrid pay-online, ship or pick up            (2026-09-15, owner)
 **Decision:** Full Stripe Checkout from day one. At checkout the customer picks **Ship** (one
-flat rate, US only initially) or **Pick up at market** (free). Shipping can be turned off via
+flat rate, Canada only initially — see "Country and currency: Canada, CAD") or **Pick up at market** (free). Shipping can be turned off via
 `settings.shipping_enabled` so the store can launch pickup-only.
 **Why:** The earlier reserve-for-pickup model (unpaid holds) was judged "weird" by the owner;
 payment secures the item and removes hold-expiry logic. Technical cost is low because Stripe's
@@ -54,8 +54,8 @@ earrings (one size). Every design has ≥1 variant row. Variant presets per cate
 **Why:** Vision models cannot read a size from a photo; size is metadata captured by tap.
 **Affects:** Phase 2 schema, Phase 4 entry UI, Phase 7 booth picker.
 
-### Locale: English + French, USD                                       (2026-09-15, owner)
-**Decision:** `next-intl` with `/en` and `/fr` prefixes. All storefront chrome, emails, and
+### Locale: English + French                                            (2026-09-15, owner)
+**Decision:** `next-intl` with `/en` and `/fr` prefixes. (Currency: see "Country and currency: Canada, CAD", 2026-09-16 — the original USD assumption was the agent's, not the owner's.) All storefront chrome, emails, and
 policy pages translated. Product `name_fr` / `description_fr` optional, fall back to EN.
 **Affects:** Phases 5, 6, 9.
 
@@ -250,6 +250,34 @@ export from admin. No GA4 (cookies → consent banner, extra vendor).
 merged stock; first-party data is enough and keeps the $0 / no-banner posture.
 **Affects:** New Phase 7 `07-analytics.md` (depends on 5, 6); Phase 9 README uses these numbers.
 
+### Country and currency: Canada, CAD; ship within Canada only          (2026-09-16, owner)
+**Decision:** The business is in Canada. Prices and Stripe Checkout in **CAD**; Stripe account
+in Canada; flat-rate shipping **within Canada only** at launch. No US shipping for now.
+**Why:** The US $800 de minimis exemption ended 2025-08-29 (codified 2026-06, permanent repeal
+scheduled 2027-07-01): every parcel to the US owes duty by HS code (jewelry 7113 ≈ 5–7%, 7117 ≈
+11%) plus any origin-country IEEPA/reciprocal rate; Canada Post requires the sender to prepay
+via Zonos (+10% of duties + fee) and CUSMA cannot be claimed through the postal stream;
+couriers can claim CUSMA only for Canadian-origin goods. Not worth it at these price points
+until demand exists. Stripe Tax handles Canadian GST/HST/PST if enabled (Open #2, reworded);
+under CAD 30k/yr the business is a "small supplier" and need not register — accountant confirms.
+**Affects:** Phase 5 (`Price` in CAD, `fr-CA`/`en-CA` formatting), Phase 6 (currency `cad`,
+Canadian address collection, rates in CAD), Phase 9 (Stripe live in Canada). Open #2, #3 reworded.
+**Later:** if US demand appears, add a per-country rate in `settings` and ship DDP via a courier
+with a Zonos landed-cost estimate; the pieces' country of origin decides the duty.
+
+### Storefront design references                                        (2026-09-16, owner)
+**Decision:** Two reference sites the owner likes; follow both for structure and feel, with our
+own touches so the result reads as inspired, not copied.
+- **luzzojewellery.com** (home page): minimalist, white space, warm gold/neutral accents;
+  hero + tagline → trust strip (shipping, packaging, handmade) → category banners → new
+  arrivals grid → curated picks; "New" badges.
+- **nazzar.ca** (product page): gallery left / details right; price and add-to-cart high on the
+  page; specs as a checklist (material, length + extension, width, waterproof/tarnish-free/
+  hypoallergenic); free-shipping-threshold banner; "Others also bought" (our similar styles);
+  footer newsletter.
+- Not planned (ask if wanted later): wishlist, chat widget, star ratings.
+**Affects:** Phase 5 steps 3–5.
+
 ---
 
 ## Open — ask the owner before the referenced step
@@ -258,12 +286,12 @@ merged stock; first-party data is enough and keeps the $0 / no-banner posture.
    needed from the owner before Phase 9 step 1: (a) who has login to the Etsy account that
    holds the Pattern shop, (b) the domain's expiry date and whether auto-renew is on at
    Hover/Tucows, (c) keep registration at Hover or transfer to Cloudflare Registrar.
-2. **Stripe Tax on or off, and business home state** (Phase 6). Stripe Tax adds 0.5%/txn and
-   only calculates — it does not file. Small sellers often collect only in their home state.
-   Owner/parents should confirm with their accountant; plan defaults to **off** with a
-   `settings.stripe_tax_enabled` flag.
-3. **Flat shipping rate and free-shipping threshold** (Phase 6). Proposed default: $5.00 flat,
-   free over $50. US-only shipping initially — confirm.
+2. **Stripe Tax on or off (GST/HST/PST), and whether the business is GST-registered** (Phase 6).
+   Stripe Tax adds 0.5%/txn and only calculates — it does not file. Under CAD 30k/yr a
+   "small supplier" need not register or collect. Owner/parents confirm with their accountant;
+   plan defaults to **off** with a `settings.stripe_tax_enabled` flag.
+3. **Flat shipping rate and free-shipping threshold, in CAD** (Phase 6). Proposed default:
+   CAD 6.00 flat (lettermail-size padded mailer), free over CAD 75. Canada-only — confirm.
 4. **Return / exchange policy text** (Phase 9). Needs owner-written EN text; agent translates to FR for review.
 5. **French product names**: (a) owner types both, (b) FR optional with EN fallback (current
    default), or (c) auto-translate at catalog time with an LLM (adds a vendor). Ask before Phase 4 step 6.
