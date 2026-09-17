@@ -53,7 +53,7 @@ Business facts that shape the design:
 | Repo | Public GitHub repo, code only. Secrets in env, data only in Supabase. README doubles as a case study. |
 | Brand | "Awenda Jewelry". Logo exists (owner will provide files). Domain `awendajewelry.com` already owned (registered via Etsy Pattern / Tucows) — recovery + DNS move in Phase 9. |
 | Budget | $0/mo hosting + domain (~$10/yr) + Stripe per-transaction fees. |
-| Design references | luzzojewellery.com (home), nazzar.ca (product page) — inspired, not copied. See `DECISIONS.md`. |
+| Design references | luzzojewellery.com (home), nazzar.ca (product page), mejuri.com/ca (bilingual Canadian DTC; variants, specs, trust row) — inspired, not copied. See `DECISIONS.md`. |
 
 ---
 

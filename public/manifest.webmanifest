@@ -1,7 +1,7 @@
 {
   "name": "Awenda Jewelry",
   "short_name": "Awenda",
-  "start_url": "/",
+  "start_url": "/admin",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#171717",

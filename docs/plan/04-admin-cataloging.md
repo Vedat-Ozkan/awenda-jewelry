@@ -9,8 +9,9 @@ manage variants and stock, and perform bulk operations across the catalog.
 publishes it, edits price, restocks, archives via bulk action; all admin routes 401/redirect
 for anonymous and non-allowlisted users.
 
-> **STOP — ask the owner** before step 1: the admin email(s) for `ADMIN_EMAILS` (Open #9).
-> Before step 6: how French product names are handled (Open #5).
+> ~~STOP — ask the owner~~ **Resolved 2026-09-16:** `ADMIN_EMAILS` = owner only (Open #9); French
+> copy optional with EN fallback (Open #5); optional spec fields `material_en/fr`, `dimensions`
+> (Open #19) — migration `0005_design_specs.sql` in step 4.
 
 > **Amended 2026-09-16:** eight categories; step 4 supports multi-file import. No SKU/label
 > sheet — booth integration is deferred (`DECISIONS.md` "Separate online stock at launch").
@@ -44,7 +45,9 @@ for anonymous and non-allowlisted users.
    centered, no hands". Preview immediately from the resized `main` blob.
 2. **Category** (8 big buttons) → **Variants**: presets for the category appear as toggle chips
    with a stepper each (default 1 when toggled on); "+ custom" adds a free-text label.
-3. **Name (EN)**, **Price** (numeric keypad, USD), optional **Description (EN)**.
+3. **Name (EN)**, **Price** (numeric keypad, CAD), optional **Description (EN)**, optional
+   **Material (EN)** and **Dimensions** (free text). Migration `0005_design_specs.sql` adds
+   `material_en`, `material_fr`, `dimensions` (all nullable text) and exposes them in `public_designs`.
 4. **Save as draft** or **Publish**.
 - On submit: server action creates the `designs` row (slug from name + short id), creates
   variants via `adjust_inventory(…, 'catalog')` so the ledger starts at the initial count,
@@ -61,7 +64,7 @@ for anonymous and non-allowlisted users.
 - **Verify:** e2e edits price and restocks; ledger shows the restock; direct `update variants set qty_on_hand` by the admin role is blocked by a trigger (`raise` unless called from `adjust_inventory`) — add that trigger in a migration here and test it.
 
 ### 6. French fields
-- Depending on Open #5: (b) default — `name_fr`/`description_fr` optional inputs with "Falls back to English" hint. If the owner picks (c), add a "Translate" button calling an LLM (new `STOP` for vendor/keys) — do not implement unless chosen.
+- Resolved as (b): `name_fr` / `description_fr` / `material_fr` optional inputs with a "Falls back to English" hint. No translation vendor.
 - **Verify:** storefront (Phase 5) falls back correctly — covered there.
 
 ### 7. Slug and SEO fields

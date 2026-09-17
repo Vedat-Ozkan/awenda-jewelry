@@ -275,8 +275,38 @@ own touches so the result reads as inspired, not copied.
   page; specs as a checklist (material, length + extension, width, waterproof/tarnish-free/
   hypoallergenic); free-shipping-threshold banner; "Others also bought" (our similar styles);
   footer newsletter.
-- Not planned (ask if wanted later): wishlist, chat widget, star ratings.
-**Affects:** Phase 5 steps 3–5.
+- **mejuri.com/ca/en** (site + product page; Canadian, CAD, bilingual `/ca/en` `/ca/fr` — the
+  closest analogue to our locale setup, also a model for FR-CA copy tone): promo bar; nav
+  "All jewelry · Best sellers · New in"; product page with 4-image gallery mixing lifestyle
+  (hand) and detail shots; **material** and **size** selectors with a "Size guide" link; trust
+  badge row (warranty · free returns/exchanges · free shipping); "Materials & specifications"
+  section (width in mm, material, recycled content); "waterproof & hypoallergenic" claims;
+  footer with help/FAQ/shipping, region + language switcher.
+- Takeaways for us: size selector = our variant chips + a size-guide page (static, EN/FR); a
+  trust row driven by `settings` (free-shipping threshold, returns policy, pickup); a specs
+  block on the product page (material, dimensions — add optional `material_en/fr` and
+  `dimensions` text fields to designs in Phase 4 if the owner wants them); extra lifestyle
+  photos via `design_images`.
+- Not planned (ask if wanted later): wishlist, chat widget, star ratings, membership/app.
+**Affects:** Phase 5 steps 3–5; Phase 4 step 4/5 (optional material/dimensions fields — Open #19).
+
+### Admin login: owner only                                             (2026-09-16, owner)
+**Decision:** `ADMIN_EMAILS` = the owner's address (`vedatkemalozkan@gmail.com`). Parents
+have no admin access. Login is Supabase magic link; the address must be in `admin_emails`
+before a link is sent. Resolves Open #9.
+**Affects:** Phase 4 step 1; hosted `admin_emails` seeded by the owner via `pnpm seed:admins`
+pointed at the hosted project (or the dashboard) before first production login.
+
+### French product copy: optional, falls back to English                 (2026-09-16, owner)
+**Decision:** `name_fr` / `description_fr` / `material_fr` are optional inputs with a "falls
+back to English" hint. No translation vendor. Resolves Open #5 as option (b).
+**Affects:** Phase 4 step 6, Phase 5 data access (fallback in one helper).
+
+### Product spec fields                                                 (2026-09-16, owner)
+**Decision:** Add optional `material_en`, `material_fr`, `dimensions` (free text) to `designs`
+(migration `0005_design_specs.sql` in Phase 4). Product page shows a specs block when present.
+Resolves Open #19.
+**Affects:** Phase 4 steps 4–6, Phase 5 step 5.
 
 ---
 
@@ -293,13 +323,12 @@ own touches so the result reads as inspired, not copied.
 3. **Flat shipping rate and free-shipping threshold, in CAD** (Phase 6). Proposed default:
    CAD 6.00 flat (lettermail-size padded mailer), free over CAD 75. Canada-only — confirm.
 4. **Return / exchange policy text** (Phase 9). Needs owner-written EN text; agent translates to FR for review.
-5. **French product names**: (a) owner types both, (b) FR optional with EN fallback (current
-   default), or (c) auto-translate at catalog time with an LLM (adds a vendor). Ask before Phase 4 step 6.
+5. ~~French product names~~ **Resolved 2026-09-16** — optional FR, EN fallback (see Locked).
 6. ~~Category list final?~~ **Resolved 2026-09-16** — see Locked "Categories and default variant presets".
 7. **Confirm inventory decrement timing** (Locked-proposed above). Ask before Phase 6.
 8. **Email sender**: transactional email needs a verified domain in Resend, which needs the
    domain from #1. Until then use Resend's onboarding sender for tests only. Ask at Phase 9.
-9. **Admin login emails** for `ADMIN_EMAILS` (Phase 4). Owner's address; parents' optional.
+9. ~~Admin login emails~~ **Resolved 2026-09-16** — owner only (see Locked).
 10. **Logo files** — where are they, and what formats? (Phase 5.) Need SVG or high-res PNG, plus a square icon for PWA manifest.
 11. **Etsy shop / Pattern site** — the Pattern site is what the domain used to point at. Once the
    domain is disconnected, should the Etsy shop itself stay open (and be linked from the new
@@ -314,3 +343,4 @@ own touches so the result reads as inspired, not copied.
 18. **Cloudflare Web Analytics site token** — owner creates the site in the Cloudflare dashboard
     (Analytics & Logs → Web Analytics → Add site, hostname `awendajewelry.com` + the workers.dev
     URL) and provides the token for `NEXT_PUBLIC_CF_BEACON_TOKEN`. Needed at Phase 7 step 1.
+19. ~~Product spec fields~~ **Resolved 2026-09-16** — material EN/FR + dimensions, optional (see Locked).

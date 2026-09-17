@@ -27,7 +27,7 @@ mobile performance ≥ 90 on the catalog page; e2e covers browsing, language swi
 - **Verify:** unit tests for fallback logic; integration test for `getSimilar` excluding self.
 
 ### 3. Design system
-- References (DECISIONS.md "Storefront design references"): Luzzo for home-page structure and feel, Nazzar for the product page. Minimalist, white space, warm gold/neutral accent, clean sans-serif; our own touches so it reads as inspired, not copied.
+- References (DECISIONS.md "Storefront design references"): Luzzo for home-page structure and feel, Nazzar and Mejuri for the product page (gallery, size selector + size guide, specs block, trust row). Minimalist, white space, warm gold/neutral accent, clean sans-serif; our own touches so it reads as inspired, not copied.
 - Tailwind theme with brand tokens from the owner's logo colours; system font stack or one Google Font (owner choice — default: none, system stack).
 - Components: `ProductCard`, `Price` (CAD, `Intl.NumberFormat` with `en-CA`/`fr-CA`), `Badge` (Sold out / Épuisé), `Button`, `Header`, `Footer` (market info, language switch, policy links).
 - Place logo in `public/brand/` (SVG preferred), favicon + PWA icons from it.
