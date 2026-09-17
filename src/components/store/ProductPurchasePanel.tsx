@@ -46,9 +46,9 @@ export function ProductPurchasePanel({ variants }: { variants: Variant[] }) {
                   disabled={soldOut}
                   aria-pressed={v.id === selectedId}
                   onClick={() => selectVariant(v.id)}
-                  className={`rounded-full border px-3 py-1 text-sm ${
-                    v.id === selectedId ? "border-ink bg-ink text-ivory" : "border-ink/20 text-ink"
-                  } ${soldOut ? "cursor-not-allowed opacity-40" : "hover:border-ink"}`}
+                  className={`rounded-full border border-gold px-3 py-1 text-sm transition-colors ${
+                    v.id === selectedId ? "bg-gold text-ivory" : "text-ink"
+                  } ${soldOut ? "cursor-not-allowed opacity-40" : "hover:bg-gold/10"}`}
                 >
                   {v.label}
                   {soldOut ? ` — ${t("soldOut")}` : ""}

@@ -29,7 +29,11 @@ export default async function HomePage({
   const { locale } = await params;
   const sort = parseSort((await searchParams).sort);
 
-  const [tHeader, tErrors] = await Promise.all([getTranslations("header"), getTranslations("errors")]);
+  const [tHeader, tHome, tErrors] = await Promise.all([
+    getTranslations("header"),
+    getTranslations("home"),
+    getTranslations("errors"),
+  ]);
 
   let designs: DesignCard[] = [];
   let settings: Settings | null = null;
@@ -41,26 +45,36 @@ export default async function HomePage({
   }
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-8 md:px-8">
-      <section className="mb-10 text-center">
-        <h1 className="font-serif text-4xl text-ink">{tHeader("wordmark")}</h1>
-        <p className="mt-2 text-ink/70">{tHeader("tagline")}</p>
+    <>
+      <section className="bg-gradient-to-b from-gold-muted/40 to-ivory px-4 py-12 text-center md:py-20">
+        <h1 className="font-serif text-4xl text-ink md:text-6xl">{tHeader("wordmark")}</h1>
+        <p className="mx-auto mt-3 max-w-xl text-ink/70 md:text-lg">{tHeader("tagline")}</p>
+        <a
+          href="#catalog"
+          className="mt-6 inline-flex items-center justify-center rounded-full bg-gold px-6 py-2.5 text-sm font-medium text-ivory transition-colors hover:bg-gold-deep"
+        >
+          {tHome("cta")}
+        </a>
       </section>
 
-      {dbError ? (
-        <p className="mb-6 text-sm text-ink/70">{tErrors("dbUnreachable")}</p>
-      ) : (
-        settings && (
-          <>
-            <TrustStrip locale={locale} settings={settings} />
-            <PickupStrip locale={locale} settings={settings} />
-          </>
-        )
-      )}
+      <main className="mx-auto max-w-6xl px-4 py-8 md:px-8">
+        {dbError ? (
+          <p className="mb-6 text-sm text-ink/70">{tErrors("dbUnreachable")}</p>
+        ) : (
+          settings && (
+            <>
+              <TrustStrip locale={locale} settings={settings} />
+              <PickupStrip locale={locale} settings={settings} />
+            </>
+          )
+        )}
 
-      <CategoryTabs locale={locale} sort={sort} />
-      <SortControl sort={sort} />
-      <CatalogGrid designs={designs} locale={locale} />
-    </main>
+        <div id="catalog">
+          <CategoryTabs locale={locale} sort={sort} />
+          <SortControl sort={sort} />
+          <CatalogGrid designs={designs} locale={locale} />
+        </div>
+      </main>
+    </>
   );
 }

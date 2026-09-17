@@ -15,13 +15,18 @@ export async function CategoryTabs({ locale, active, sort }: { locale: Locale; a
   const t = await getTranslations("nav");
   const query = sort === "newest" ? "" : `?sort=${sort}`;
 
+  const pill = (isActive: boolean) =>
+    isActive
+      ? "shrink-0 rounded-full bg-gold px-4 py-1.5 text-ivory"
+      : "shrink-0 rounded-full px-4 py-1.5 text-ink/70 decoration-gold decoration-2 underline-offset-4 hover:text-ink hover:underline";
+
   return (
-    <nav className="mb-6 flex flex-wrap gap-x-4 gap-y-2 text-sm">
+    <nav className="mb-6 flex gap-2 overflow-x-auto text-sm [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       <Link
         href={`/${query}`}
         locale={locale}
         aria-current={!active ? "page" : undefined}
-        className={!active ? "font-semibold text-ink" : "text-ink/70 hover:text-ink"}
+        className={pill(!active)}
       >
         {t("all")}
       </Link>
@@ -31,7 +36,7 @@ export async function CategoryTabs({ locale, active, sort }: { locale: Locale; a
           href={`/c/${category}${query}`}
           locale={locale}
           aria-current={active === category ? "page" : undefined}
-          className={active === category ? "font-semibold text-ink" : "text-ink/70 hover:text-ink"}
+          className={pill(active === category)}
         >
           {t(category)}
         </Link>

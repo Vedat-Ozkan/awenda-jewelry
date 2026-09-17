@@ -17,12 +17,13 @@
     "language": "Langue"
   },
   "home": {
+    "cta": "Voir toute la collection",
     "nextPickup": "Prochaine cueillette : {date} au {market}",
     "marketClosed": "Nous sautons le marché jusqu'au {date}.",
     "trust": {
       "shipping": "Livraison gratuite dès {threshold}",
       "shippingFlat": "Livraison à taux fixe partout au Canada",
-      "pickupOnly": "Prêt pour la cueillette au marché",
+      "pickupOnly": "Paiement sécurisé avec Stripe",
       "pickup": "Cueillette gratuite au {market}",
       "handmade": "Fait à la main, en petites séries"
     }

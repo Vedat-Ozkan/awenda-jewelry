@@ -12,6 +12,9 @@
   --ink: #1c1a17;
   --gold: #b8905e;
   --gold-muted: #e8dac2;
+  /* Storefront light pass: darker gold for hover states / text on light
+     backgrounds, where --gold alone doesn't have enough contrast. */
+  --gold-deep: #9a7648;
 }
 
 @theme inline {
@@ -21,20 +24,18 @@
   --color-ink: var(--ink);
   --color-gold: var(--gold);
   --color-gold-muted: var(--gold-muted);
-  --font-sans: var(--font-geist-sans);
+  --color-gold-deep: var(--gold-deep);
+  --font-sans: var(--font-geist-sans, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif);
   --font-mono: var(--font-geist-mono);
   --font-serif: var(--font-store-serif);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* No dark mode: the storefront is always light (ivory/ink); admin is always
+   light too. Base styles are layered so Tailwind utilities on <body> win. */
+@layer base {
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
   }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
 }
