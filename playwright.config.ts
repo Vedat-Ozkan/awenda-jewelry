@@ -2,6 +2,9 @@ import { defineConfig } from "@playwright/test";
 
 export default defineConfig({
   testDir: "./e2e",
+  // Admin specs share one local DB (seeded designs, E2E cleanup helpers, the
+  // settings row), so spec files must not run concurrently.
+  workers: 1,
   use: {
     baseURL: "http://localhost:3000",
   },
