@@ -5,6 +5,7 @@ import { Gallery, type GalleryImage } from "@/components/store/Gallery";
 import { formatPrice, Price } from "@/components/store/Price";
 import { ProductCard } from "@/components/store/ProductCard";
 import { ProductPurchasePanel } from "@/components/store/ProductPurchasePanel";
+import { HandmadeIcon, PickupIcon, ShippingIcon } from "@/components/store/TrustStrip";
 import { permanentRedirect } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { getCurrentSlugFor, getDesignBySlug, getSettings, getSimilar, type DesignDetail } from "@/lib/catalog";
@@ -131,7 +132,7 @@ export default async function ProductPage({ params }: { params: Promise<{ locale
           </div>
 
           {(design.material || design.dimensions) && (
-            <dl className="mt-6 space-y-1 text-sm text-ink/70">
+            <dl className="mt-6 space-y-1 border-t border-gold-muted pt-4 text-sm text-ink/70">
               {design.material && (
                 <div className="flex gap-2">
                   <dt className="font-medium text-ink">{tProduct("material")}</dt>
@@ -147,16 +148,25 @@ export default async function ProductPage({ params }: { params: Promise<{ locale
             </dl>
           )}
 
-          <ul className="mt-6 space-y-1 text-sm text-ink/60">
+          <ul className="mt-6 space-y-2 text-sm text-ink/60">
             {settings.shippingEnabled && (
-              <li>
+              <li className="flex items-center gap-2">
+                <ShippingIcon />
                 {settings.freeShippingThresholdCents != null
                   ? tProduct("trust.shipping", { threshold: formatPrice(settings.freeShippingThresholdCents, locale) })
                   : tProduct("trust.shippingFlat")}
               </li>
             )}
-            {settings.marketName && <li>{tProduct("trust.pickup", { market: settings.marketName })}</li>}
-            <li>{tProduct("trust.returns")}</li>
+            {settings.marketName && (
+              <li className="flex items-center gap-2">
+                <PickupIcon />
+                {tProduct("trust.pickup", { market: settings.marketName })}
+              </li>
+            )}
+            <li className="flex items-center gap-2">
+              <HandmadeIcon />
+              {tProduct("trust.returns")}
+            </li>
           </ul>
         </div>
       </div>

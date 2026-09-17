@@ -39,14 +39,14 @@ export function ProductCard({
 
   return (
     <Link href={`/p/${design.slug}`} locale={locale} className="group block">
-      <div className="relative aspect-square overflow-hidden rounded-lg bg-ivory">
+      <div className="relative aspect-square overflow-hidden rounded-xl bg-ivory shadow-sm transition-shadow duration-300 group-hover:shadow-md">
         {src && (
           <Image
             src={src}
             alt={design.name}
             fill
             sizes={CARD_SIZES}
-            className={`object-cover ${soldOut ? "opacity-60" : ""}`}
+            className={`object-cover transition-transform duration-300 ${soldOut ? "opacity-60" : "group-hover:scale-[1.02]"}`}
           />
         )}
         {soldOut && (
@@ -55,8 +55,10 @@ export function ProductCard({
           </span>
         )}
       </div>
-      <p className="mt-2 text-sm text-ink">{design.name}</p>
-      <Price cents={design.price_cents} locale={locale} />
+      <p className="mt-2 font-serif text-sm text-ink">{design.name}</p>
+      <p className="text-sm text-ink">
+        <Price cents={design.price_cents} locale={locale} />
+      </p>
     </Link>
   );
 }

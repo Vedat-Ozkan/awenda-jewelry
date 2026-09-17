@@ -17,12 +17,13 @@
     "language": "Language"
   },
   "home": {
+    "cta": "Shop all",
     "nextPickup": "Next pickup: {date} at {market}",
     "marketClosed": "We're skipping the market until {date}.",
     "trust": {
       "shipping": "Free shipping over {threshold}",
       "shippingFlat": "Flat-rate shipping within Canada",
-      "pickupOnly": "Ready for pickup at the market",
+      "pickupOnly": "Secure checkout with Stripe",
       "pickup": "Free pickup at {market}",
       "handmade": "Handmade in small batches"
     }

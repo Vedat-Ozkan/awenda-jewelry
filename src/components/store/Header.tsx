@@ -20,7 +20,7 @@ export async function Header({ locale }: { locale: Locale }) {
   const tHeader = await getTranslations("header");
 
   return (
-    <header className="border-b border-ink/10">
+    <header className="border-b border-gold-muted">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4 md:px-8">
         <Link href="/" locale={locale} className="shrink-0 font-serif text-xl tracking-wide text-ink">
           {tHeader("wordmark")}

@@ -3,8 +3,8 @@ import type { ButtonHTMLAttributes } from "react";
 type Variant = "primary" | "secondary";
 
 const VARIANT_CLASSES: Record<Variant, string> = {
-  primary: "bg-ink text-ivory hover:bg-ink/90",
-  secondary: "border border-ink/20 text-ink hover:bg-ink/5",
+  primary: "bg-gold text-ivory hover:bg-gold-deep",
+  secondary: "border border-gold text-ink hover:bg-gold/10",
 };
 
 // Storefront button (Phase 5 step 3 design system). Cart/checkout actions in
