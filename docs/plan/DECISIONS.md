@@ -341,6 +341,16 @@ follow-up once they arrive in `public/brand/`).
 **Affects:** Phase 5; Phase 6 (replaces the checkout stub, reuses the quote logic); Phase 7
 (notify-me slot on sold-out product pages: `<section id="notify-me">`).
 
+### Singleton/config rows live in migrations, not seed                 (2026-09-17, agent)
+**Decision:** Rows the app assumes exist (the `settings` row, future lookup/config rows) are
+inserted idempotently by a migration (`insert … on conflict do nothing`), never only by
+`seed.sql`. `seed.sql` is local-only demo data and is never pushed to the hosted project.
+Readers still tolerate absence (`maybeSingle()` + a safe default) so a missing row degrades
+the page instead of 500-ing.
+**Why:** After Phase 5 deployed, `/en` returned 500 in production: `public_settings` had no
+row on the hosted DB (migration 0007 fixed it). Same rule applies to Phase 6/7 config.
+**Affects:** all later migrations; `supabase/seed.sql` inserts use `on conflict do nothing`.
+
 ---
 
 ## Open — ask the owner before the referenced step

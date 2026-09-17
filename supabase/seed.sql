@@ -27,7 +27,8 @@ insert into settings (
     "earring": ["One size"],
     "pendant": ["One size"]
   }'::jsonb
-);
+)
+on conflict (id) do nothing; -- row is created by migration 0007
 
 -- 16 designs, 2 per category. Design #10 (stud-earring-os) is sold out (its
 -- only variant is at qty 0). Design #4 is archived, #8 is a draft, the rest
