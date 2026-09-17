@@ -159,12 +159,16 @@ export type Database = {
           created_at: string
           description_en: string | null
           description_fr: string | null
+          dimensions: string | null
           embedded_at: string | null
           embedding: string | null
           id: string
           main_image_path: string | null
+          material_en: string | null
+          material_fr: string | null
           name_en: string
           name_fr: string | null
+          previous_slugs: string[]
           price_cents: number
           slug: string
           status: Database["public"]["Enums"]["design_status"]
@@ -176,12 +180,16 @@ export type Database = {
           created_at?: string
           description_en?: string | null
           description_fr?: string | null
+          dimensions?: string | null
           embedded_at?: string | null
           embedding?: string | null
           id?: string
           main_image_path?: string | null
+          material_en?: string | null
+          material_fr?: string | null
           name_en: string
           name_fr?: string | null
+          previous_slugs?: string[]
           price_cents: number
           slug: string
           status?: Database["public"]["Enums"]["design_status"]
@@ -193,12 +201,16 @@ export type Database = {
           created_at?: string
           description_en?: string | null
           description_fr?: string | null
+          dimensions?: string | null
           embedded_at?: string | null
           embedding?: string | null
           id?: string
           main_image_path?: string | null
+          material_en?: string | null
+          material_fr?: string | null
           name_en?: string
           name_fr?: string | null
+          previous_slugs?: string[]
           price_cents?: number
           slug?: string
           status?: Database["public"]["Enums"]["design_status"]
@@ -492,8 +504,11 @@ export type Database = {
           created_at: string | null
           description_en: string | null
           description_fr: string | null
+          dimensions: string | null
           id: string | null
           main_image_path: string | null
+          material_en: string | null
+          material_fr: string | null
           name_en: string | null
           name_fr: string | null
           price_cents: number | null
@@ -573,6 +588,10 @@ export type Database = {
           p_ref_id?: string
           p_variant_id: string
         }
+        Returns: number
+      }
+      bulk_restock: {
+        Args: { p_design_ids: string[]; p_note?: string; p_qty: number }
         Returns: number
       }
       design_is_published: { Args: { p_design_id: string }; Returns: boolean }

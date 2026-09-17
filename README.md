@@ -36,6 +36,14 @@ In production (Cloudflare Workers), secret values are set with `wrangler secret 
 (prompts for the value, never stored in the repo); non-secret values go in the `vars` block of
 `wrangler.jsonc`.
 
+## Admin login
+
+`/admin` requires a Supabase magic-link sign-in from an address in `admin_emails` (seed it with
+`pnpm seed:admins` after every `pnpm db:reset`). Locally, `pnpm supabase start` runs
+[Mailpit](https://mailpit.axllent.org/) instead of sending real email — open
+http://127.0.0.1:54324 after requesting a link and click the "Sign in" link in the newest
+message addressed to you.
+
 ## Commands
 
 | Command | What it does |

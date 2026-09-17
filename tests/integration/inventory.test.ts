@@ -136,6 +136,32 @@ describe("inventory", () => {
     expect(movements).toHaveLength(1);
   });
 
+  it("blocks a direct qty_on_hand update but still allows adjust_inventory (0005_design_specs.sql)", async () => {
+    const variantId = await createVariant("guard-trigger", 4);
+
+    const { error: directError } = await supabase
+      .from("variants")
+      .update({ qty_on_hand: 9 })
+      .eq("id", variantId);
+    expect(directError).not.toBeNull();
+    expect(directError?.message).toContain("use adjust_inventory()");
+
+    const { data: unchanged } = await supabase
+      .from("variants")
+      .select("qty_on_hand")
+      .eq("id", variantId)
+      .single();
+    expect(unchanged?.qty_on_hand).toBe(4);
+
+    const { data: newQty, error: adjustError } = await supabase.rpc("adjust_inventory", {
+      p_variant_id: variantId,
+      p_delta: 1,
+      p_reason: "restock",
+    });
+    expect(adjustError).toBeNull();
+    expect(newQty).toBe(5);
+  });
+
   it("next_market_date() returns the seeded weekday and honours market_closed_until", async () => {
     const { data: original } = await supabase
       .from("settings")
