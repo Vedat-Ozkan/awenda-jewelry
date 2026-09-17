@@ -16,9 +16,9 @@ vi.mock("@/lib/auth", () => ({
 }));
 // revalidatePath() requires a Next.js request/render context that doesn't
 // exist under Vitest ("Invariant: static generation store missing").
-vi.mock("next/cache", () => ({ revalidatePath: () => {} }));
+vi.mock("next/cache", () => ({ revalidatePath: () => {}, revalidateTag: vi.fn() }));
 
-const { createDraftDesign, saveDesignDetails } = await import("@/app/admin/(shell)/catalog/new/actions");
+const { createDraftDesign, saveDesignDetails } = await import("@/app/(admin)/admin/(shell)/catalog/new/actions");
 
 describe("catalog new-design actions", () => {
   const supabase = createServiceClient();

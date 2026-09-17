@@ -30,6 +30,12 @@ vi.mock("@/lib/supabase/server", () => ({
   createClient: async () => createAnonClient(),
 }));
 
+// route.ts calls revalidateTag("catalog", …) after a design photo update
+// (Phase 5 step 2); revalidateTag needs a Next.js request/render context
+// ("static generation store missing") that doesn't exist under Vitest —
+// same reasoning as revalidatePath in tests/integration/catalog-actions.test.ts.
+vi.mock("next/cache", () => ({ revalidateTag: vi.fn(), revalidatePath: vi.fn() }));
+
 const { POST } = await import("@/app/api/photos/route");
 const { findCandidates } = await import("@/lib/embeddings/search");
 

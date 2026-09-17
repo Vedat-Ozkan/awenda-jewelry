@@ -1,0 +1,131 @@
+{
+  "nav": {
+    "all": "All",
+    "necklace": "Necklaces",
+    "bracelet": "Bracelets",
+    "anklet": "Anklets",
+    "ring": "Rings",
+    "earring": "Earrings",
+    "bangle": "Bangles",
+    "chain": "Chains",
+    "pendant": "Pendants"
+  },
+  "header": {
+    "wordmark": "Awenda Jewelry",
+    "tagline": "Handmade jewelry, sold online and at the weekly market",
+    "cart": "Cart",
+    "language": "Language"
+  },
+  "home": {
+    "nextPickup": "Next pickup: {date} at {market}",
+    "marketClosed": "We're skipping the market until {date}.",
+    "trust": {
+      "shipping": "Free shipping over {threshold}",
+      "shippingFlat": "Flat-rate shipping within Canada",
+      "pickupOnly": "Ready for pickup at the market",
+      "pickup": "Free pickup at {market}",
+      "handmade": "Handmade in small batches"
+    }
+  },
+  "footer": {
+    "policies": "Policies",
+    "pickup": "Pickup",
+    "about": "About",
+    "rights": "© {year} Awenda Jewelry"
+  },
+  "badges": {
+    "soldOut": "Sold out"
+  },
+  "catalog": {
+    "sort": {
+      "label": "Sort",
+      "newest": "Newest",
+      "priceAsc": "Price: low to high",
+      "priceDesc": "Price: high to low"
+    },
+    "empty": "No designs in this category yet."
+  },
+  "product": {
+    "variant": "Size",
+    "soldOut": "Sold out",
+    "quantity": "Quantity",
+    "addToCart": "Add to cart",
+    "added": "Added to cart",
+    "soldOutTitle": "Sold out",
+    "soldOutBody": "This design is sold out for now.",
+    "similar": "Similar styles",
+    "material": "Material",
+    "dimensions": "Dimensions",
+    "trust": {
+      "shipping": "Flat-rate shipping within Canada, free over {threshold}",
+      "shippingFlat": "Flat-rate shipping within Canada",
+      "pickup": "Free pickup at {market}",
+      "returns": "See our policies for returns"
+    }
+  },
+  "cart": {
+    "title": "Your cart",
+    "empty": "Your cart is empty.",
+    "backToShop": "Back to the shop",
+    "loading": "Loading your cart…",
+    "quantity": "Quantity",
+    "remove": "Remove",
+    "unavailableItem": "Item",
+    "unavailable": "No longer available — remove",
+    "subtotal": "Subtotal",
+    "total": "Total",
+    "blockedByUnavailable": "Remove unavailable items before checking out.",
+    "checkout": "Checkout",
+    "checkoutError": "Checkout isn't available yet — please check back soon.",
+    "fulfillment": {
+      "label": "Fulfillment",
+      "pickup": "Pick up at market (free)",
+      "ship": "Ship (flat rate {rate})"
+    },
+    "freeShipping": {
+      "progress": "Add {amount} more for free shipping",
+      "unlocked": "Free shipping unlocked"
+    },
+    "loadError": "We couldn't load your cart right now. Please try again in a moment."
+  },
+  "pages": {
+    "about": {
+      "title": "About us",
+      "body1": "Awenda Jewelry is a small, family-run jewelry business. Every piece starts at our weekly market stand and now finds a home online too.",
+      "body2": "We're still writing our full story here — check back soon, or say hello at the market."
+    },
+    "pickup": {
+      "title": "Pickup at the market",
+      "weekday": "Every {weekday}",
+      "hours": "{open}–{close}",
+      "nextDate": "Next pickup: {date}",
+      "weekdays": {
+        "0": "Sunday",
+        "1": "Monday",
+        "2": "Tuesday",
+        "3": "Wednesday",
+        "4": "Thursday",
+        "5": "Friday",
+        "6": "Saturday"
+      }
+    },
+    "policies": {
+      "title": "Policies",
+      "shippingTitle": "Shipping",
+      "shippingBody": "We ship within Canada with one flat rate. Full shipping details are coming soon.",
+      "returnsTitle": "Returns & exchanges",
+      "returnsBody": "Our return and exchange policy is being finalized. In the meantime, contact us and we'll sort it out.",
+      "privacyTitle": "Privacy",
+      "privacyBody": "We collect only what's needed to fulfill your order. A full privacy policy is coming soon.",
+      "tbd": "These policy pages are placeholders while we finalize the details."
+    }
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "retry": "Try again",
+    "notFoundTitle": "Page not found",
+    "notFoundBody": "We couldn't find that page.",
+    "backHome": "Back to the shop",
+    "dbUnreachable": "We're having trouble loading the shop right now. See you at the market!"
+  }
+}

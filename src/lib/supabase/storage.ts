@@ -7,3 +7,14 @@ export function publicPhotoUrl(path: string): string {
   const cleanPath = path.startsWith("/") ? path.slice(1) : path;
   return `${base}/storage/v1/object/public/photos/${cleanPath}`;
 }
+
+// Seed rows point at public/seed/<slug>.svg (served as a static file, not a
+// Storage object — see DECISIONS.md "Phase 2 plan drift"); everything else
+// is a real photo in the `photos` Storage bucket. Same rule as the local
+// `thumbSrc()` in src/app/admin/(shell)/catalog/catalog-list.tsx, exported
+// here for the storefront (ProductCard) too. Returns null for a design with
+// no photo yet.
+export function resolvePhotoUrl(path: string | null): string | null {
+  if (!path) return null;
+  return path.startsWith("seed/") ? `/${path}` : publicPhotoUrl(path);
+}
