@@ -85,7 +85,7 @@ export async function POST(request: Request) {
     supabase
       .from("public_settings")
       .select("shipping_enabled, shipping_flat_cents, free_shipping_threshold_cents")
-      .single(),
+      .maybeSingle(),
   ]);
   if (designsError) throw designsError;
   if (settingsError) throw settingsError;
@@ -104,20 +104,21 @@ export async function POST(request: Request) {
     .filter((line) => line.available)
     .reduce((sum, line) => sum + line.unitPriceCents * line.qty, 0);
 
-  const shippingEnabled = settingsRow.shipping_enabled ?? false;
+  // No settings row (should not happen after migration 0007): treat as pickup-only.
+  const shippingEnabled = settingsRow?.shipping_enabled ?? false;
   if (fulfillment === "ship" && !shippingEnabled) {
     return NextResponse.json({ error: "shipping_disabled" }, { status: 400 });
   }
-  const freeShippingThresholdCents = settingsRow.free_shipping_threshold_cents;
+  const freeShippingThresholdCents = settingsRow?.free_shipping_threshold_cents ?? null;
   const overThreshold = freeShippingThresholdCents != null && subtotalCents >= freeShippingThresholdCents;
   const shippingCents =
-    fulfillment === "ship" ? (overThreshold ? 0 : (settingsRow.shipping_flat_cents ?? 0)) : 0;
+    fulfillment === "ship" ? (overThreshold ? 0 : (settingsRow?.shipping_flat_cents ?? 0)) : 0;
 
   const response: QuoteResponse = {
     lines,
     subtotalCents,
     shippingCents,
-    shippingFlatCents: settingsRow.shipping_flat_cents,
+    shippingFlatCents: settingsRow?.shipping_flat_cents ?? null,
     freeShippingThresholdCents,
     totalCents: subtotalCents + shippingCents,
     shippingEnabled,

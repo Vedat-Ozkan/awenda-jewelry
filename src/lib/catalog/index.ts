@@ -88,6 +88,23 @@ export interface Settings {
   pickupInstructionsFr: string | null;
 }
 
+const EMPTY_SETTINGS: Settings = {
+  marketName: null,
+  marketAddress: null,
+  nextMarketDate: null,
+  marketWeekday: null,
+  marketOpenTime: null,
+  marketCloseTime: null,
+  marketClosedUntil: null,
+  marketClosedNoteEn: null,
+  marketClosedNoteFr: null,
+  shippingEnabled: false,
+  freeShippingThresholdCents: null,
+  shippingFlatCents: null,
+  pickupInstructionsEn: null,
+  pickupInstructionsFr: null,
+};
+
 function toDesignCard(row: PublicDesignRow, locale: Locale): DesignCard {
   return {
     id: row.id!,
@@ -190,11 +207,14 @@ async function fetchSettings(): Promise<Settings> {
   const supabase = createAnonClient();
 
   const [{ data: settings, error: settingsError }, { data: nextMarketDate, error: dateError }] = await Promise.all([
-    supabase.from("public_settings").select("*").single(),
+    supabase.from("public_settings").select("*").maybeSingle(),
     supabase.rpc("next_market_date"),
   ]);
   if (settingsError) throw settingsError;
   if (dateError) throw dateError;
+  // Migration 0007 guarantees the row, but never let a missing row take the
+  // storefront down: render with market info unknown and shipping off.
+  if (!settings) return EMPTY_SETTINGS;
 
   return toSettings(settings, nextMarketDate);
 }
