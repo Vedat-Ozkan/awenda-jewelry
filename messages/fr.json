@@ -1,0 +1,131 @@
+{
+  "nav": {
+    "all": "Tout",
+    "necklace": "Colliers",
+    "bracelet": "Bracelets",
+    "anklet": "Chaînes de cheville",
+    "ring": "Bagues",
+    "earring": "Boucles d'oreilles",
+    "bangle": "Joncs",
+    "chain": "Chaînes",
+    "pendant": "Pendentifs"
+  },
+  "header": {
+    "wordmark": "Awenda Jewelry",
+    "tagline": "Bijoux faits à la main, vendus en ligne et au marché hebdomadaire",
+    "cart": "Panier",
+    "language": "Langue"
+  },
+  "home": {
+    "nextPickup": "Prochaine cueillette : {date} au {market}",
+    "marketClosed": "Nous sautons le marché jusqu'au {date}.",
+    "trust": {
+      "shipping": "Livraison gratuite dès {threshold}",
+      "shippingFlat": "Livraison à taux fixe partout au Canada",
+      "pickupOnly": "Prêt pour la cueillette au marché",
+      "pickup": "Cueillette gratuite au {market}",
+      "handmade": "Fait à la main, en petites séries"
+    }
+  },
+  "footer": {
+    "policies": "Politiques",
+    "pickup": "Cueillette",
+    "about": "À propos",
+    "rights": "© {year} Awenda Jewelry"
+  },
+  "badges": {
+    "soldOut": "Épuisé"
+  },
+  "catalog": {
+    "sort": {
+      "label": "Trier",
+      "newest": "Plus récent",
+      "priceAsc": "Prix : croissant",
+      "priceDesc": "Prix : décroissant"
+    },
+    "empty": "Aucune pièce dans cette catégorie pour le moment."
+  },
+  "product": {
+    "variant": "Taille",
+    "soldOut": "Épuisé",
+    "quantity": "Quantité",
+    "addToCart": "Ajouter au panier",
+    "added": "Ajouté au panier",
+    "soldOutTitle": "Épuisé",
+    "soldOutBody": "Cette pièce est épuisée pour le moment.",
+    "similar": "Styles similaires",
+    "material": "Matériau",
+    "dimensions": "Dimensions",
+    "trust": {
+      "shipping": "Livraison à taux fixe partout au Canada, gratuite dès {threshold}",
+      "shippingFlat": "Livraison à taux fixe partout au Canada",
+      "pickup": "Cueillette gratuite au {market}",
+      "returns": "Consultez nos politiques pour les retours"
+    }
+  },
+  "cart": {
+    "title": "Votre panier",
+    "empty": "Votre panier est vide.",
+    "backToShop": "Retour à la boutique",
+    "loading": "Chargement de votre panier…",
+    "quantity": "Quantité",
+    "remove": "Retirer",
+    "unavailableItem": "Article",
+    "unavailable": "Non disponible — à retirer",
+    "subtotal": "Sous-total",
+    "total": "Total",
+    "blockedByUnavailable": "Retirez les articles non disponibles avant de passer à la caisse.",
+    "checkout": "Passer à la caisse",
+    "checkoutError": "La caisse n'est pas encore disponible — revenez bientôt.",
+    "fulfillment": {
+      "label": "Livraison",
+      "pickup": "Cueillette au marché (gratuit)",
+      "ship": "Livraison (taux fixe {rate})"
+    },
+    "freeShipping": {
+      "progress": "Ajoutez {amount} de plus pour la livraison gratuite",
+      "unlocked": "Livraison gratuite débloquée"
+    },
+    "loadError": "Impossible de charger votre panier pour le moment. Veuillez réessayer dans un instant."
+  },
+  "pages": {
+    "about": {
+      "title": "À propos de nous",
+      "body1": "Awenda Jewelry est une petite entreprise familiale de bijoux. Chaque pièce commence à notre kiosque du marché hebdomadaire et trouve maintenant aussi sa place en ligne.",
+      "body2": "Nous sommes en train d'écrire notre histoire complète ici — revenez bientôt, ou venez nous saluer au marché."
+    },
+    "pickup": {
+      "title": "Cueillette au marché",
+      "weekday": "Chaque {weekday}",
+      "hours": "{open}–{close}",
+      "nextDate": "Prochaine cueillette : {date}",
+      "weekdays": {
+        "0": "dimanche",
+        "1": "lundi",
+        "2": "mardi",
+        "3": "mercredi",
+        "4": "jeudi",
+        "5": "vendredi",
+        "6": "samedi"
+      }
+    },
+    "policies": {
+      "title": "Politiques",
+      "shippingTitle": "Livraison",
+      "shippingBody": "Nous livrons partout au Canada à taux fixe. Les détails complets s'en viennent bientôt.",
+      "returnsTitle": "Retours et échanges",
+      "returnsBody": "Notre politique de retour et d'échange est en cours de finalisation. Entre-temps, contactez-nous et nous nous en occuperons.",
+      "privacyTitle": "Confidentialité",
+      "privacyBody": "Nous recueillons seulement ce qui est nécessaire pour traiter votre commande. Une politique de confidentialité complète s'en vient bientôt.",
+      "tbd": "Ces pages de politiques sont temporaires, le temps d'en finaliser les détails."
+    }
+  },
+  "errors": {
+    "generic": "Une erreur s'est produite. Veuillez réessayer.",
+    "retry": "Réessayer",
+    "notFoundTitle": "Page introuvable",
+    "notFoundBody": "Nous n'avons pas trouvé cette page.",
+    "backHome": "Retour à la boutique",
+    "dbUnreachable": "Nous avons de la difficulté à charger la boutique en ce moment. À bientôt au marché !"
+  }
+}

@@ -9,10 +9,10 @@ vi.mock("@/lib/supabase/admin", () => ({
 vi.mock("@/lib/auth", () => ({
   requireAdminFromCookies: async () => ({ user: { email: "admin@example.com" }, email: "admin@example.com" }),
 }));
-vi.mock("next/cache", () => ({ revalidatePath: () => {} }));
+vi.mock("next/cache", () => ({ revalidatePath: () => {}, revalidateTag: vi.fn() }));
 
 const { updateDesign, addVariant, removeVariant, adjustVariantQty } = await import(
-  "@/app/admin/(shell)/catalog/[id]/actions"
+  "@/app/(admin)/admin/(shell)/catalog/[id]/actions"
 );
 
 describe("catalog edit-design actions", () => {

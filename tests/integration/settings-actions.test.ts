@@ -13,9 +13,9 @@ vi.mock("@/lib/supabase/admin", () => ({
 vi.mock("@/lib/auth", () => ({
   requireAdminFromCookies: async () => ({ user: { email: "admin@example.com" }, email: "admin@example.com" }),
 }));
-vi.mock("next/cache", () => ({ revalidatePath: () => {} }));
+vi.mock("next/cache", () => ({ revalidatePath: () => {}, revalidateTag: vi.fn() }));
 
-const { saveSettings } = await import("@/app/admin/(shell)/settings/actions");
+const { saveSettings } = await import("@/app/(admin)/admin/(shell)/settings/actions");
 
 // Exactly supabase/seed.sql's settings row (id=1) — must round-trip
 // unchanged so tests that overwrite variant_presets don't leak a different

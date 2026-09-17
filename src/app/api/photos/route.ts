@@ -1,3 +1,4 @@
+import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth";
 import { getEmbeddingProvider } from "@/lib/embeddings";
@@ -86,6 +87,7 @@ export async function POST(request: Request) {
       .eq("id", id);
     if (updateError) throw updateError;
 
+    revalidateTag("catalog", "minutes");
     return NextResponse.json({ ok: true, target, paths: { main: mainPath, thumb: thumbPath } });
   }
 

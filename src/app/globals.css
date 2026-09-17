@@ -3,13 +3,27 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  /* Storefront palette (Phase 5 step 3, DECISIONS.md "Storefront brand"):
+     placeholder tokens until the real logo/brand files arrive — ivory
+     background, near-black text, one warm gold accent (+ a muted tint for
+     backgrounds/hovers). Admin keeps --background/--foreground above. */
+  --ivory: #faf6ef;
+  --ink: #1c1a17;
+  --gold: #b8905e;
+  --gold-muted: #e8dac2;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-ivory: var(--ivory);
+  --color-ink: var(--ink);
+  --color-gold: var(--gold);
+  --color-gold-muted: var(--gold-muted);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-serif: var(--font-store-serif);
 }
 
 @media (prefers-color-scheme: dark) {

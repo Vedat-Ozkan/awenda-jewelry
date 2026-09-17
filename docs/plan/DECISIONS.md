@@ -308,6 +308,39 @@ back to English" hint. No translation vendor. Resolves Open #5 as option (b).
 Resolves Open #19.
 **Affects:** Phase 4 steps 4–6, Phase 5 step 5.
 
+### Storefront brand: placeholder wordmark, serif + system sans          (2026-09-17, owner)
+**Decision:** Phase 5 ships with a text wordmark and a neutral palette (ivory background,
+near-black text, one warm gold accent) inspired by the reference sites; headings in one Google
+serif (agent picks a classic, e.g. Cormorant Garamond or Playfair Display, loaded via
+`next/font` with `display: swap`), body in the system sans stack. Logo files still pending
+(Open #10 stays open for the files themselves; swapping the wordmark and tokens is a small
+follow-up once they arrive in `public/brand/`).
+**Affects:** Phase 5 step 3, Phase 9 (final brand assets).
+
+### Phase 5 plan drift                                                  (2026-09-17, agent)
+**Decision:**
+- Next 16: the request middleware is `src/proxy.ts`; next-intl's middleware is composed there
+  with the admin guard. Admin/auth live under the `(admin)` route group so the storefront can
+  own `<html lang>`; `global-not-found.tsx` handles unknown top-level paths.
+- Storefront routes are `force-dynamic` (render on request) so `next build` never touches the
+  database (CI and the Cloudflare deploy have none). Data is cached with `unstable_cache`
+  (tag `catalog`, 60 s) and `revalidateTag('catalog', …)` runs from every admin mutation
+  (`revalidateTag` takes two arguments in Next 16).
+- `public_designs` has no `previous_slugs`; old-slug redirects and `getSimilar()` use the
+  service client on `designs` (server-only, read-only).
+- Archived designs count as sold out regardless of remaining qty (shared `isSoldOut()`).
+- `getSimilar()` tops up in two tiers (same category, then any category, newest in stock) so
+  "always 4 similar styles" holds on a small catalog.
+- The cart quote route reads `public_settings` uncached (money-affecting toggles must not lag
+  a minute) and returns `shippingFlatCents` so the Ship option can be labelled while Pickup is
+  selected. `POST /api/checkout` is a 501 stub until Phase 6.
+- Images: `images.unoptimized = true` — no transforms on the free tier, so a passthrough loader
+  with `srcset` is pointless; `next/image` is kept for lazy loading and layout stability.
+- The cart store is a plain external store read via `useSyncExternalStore` (localStorage is
+  browser-only; avoids set-state-in-effect).
+**Affects:** Phase 5; Phase 6 (replaces the checkout stub, reuses the quote logic); Phase 7
+(notify-me slot on sold-out product pages: `<section id="notify-me">`).
+
 ---
 
 ## Open — ask the owner before the referenced step

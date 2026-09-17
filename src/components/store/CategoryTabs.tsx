@@ -1,0 +1,41 @@
+import { getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
+import type { Locale } from "@/i18n/routing";
+import { CATEGORIES, type Sort } from "@/lib/catalog";
+import type { Database } from "@/lib/supabase/database.types";
+
+type Category = Database["public"]["Enums"]["category"];
+
+// Catalog-page category tabs (Phase 5 step 4): "All" + the 8 categories,
+// reusing Header's `nav` translations. Distinct from Header's own top nav
+// (chunk A, step 3) — these live on the catalog pages themselves and carry
+// the current `sort` selection across tab switches, which the header links
+// don't need to do.
+export async function CategoryTabs({ locale, active, sort }: { locale: Locale; active?: Category; sort: Sort }) {
+  const t = await getTranslations("nav");
+  const query = sort === "newest" ? "" : `?sort=${sort}`;
+
+  return (
+    <nav className="mb-6 flex flex-wrap gap-x-4 gap-y-2 text-sm">
+      <Link
+        href={`/${query}`}
+        locale={locale}
+        aria-current={!active ? "page" : undefined}
+        className={!active ? "font-semibold text-ink" : "text-ink/70 hover:text-ink"}
+      >
+        {t("all")}
+      </Link>
+      {CATEGORIES.map((category) => (
+        <Link
+          key={category}
+          href={`/c/${category}${query}`}
+          locale={locale}
+          aria-current={active === category ? "page" : undefined}
+          className={active === category ? "font-semibold text-ink" : "text-ink/70 hover:text-ink"}
+        >
+          {t(category)}
+        </Link>
+      ))}
+    </nav>
+  );
+}
