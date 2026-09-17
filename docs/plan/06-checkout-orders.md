@@ -13,7 +13,7 @@ auto-refund path; admin can mark shipped/picked up/refund.
 
 > **STOP — ask the owner** before step 1: Stripe account exists and test keys available?
 > (The business owner must create the Stripe account — needs EIN/SSN and bank details.)
-> Before step 2: shipping rate/threshold and US-only (Open #3), Stripe Tax (Open #2),
+> Before step 2: shipping rate/threshold in CAD, Canada-only (Open #3), Stripe Tax / GST-HST (Open #2),
 > decrement timing (Open #7).
 
 ---
@@ -31,13 +31,13 @@ auto-refund path; admin can mark shipped/picked up/refund.
 - Server re-validates: variant exists, design active, `qty ≤ qty_on_hand`, price from DB.
   Reject with a localized error listing unavailable lines.
 - Build session:
-  - `mode: 'payment'`, `line_items` with `price_data` (USD, `unit_amount`, `product_data.name` =
+  - `mode: 'payment'`, `line_items` with `price_data` (`currency: 'cad'`, `unit_amount`, `product_data.name` =
     localized name + variant label, `images: [main url]`), `quantity`.
   - `metadata`: `fulfillment`, `locale`, and a compact JSON of `[{variantId, qty}]` (≤ 500 chars; if
     larger, store a `checkout_drafts` row and put its id in metadata — implement only if needed).
   - `locale` → Stripe's `fr` / `en`.
   - **pickup**: no address collection; `custom_text.submit` = pickup message with next market date.
-  - **ship**: `shipping_address_collection.allowed_countries: ['US']`, one `shipping_options`
+  - **ship**: `shipping_address_collection.allowed_countries: ['CA']`, one `shipping_options`
     entry with `shipping_rate_data` flat amount, or amount 0 named "Free shipping" when
     subtotal ≥ threshold.
   - `automatic_tax.enabled` = `settings.stripe_tax_enabled`.
