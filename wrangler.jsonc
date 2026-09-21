@@ -15,6 +15,12 @@
     "NEXT_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhwZXJoYnVza25lYmx3dXllb3dxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk1NTY1MDgsImV4cCI6MjEwNTEzMjUwOH0.hDbv6A0gs4Q33hDB6Ar8R83GIgWxMSYz8YdcrwAFswg"
   },
   "triggers": {
-    "crons": ["0 6 */3 * *"]
+    // "0 6 */3 * *": keepalive, every 3 days at 06:00 UTC.
+    // "0 14 * * *": pickup-reminders, daily at 14:00 UTC = 09:00
+    // America/New_York during EDT (market timezone default, settings.market_timezone).
+    // Cloudflare Cron Trigger expressions are fixed UTC — there is no DST-aware
+    // cron here, so this drifts to 10:00 local once EST starts in November;
+    // acceptable for a once-daily reminder, revisit if it matters.
+    "crons": ["0 6 */3 * *", "0 14 * * *"]
   }
 }

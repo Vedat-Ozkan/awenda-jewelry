@@ -77,7 +77,9 @@
     "total": "Total",
     "blockedByUnavailable": "Retirez les articles non disponibles avant de passer à la caisse.",
     "checkout": "Passer à la caisse",
-    "checkoutError": "La caisse n'est pas encore disponible — revenez bientôt.",
+    "checkingOut": "Passage à la caisse…",
+    "checkoutError": "Une erreur est survenue au passage à la caisse — veuillez réessayer.",
+    "shippingDisabled": "La livraison a été désactivée — vous êtes passé à la cueillette.",
     "fulfillment": {
       "label": "Livraison",
       "pickup": "Cueillette au marché (gratuit)",
@@ -88,6 +90,31 @@
       "unlocked": "Livraison gratuite débloquée"
     },
     "loadError": "Impossible de charger votre panier pour le moment. Veuillez réessayer dans un instant."
+  },
+  "checkout": {
+    "pickupMessage": "Votre commande sera prête pour la cueillette au marché le {date}.",
+    "pickupMessageNoDate": "Nous vous enverrons un courriel dès que votre commande sera prête pour la cueillette.",
+    "shippingFlat": "Livraison",
+    "shippingFree": "Livraison gratuite"
+  },
+  "order": {
+    "title": "Commande confirmée",
+    "confirming": "Confirmation de votre paiement…",
+    "confirmingTimeout": "Cela prend plus de temps que prévu — vérifiez votre courriel pour la confirmation.",
+    "subtotal": "Sous-total",
+    "shipping": "Livraison",
+    "tax": "Taxe",
+    "total": "Total",
+    "soldOutRefunded": "Épuisé — remboursé",
+    "customerEmail": "Un reçu a été envoyé à {email}.",
+    "pickup": {
+      "title": "Cueillette au marché",
+      "nextDate": "Prête pour la cueillette : {date}",
+      "fallback": "Nous vous enverrons un courriel dès que votre commande sera prête pour la cueillette."
+    },
+    "ship": {
+      "trackingEmail": "Vous recevrez un courriel de suivi une fois votre commande expédiée."
+    }
   },
   "pages": {
     "about": {

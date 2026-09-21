@@ -44,6 +44,47 @@ In production (Cloudflare Workers), secret values are set with `wrangler secret 
 http://127.0.0.1:54324 after requesting a link and click the "Sign in" link in the newest
 message addressed to you.
 
+## Stripe (local)
+
+Checkout (Phase 6) needs a Stripe test account. Set `STRIPE_SECRET_KEY` (test key,
+`sk_test_...`) and `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` (`pk_test_...`) in `.env.local` — get
+them from the [Stripe Dashboard](https://dashboard.stripe.com/test/apikeys) in test mode.
+`pnpm stripe:check` confirms the key works (prints the account id, country, and that
+`livemode` is false).
+
+For the webhook, run the [Stripe CLI](https://stripe.com/docs/stripe-cli) alongside `pnpm dev`:
+
+```
+stripe listen --forward-to localhost:3000/api/stripe/webhook
+```
+
+It prints a `whsec_...` signing secret — set that as `STRIPE_WEBHOOK_SECRET` in `.env.local`.
+
+The full cart → Stripe → webhook → order path needs a real Stripe test key, so it isn't
+covered by the automated e2e suite (which stubs `/api/checkout`'s response instead). Run it
+manually once a key exists — see `docs/manual-tests.md`.
+
+The orders admin's refund action also needs a real payment to refund against, so its e2e spec
+sets `STRIPE_FAKE_REFUNDS=1` (dev/test only, ignored in production) to skip the Stripe call.
+
+## Cron jobs
+
+Two Cloudflare Cron Triggers (`wrangler.jsonc` `triggers.crons`) share the `scheduled()` handler
+in `custom-worker.ts`, which branches on `event.cron` and pings the matching route with the
+`x-cron-secret` header:
+
+| Cron expression | Route | What it does |
+|---|---|---|
+| `0 6 */3 * *` | `/api/keepalive` | Pings Supabase every 3 days so the free-tier project doesn't idle-pause. |
+| `0 14 * * *` | `/api/cron/pickup-reminders` | Emails the day-before-market reminder to `awaiting_pickup` orders due tomorrow. |
+
+Both routes require `x-cron-secret: $CRON_SECRET` and can be triggered manually in dev:
+
+```
+curl -H "x-cron-secret: $CRON_SECRET" localhost:3000/api/keepalive
+curl -H "x-cron-secret: $CRON_SECRET" localhost:3000/api/cron/pickup-reminders
+```
+
 ## Commands
 
 | Command | What it does |

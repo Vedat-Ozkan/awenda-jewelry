@@ -9,12 +9,15 @@ type EnvWithCronSecret = CloudflareEnv & { CRON_SECRET: string };
 export default {
   fetch: handler.fetch,
 
-  async scheduled(_event, env, ctx) {
+  async scheduled(event, env, ctx) {
     const { CRON_SECRET } = env as EnvWithCronSecret;
+    // Two cron expressions share this handler (wrangler.jsonc `triggers.crons`):
+    // "0 6 */3 * *" -> keepalive, "0 14 * * *" -> pickup-reminders.
+    const path = event.cron === "0 14 * * *" ? "/api/cron/pickup-reminders" : "/api/keepalive";
     ctx.waitUntil(
       handler
         .fetch(
-          new Request("https://awenda-jewelry.internal/api/keepalive", {
+          new Request(`https://awenda-jewelry.internal${path}`, {
             headers: { "x-cron-secret": CRON_SECRET },
           }),
           env,
@@ -22,7 +25,7 @@ export default {
         )
         .then((response: Response) => {
           if (!response.ok) {
-            console.error(`Keepalive ping failed: ${response.status}`);
+            console.error(`Scheduled ping to ${path} failed: ${response.status}`);
           }
         }),
     );

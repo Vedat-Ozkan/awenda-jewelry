@@ -333,6 +333,7 @@ export type Database = {
           locale: string
           picked_up_at: string | null
           refunded_at: string | null
+          reminder_sent_at: string | null
           shipped_at: string | null
           shipping_address: Json | null
           shipping_cents: number
@@ -356,6 +357,7 @@ export type Database = {
           locale?: string
           picked_up_at?: string | null
           refunded_at?: string | null
+          reminder_sent_at?: string | null
           shipped_at?: string | null
           shipping_address?: Json | null
           shipping_cents?: number
@@ -379,6 +381,7 @@ export type Database = {
           locale?: string
           picked_up_at?: string | null
           refunded_at?: string | null
+          reminder_sent_at?: string | null
           shipped_at?: string | null
           shipping_address?: Json | null
           shipping_cents?: number
@@ -594,6 +597,7 @@ export type Database = {
         Args: { p_design_ids: string[]; p_note?: string; p_qty: number }
         Returns: number
       }
+      create_order_from_checkout: { Args: { p_payload: Json }; Returns: Json }
       design_is_published: { Args: { p_design_id: string }; Returns: boolean }
       is_admin: { Args: never; Returns: boolean }
       match_designs: {
@@ -608,6 +612,43 @@ export type Database = {
         }[]
       }
       next_market_date: { Args: never; Returns: string }
+      pickup_reminder_candidates: {
+        Args: { p_today?: string }
+        Returns: {
+          created_at: string
+          customer_email: string
+          customer_name: string | null
+          customer_phone: string | null
+          fulfillment: Database["public"]["Enums"]["fulfillment_type"]
+          id: string
+          locale: string
+          picked_up_at: string | null
+          refunded_at: string | null
+          reminder_sent_at: string | null
+          shipped_at: string | null
+          shipping_address: Json | null
+          shipping_cents: number
+          status: Database["public"]["Enums"]["order_status"]
+          stripe_checkout_session_id: string
+          stripe_payment_intent_id: string | null
+          subtotal_cents: number
+          tax_cents: number
+          total_cents: number
+          tracking_number: string | null
+          tracking_url: string | null
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "orders"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      refund_order_items: {
+        Args: { p_item_ids: string[]; p_order_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       booth_sale_status: "pending" | "matched" | "unmatched" | "oversold"

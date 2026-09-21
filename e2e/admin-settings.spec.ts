@@ -17,7 +17,7 @@ test.describe("admin settings", () => {
   test.afterAll(async () => {
     // Restore the seeded row (supabase/seed.sql): shipping rate and closed-until.
     const supabase = createServiceClient();
-    await supabase.from("settings").update({ shipping_flat_cents: 500, market_closed_until: null }).eq("id", 1);
+    await supabase.from("settings").update({ shipping_flat_cents: 1200, market_closed_until: null }).eq("id", 1);
     await deleteTestAdmin(ADMIN_EMAIL);
   });
 

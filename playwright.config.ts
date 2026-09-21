@@ -32,6 +32,11 @@ export default defineConfig({
       // role key (checkAdmin()/updateSession() call createAdminClient()).
       SUPABASE_SERVICE_ROLE_KEY:
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU",
+      // No Stripe test key is available in CI/local e2e — the orders admin's
+      // refund action skips the real Stripe call when this is set (see
+      // src/app/(admin)/admin/(shell)/orders/actions.ts's shouldFakeRefund(),
+      // which also gates on NODE_ENV !== "production").
+      STRIPE_FAKE_REFUNDS: "1",
     },
   },
 });
