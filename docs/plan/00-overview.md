@@ -15,7 +15,7 @@ surgical changes, verify every step) apply to every phase here.
 | Surface | Who uses it | What it does |
 |---|---|---|
 | **Storefront** (`/en`, `/fr`) | Customers | Browse catalog, add to cart, pay with Stripe, choose **Ship** or **Pick up at market**. Sold-out designs stay visible, greyed, with "similar styles". |
-| **Admin: Catalog** (`/admin/catalog`) | Owner | Photograph new stock on a gray backdrop, enter name/category/price/variants, publish. Bulk ops (archive, restock, reprice). Photo generates a Voyage image embedding stored in pgvector. |
+| **Admin: Catalog** (`/admin/catalog`) | Owner | Photograph new stock on an ivory backdrop, enter name/category/price/variants, publish. Bulk ops (archive, restock, reprice). Photo generates a Voyage image embedding stored in pgvector. |
 | **Admin: Analytics** (`/admin/analytics`) | Owner | Traffic (Cloudflare Web Analytics), funnel views → carts → orders, revenue, top and sold-out designs, leads (notify-me, newsletter). |
 | **Admin: Orders** (`/admin/orders`) | Owner | View paid orders, mark shipped (with tracking) or picked up, refund. |
 
