@@ -41,3 +41,6 @@ playwright-report/
 
 # Lighthouse/Chrome profile dirs created with a Windows-style path under WSL
 C:*
+
+# AI product photo batches (Phase 10) — real photos + generated images
+ai-photos/batches/

@@ -28,16 +28,25 @@ Both take the target from the env file: `--env-file=.env.local` (default, local 
 
 - **fetch** — lists pending designs (limit via `--limit`, default 10), downloads the main photo and
   extra photos into `ai-photos/batches/<YYYY-MM-DD-HHmm>/<slug>/` (gitignored) and writes a
-  `manifest.json` per batch: design id, slug, name, category, metal, local file names,
-  `studio`/`model` (null until generated), `approved` (false).
+  `manifest.json` per batch: `createdAt`, `supabaseUrl`, and per design: id, slug, name, category,
+  metal, `photos` (real file names, main first), `studio`/`model` (null until generated),
+  `approved` (false), `note` (null; why a design was skipped).
 - **upload** — for each design in a batch with `approved: true` and both images present:
-  1. Resize each generated image to main (≤1024 px) + thumb (≤400 px) JPEG, same as the admin
-     pipeline, and upload to the `photos` bucket using the same path scheme as `/api/photos`.
+  1. Resize each generated image to main (≤1024 px) + thumb (≤400 px) JPEG (q85, same as the admin
+     pipeline; done with `sharp`, a devDependency used only by this script) and upload to the
+     `photos` bucket at `designs/<id>/ai/{studio,model}-{main,thumb}.jpg`. (Not `main.jpg`: the
+     `/api/photos` path would overwrite the real main photo, which must stay as a gallery image.)
+     The previous main photo is copied to `designs/<id>/ai/original-{main,thumb}.jpg` and the
+     gallery row points at the copy, so a later admin "replace main photo" (which rewrites
+     `designs/<id>/main.jpg`) cannot clobber the gallery original.
   2. Studio → the design's main image; embed it with the configured provider (same as
      `/api/photos`) so "similar styles" stays correct.
-  3. Gallery (`design_images.sort_order`): model shot 0, previous main photo 1, previous extra
+  3. Gallery (`design_images.sort_order`): model shot 0, previous main photo (the copy) 1, previous extra
      photos after it (order kept). Nothing is deleted.
-  4. Set `ai_photos_at = now()`. Idempotent: a design already done is skipped.
+  4. Set `ai_photos_at = now()` (last, so a partial failure leaves the design pending and the
+     rerun repeatable; gallery rows are rewritten with absolute `sort_order`s). Idempotent: a design
+     already done is skipped. Refuses to run if the manifest's `supabaseUrl` differs from the
+     target (a local batch cannot be uploaded to prod).
   Prints a summary; exits non-zero if any design failed (others still processed).
 
 ## 3. Skill `.claude/skills/ai-photos/SKILL.md` (`/ai-photos [prod] [limit]`)
@@ -59,8 +68,9 @@ Both take the target from the env file: `--env-file=.env.local` (default, local 
 5. Run upload for the approved designs; report what went live.
 
 ## 4. Tests
-- Integration: pending query excludes archived, seed placeholders and already-done designs.
-- E2E: seed a design with a real fixture photo, run the upload script against local Supabase with
+- Integration (`tests/integration/ai-photos-pending.test.ts`): pending query includes active and
+  draft designs; excludes archived, seed placeholders, no-photo and already-done designs.
+- E2E (`e2e/admin-ai-photos.spec.ts`): seed a design with a real fixture photo, run the upload script against local Supabase with
   fixture studio/model images, then the product page shows studio as the main image, model as the
   second gallery image, and the original photo after it.
 
