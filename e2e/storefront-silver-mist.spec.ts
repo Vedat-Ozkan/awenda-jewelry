@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 // Silver Mist restyle of the non-home storefront pages (DECISIONS.md
 // 2026-09-29): no horizontal scroll at the four target widths, and the

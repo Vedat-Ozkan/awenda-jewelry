@@ -4,9 +4,11 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import type { Database } from "@/lib/supabase/database.types";
 import { createAnonClient } from "./client";
 import { localize } from "./localize";
+import { METALS, type Metal } from "./metals";
+
+export { METALS, type Metal };
 
 type Category = Database["public"]["Enums"]["category"];
-export type Metal = Database["public"]["Enums"]["metal"];
 // public_designs/public_settings are views (0004_rls.sql), so generated
 // types put them under Views, not Tables.
 type PublicDesignRow = Database["public"]["Views"]["public_designs"]["Row"];
@@ -32,8 +34,6 @@ export const CATEGORIES: Category[] = [
 export function isCategory(value: string): value is Category {
   return (CATEGORIES as string[]).includes(value);
 }
-
-export const METALS: Metal[] = ["stainless_steel", "sterling_silver"];
 
 export function isMetal(value: unknown): value is Metal {
   return typeof value === "string" && (METALS as string[]).includes(value);

@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import { createServiceClient } from "../tests/helpers/local-supabase";
 
 // Phase 7 step 3. Browse home -> product -> add to cart; the funnel events

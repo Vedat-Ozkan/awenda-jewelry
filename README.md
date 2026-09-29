@@ -142,6 +142,9 @@ curl -H "x-cron-secret: $CRON_SECRET" localhost:3000/api/cron/pickup-reminders
 - In CI, `.github/workflows/deploy.yml` runs `pnpm run deploy` after `ci.yml` succeeds on
   `main`, using the repo secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` (the owner
   adds these in GitHub repo settings; agents cannot).
+- After `supabase db push` applies migration 0014, every existing hosted design is
+  `stainless_steel`. The owner must reclassify sterling-silver designs in /admin (edit page,
+  metal select).
 
 ## Status
 

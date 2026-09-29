@@ -33,7 +33,7 @@ export async function Header({ locale }: { locale: Locale }) {
   const always = "flex";
   const primary = [
     { href: "/#catalog", label: t("shopAll"), show: always },
-    { href: "/?sort=newest#catalog", label: t("newIn"), show: always },
+    { href: "/#new-in", label: t("newIn"), show: always },
     ...METALS.map((metal) => ({ href: `/?metal=${metal}#catalog`, label: tMetal(metal), show: always })),
   ];
   const links = [

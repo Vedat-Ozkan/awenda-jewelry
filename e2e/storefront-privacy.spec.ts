@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 // Phase 7 step 6: the policies page carries the analytics/privacy section in
 // both locales.

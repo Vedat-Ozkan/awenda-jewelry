@@ -49,7 +49,7 @@ export function MobileMenu({ locale, links }: { locale: Locale; links: MenuLink[
       <button
         ref={buttonRef}
         type="button"
-        aria-label={t("menu")}
+        aria-label={open ? t("closeMenu") : t("menu")}
         aria-expanded={open}
         aria-controls={panelId}
         onClick={() => setOpen((v) => !v)}
@@ -70,7 +70,11 @@ export function MobileMenu({ locale, links }: { locale: Locale; links: MenuLink[
       </button>
       {open && (
         <>
-          <div aria-hidden="true" className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
+          <div aria-hidden="true" className="fixed inset-0 z-40" onClick={() => {
+              setOpen(false);
+              buttonRef.current?.focus();
+            }}
+          />
           <div
             id={panelId}
             className="absolute inset-x-0 top-full z-50 mt-2 rounded-3xl bg-white p-3 shadow-[0_8px_30px_rgba(30,31,36,0.12)]"

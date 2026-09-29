@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import { createServiceClient } from "../tests/helpers/local-supabase";
 
 // Phase 6 step 4. Orders aren't reachable through any UI flow yet (Stripe

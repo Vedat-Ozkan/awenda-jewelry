@@ -3,6 +3,7 @@
 import { revalidatePath, revalidateTag } from "next/cache";
 import { z } from "zod";
 import { requireAdminFromCookies } from "@/lib/auth";
+import { METALS } from "@/lib/catalog/metals";
 import { slugify, uniqueSlug } from "@/lib/catalog/slug";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Database } from "@/lib/supabase/database.types";
@@ -45,7 +46,7 @@ const CATEGORIES: [Category, ...Category[]] = [
 
 const detailsSchema = z.object({
   category: z.enum(CATEGORIES),
-  metal: z.enum(["stainless_steel", "sterling_silver"]).default("stainless_steel"),
+  metal: z.enum(METALS),
   nameEn: z.string().min(1),
   nameFr: z.string().optional(),
   priceCents: z.number().int().positive(),

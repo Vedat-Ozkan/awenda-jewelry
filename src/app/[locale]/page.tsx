@@ -37,14 +37,13 @@ function parseMetal(value: string | string[] | undefined): Metal | undefined {
 const TILE_TONES = ["#dadbe0", "#d2d4da", "#e0e1e5", "#cdcfd6", "#dcdde2", "#d4d6dc", "#dfe0e4", "#d6d8de"];
 
 // Storefront home (Phase 5 step 4; Silver Mist redesign): hero with a
-// floating card, category tiles, best sellers, trust tiles, then the full
-// catalog (category tabs + sort + grid, the `#catalog` anchor the nav's
-// "Shop all" / "New in" links point at).
+// floating card, category tiles, new in, trust tiles, then the full
+// catalog (category tabs + sort + grid). The nav's "Shop all" link points at
+// the `#catalog` anchor, "New in" at the `#new-in` section.
 //
-// Hero photo, tile photos and "best sellers" all come from data the storefront
+// Hero photo, tile photos and "new in" all come from data the storefront
 // already has: the newest in-stock design's main image, the newest design with
-// a photo per category, and the four newest in-stock designs (there is no
-// sales data to rank by).
+// a photo per category, and the four newest in-stock designs.
 //
 // DB-unreachable handling (step 10): getDesigns/getSettings are wrapped in
 // try/catch. A thrown Supabase error still renders the header/footer chrome,
@@ -83,7 +82,7 @@ export default async function HomePage({
   }
 
   const inStock = newest.filter((d) => !isSoldOut(d));
-  const bestSellers = inStock.slice(0, 4);
+  const newIn = inStock.slice(0, 4);
 
   // Hero photo: the newest in-stock design's main image (thumb as fallback).
   let heroSrc: string | null = null;
@@ -177,11 +176,11 @@ export default async function HomePage({
         </ul>
       </section>
 
-      {bestSellers.length > 0 && (
-        <section className="flex flex-col gap-4 pt-10 lg:gap-7 lg:pt-20">
+      {newIn.length > 0 && (
+        <section id="new-in" className="scroll-mt-4 flex flex-col gap-4 pt-10 lg:gap-7 lg:pt-20">
           <div className="flex items-end justify-between px-1 lg:px-0">
             <h2 className="font-serif text-[32px] font-normal tracking-[-0.01em] lg:text-[52px]">
-              {tHome("bestSellers")}
+              {tHome("newIn")}
             </h2>
             <Link
               href="/#catalog"
@@ -192,7 +191,7 @@ export default async function HomePage({
             </Link>
           </div>
           <div className="grid grid-cols-2 gap-2.5 lg:grid-cols-4 lg:gap-4">
-            {bestSellers.map((design) => (
+            {newIn.map((design) => (
               <ProductCard key={design.id} design={design} locale={locale} soldOutLabel={tBadges("soldOut")} />
             ))}
           </div>

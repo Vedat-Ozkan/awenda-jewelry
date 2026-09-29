@@ -4,6 +4,7 @@ import { randomBytes } from "node:crypto";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { z } from "zod";
 import { requireAdminFromCookies } from "@/lib/auth";
+import { METALS } from "@/lib/catalog/metals";
 import { slugify } from "@/lib/catalog/slug";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Database } from "@/lib/supabase/database.types";
@@ -26,8 +27,7 @@ const STATUSES: [DesignStatus, ...DesignStatus[]] = ["draft", "active", "archive
 const updateDesignSchema = z.object({
   slug: z.string().min(1),
   category: z.enum(CATEGORIES),
-  // Optional so callers that predate the metal field leave it unchanged.
-  metal: z.enum(["stainless_steel", "sterling_silver"]).optional(),
+  metal: z.enum(METALS),
   nameEn: z.string().min(1),
   nameFr: z.string().optional(),
   descriptionEn: z.string().optional(),
@@ -81,7 +81,7 @@ export async function updateDesign(id: string, data: UpdateDesignInput): Promise
       slug: newSlug,
       previous_slugs: previousSlugs,
       category: parsed.category,
-      ...(parsed.metal ? { metal: parsed.metal } : {}),
+      metal: parsed.metal,
       name_en: parsed.nameEn,
       name_fr: parsed.nameFr?.trim() || null,
       description_en: parsed.descriptionEn?.trim() || null,

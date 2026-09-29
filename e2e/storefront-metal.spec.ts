@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page } from "./fixtures";
 
 // DECISIONS.md "Structured metal on designs" (2026-09-29): nav links, the home
 // "All designs" filter and the steel/silver label on product cards, against

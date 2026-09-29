@@ -537,6 +537,9 @@ stay for detail ("316L, 18k PVD"). No durability claims are attached to either m
 **Why:** Silver Mist nav and filters say "stainless steel / sterling silver"; a structured column
 is filterable and cannot drift like free text.
 **Affects:** Phase 4 admin forms and list, Phase 5 catalog query and listing pages, seed data.
+**Deploy note:** Migration 0014 defaults every existing hosted row to `stainless_steel`. After
+`supabase db push`, the owner must reclassify sterling-silver designs in /admin (edit page,
+metal select).
 
 ## Open — ask the owner before the referenced step
 

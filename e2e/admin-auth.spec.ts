@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import { createServiceClient } from "../tests/helpers/local-supabase";
 import { deleteTestAdmin, hasMessageTo, loginAsAdmin } from "./helpers/admin";
 

@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 // DECISIONS.md "Structured metal on designs" (2026-09-29): `?metal=` filter on
 // the category listing, against supabase/seed.sql (the "Silver *" designs are
