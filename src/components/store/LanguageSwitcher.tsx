@@ -14,17 +14,23 @@ export function LanguageSwitcher({ locale }: { locale: Locale }) {
   const t = useTranslations("header");
 
   return (
-    <nav aria-label={t("language")} className="flex gap-2 text-sm">
-      {routing.locales.map((l) => (
-        <Link
-          key={l}
-          href={pathname}
-          locale={l}
-          aria-current={l === locale ? "true" : undefined}
-          className={l === locale ? "font-semibold text-ink" : "text-ink/60 hover:text-ink"}
-        >
-          {LABELS[l]}
-        </Link>
+    <nav aria-label={t("language")} className="flex items-center text-[15px]">
+      {routing.locales.map((l, i) => (
+        <span key={l} className="flex items-center">
+          {i > 0 && (
+            <span aria-hidden="true" className="text-muted">
+              ·
+            </span>
+          )}
+          <Link
+            href={pathname}
+            locale={l}
+            aria-current={l === locale ? "true" : undefined}
+            className={`flex h-11 min-w-11 items-center justify-center px-1.5 ${l === locale ? "font-semibold text-ink" : "text-muted hover:text-ink"}`}
+          >
+            {LABELS[l]}
+          </Link>
+        </span>
       ))}
     </nav>
   );

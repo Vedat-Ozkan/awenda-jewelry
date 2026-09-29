@@ -4,38 +4,53 @@
   --background: #ffffff;
   --foreground: #171717;
 
-  /* Storefront palette (Phase 5 step 3, DECISIONS.md "Storefront brand"):
-     placeholder tokens until the real logo/brand files arrive — ivory
-     background, near-black text, one warm gold accent (+ a muted tint for
-     backgrounds/hovers). Admin keeps --background/--foreground above. */
-  --ivory: #faf6ef;
-  --ink: #1c1a17;
-  --gold: #b8905e;
-  --gold-muted: #e8dac2;
-  /* Storefront light pass: darker gold for hover states / text on light
-     backgrounds, where --gold alone doesn't have enough contrast. */
-  --gold-deep: #9a7648;
+  /* "Silver Mist" palette (DECISIONS.md "Visual redesign", 2026-09-29) for
+     the storefront and, from the admin chunk on, /admin. */
+  --page: #f7f8f8;
+  --surface: #ffffff;
+  --mist: #e9e8ee;
+  --well: #eeeff1;
+  --ink: #1e1f24;
+  --muted: #585a63;
+  --accent: #5c5a6e;
+  /* Hover state for accent fills. */
+  --accent-deep: #4a4859;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-ivory: var(--ivory);
+  --color-page: var(--page);
+  --color-surface: var(--surface);
+  --color-mist: var(--mist);
+  --color-well: var(--well);
   --color-ink: var(--ink);
-  --color-gold: var(--gold);
-  --color-gold-muted: var(--gold-muted);
-  --color-gold-deep: var(--gold-deep);
-  --font-sans: var(--font-geist-sans, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif);
-  --font-mono: var(--font-geist-mono);
-  --font-serif: var(--font-store-serif);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-deep: var(--accent-deep);
+  /* Legacy ivory/gold names, aliased to the new palette so pages that
+     haven't been restyled yet (product, cart, admin chart) keep working.
+     Later redesign chunks remove their usages; then delete these. */
+  --color-ivory: var(--page);
+  --color-gold: var(--accent);
+  --color-gold-muted: var(--mist);
+  --color-gold-deep: var(--accent-deep);
+  --font-sans: var(--font-figtree, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif);
+  --font-serif: var(--font-newsreader, ui-serif, Georgia, serif);
 }
 
-/* No dark mode: the storefront is always light (ivory/ink); admin is always
-   light too. Base styles are layered so Tailwind utilities on <body> win. */
+/* No dark mode: storefront and admin are always light. Base styles are
+   layered so Tailwind utilities on <body> win. */
 @layer base {
   body {
     background: var(--background);
     color: var(--foreground);
     font-family: var(--font-sans);
+  }
+
+  /* Visible keyboard focus everywhere (accent on light surfaces). */
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
   }
 }

@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
-import { Cormorant_Garamond } from "next/font/google";
+import { Figtree, Newsreader } from "next/font/google";
 import type { ReactNode } from "react";
+import { AnnouncementBar } from "@/components/store/AnnouncementBar";
 import { Footer } from "@/components/store/Footer";
 import { Header } from "@/components/store/Header";
 import { PageViewTracker } from "@/components/store/AnalyticsTrackers";
@@ -14,20 +15,24 @@ import "../globals.css";
 // Storefront root layout (Phase 5 step 1): second root layout alongside
 // src/app/(admin)/layout.tsx — see docs/plan/05-storefront.md step 1 and
 // node_modules/next/dist/docs/01-app/03-api-reference/03-file-conventions/route-groups.md
-// ("Defining multiple root layouts"). Serif heading font loaded once here
-// (DECISIONS.md "Storefront brand": placeholder wordmark, serif + system
-// sans) and exposed as --font-store-serif (src/app/globals.css @theme).
-// display: "swap" avoids render-blocking on the font request (Phase 5 step
-// 9). Weight 500 only: every `font-serif` heading across the storefront
-// (Header, product/category/static page <h1>/<h2>s) uses the utility with
-// no font-weight modifier, so 400 is requested and the browser's nearest-
-// weight fallback resolves to the lightest loaded weight — 600/700 were
-// never actually selected by any element and just cost extra font-file
-// bytes for nothing.
-const storeSerif = Cormorant_Garamond({
-  variable: "--font-store-serif",
+// ("Defining multiple root layouts"). Fonts (DECISIONS.md "Visual redesign:
+// Silver Mist"): Newsreader for whole headings and the wordmark, Figtree for
+// everything else; exposed as --font-newsreader / --font-figtree
+// (src/app/globals.css @theme). display: "swap" avoids render-blocking on the
+// font request (Phase 5 step 9). Newsreader's optical-size axis lets the
+// browser pick the right cut per size, as the design canvas does. `axes` needs
+// the variable font, so no `weight` list: the page uses 400 and 500.
+const newsreader = Newsreader({
+  variable: "--font-newsreader",
   subsets: ["latin"],
-  weight: ["500"],
+  axes: ["opsz"],
+  display: "swap",
+});
+
+const figtree = Figtree({
+  variable: "--font-figtree",
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
   display: "swap",
 });
 
@@ -93,11 +98,12 @@ export default async function LocaleLayout({
   const messages = await getMessages();
 
   return (
-    <html lang={locale} className={`${storeSerif.variable} h-full antialiased`}>
-      <body className="flex min-h-full flex-col bg-ivory font-sans text-ink">
+    <html lang={locale} className={`${newsreader.variable} ${figtree.variable} h-full antialiased`}>
+      <body className="flex min-h-full flex-col bg-page font-sans text-ink">
         <NextIntlClientProvider messages={messages}>
           <CartProvider>
             <PageViewTracker />
+            <AnnouncementBar />
             <Header locale={locale} />
             <div className="flex-1">{children}</div>
             <Footer locale={locale} />

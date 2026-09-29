@@ -33,7 +33,12 @@ export function LeadForm({
       const res = await fetch(`/api/leads/${kind}`, {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ email, locale, website, ...(kind === "notify" ? { designId, variantId } : {}) }),
+        body: JSON.stringify({
+          email,
+          locale,
+          website,
+          ...(kind === "notify" ? { designId, variantId } : {}),
+        }),
       });
       setStatus(res.status === 204 ? "done" : "error");
     } catch {
@@ -49,12 +54,18 @@ export function LeadForm({
     );
   }
 
+  // The footer newsletter (Silver Mist) is a single mist pill: the input and
+  // the button share it, and the label is visually hidden because the footer
+  // heading above the form says what it is. The notify form keeps the stacked
+  // layout.
+  const pill = kind === "newsletter";
+
   return (
     <form onSubmit={handleSubmit} data-testid={`${kind}-form`} className="flex flex-col gap-2">
-      <label htmlFor={inputId} className="text-sm font-medium text-ink">
+      <label htmlFor={inputId} className={pill ? "sr-only" : "text-sm font-medium text-ink"}>
         {t(`${kind}.title`)}
       </label>
-      <div className="flex flex-wrap gap-2">
+      <div className={pill ? "flex gap-1.5 rounded-full bg-mist p-[5px] lg:p-1.5" : "flex flex-wrap gap-2"}>
         <input
           id={inputId}
           type="email"
@@ -66,7 +77,11 @@ export function LeadForm({
           placeholder={t("emailPlaceholder")}
           aria-label={t("emailLabel")}
           data-testid={`${kind}-email`}
-          className="min-w-0 flex-1 rounded border border-ink/20 bg-white px-3 py-2 text-sm"
+          className={
+            pill
+              ? "h-11 min-w-0 flex-1 rounded-full bg-transparent px-3.5 text-[15px] placeholder:text-muted lg:h-12 lg:w-[260px] lg:flex-none lg:px-[18px]"
+              : "min-w-0 flex-1 rounded border border-ink/20 bg-white px-3 py-2 text-sm"
+          }
         />
         <input
           type="text"
@@ -78,7 +93,12 @@ export function LeadForm({
           onChange={(e) => setWebsite(e.target.value)}
           className="absolute -left-[9999px] h-0 w-0 opacity-0"
         />
-        <Button type="submit" disabled={status === "sending"} data-testid={`${kind}-submit`}>
+        <Button
+          type="submit"
+          disabled={status === "sending"}
+          data-testid={`${kind}-submit`}
+          className={pill ? "shrink-0 lg:h-12" : undefined}
+        >
           {status === "sending" ? t(`${kind}.sending`) : t(`${kind}.submit`)}
         </Button>
       </div>

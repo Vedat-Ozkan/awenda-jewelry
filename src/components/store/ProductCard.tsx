@@ -16,6 +16,7 @@ export interface ProductCardDesign {
   name: string;
   price_cents: number;
   thumb_image_path: string | null;
+  material?: string | null;
   total_qty: number;
   status: "active" | "archived";
 }
@@ -38,8 +39,12 @@ export function ProductCard({
   const src = resolvePhotoUrl(design.thumb_image_path);
 
   return (
-    <Link href={`/p/${design.slug}`} locale={locale} className="group block">
-      <div className="relative aspect-square overflow-hidden rounded-xl bg-ivory shadow-sm transition-shadow duration-300 group-hover:shadow-md">
+    <Link
+      href={`/p/${design.slug}`}
+      locale={locale}
+      className="group flex flex-col gap-2 rounded-[20px] bg-white p-1.5 lg:gap-3 lg:rounded-3xl lg:p-2.5"
+    >
+      <div className="relative aspect-[10/11] overflow-hidden rounded-[15px] bg-well lg:rounded-[18px]">
         {src && (
           <Image
             src={src}
@@ -50,15 +55,23 @@ export function ProductCard({
           />
         )}
         {soldOut && (
-          <span className="absolute bottom-2 left-2">
+          <span className="absolute left-2 top-2 lg:left-3 lg:top-3">
             <Badge>{soldOutLabel}</Badge>
           </span>
         )}
+        {design.material && (
+          <span className="absolute bottom-3 left-3 hidden lg:block">
+            <Badge>{design.material}</Badge>
+          </span>
+        )}
       </div>
-      <p className="mt-2 font-serif text-sm text-ink">{design.name}</p>
-      <p className="text-sm text-ink">
-        <Price cents={design.price_cents} locale={locale} />
-      </p>
+      <div className="flex flex-col gap-0.5 px-1.5 pb-2 lg:flex-row lg:justify-between lg:gap-3 lg:px-2 lg:pb-2.5">
+        <span className="text-[15px] font-medium lg:text-base">{design.name}</span>
+        {design.material && <span className="text-xs text-muted lg:hidden">{design.material}</span>}
+        <span className="text-sm lg:text-base lg:font-medium">
+          <Price cents={design.price_cents} locale={locale} />
+        </span>
+      </div>
     </Link>
   );
 }

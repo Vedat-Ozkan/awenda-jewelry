@@ -8,31 +8,64 @@
     "earring": "Boucles d'oreilles",
     "bangle": "Joncs",
     "chain": "Chaînes",
-    "pendant": "Pendentifs"
+    "pendant": "Pendentifs",
+    "shopAll": "Toute la boutique",
+    "newIn": "Nouveautés"
   },
   "header": {
     "wordmark": "Awenda Jewelry",
     "tagline": "Bijoux faits à la main, vendus en ligne et au marché hebdomadaire",
     "cart": "Panier",
-    "language": "Langue"
+    "language": "Langue",
+    "menu": "Menu",
+    "closeMenu": "Fermer le menu",
+    "primaryNav": "Principale"
   },
   "home": {
     "cta": "Voir toute la collection",
     "nextPickup": "Prochaine cueillette : {date} au {market}",
     "marketClosed": "Nous sautons le marché jusqu'au {date}.",
     "trust": {
-      "shipping": "Livraison gratuite dès {threshold}",
-      "shippingFlat": "Livraison à taux fixe partout au Canada",
-      "pickupOnly": "Paiement sécurisé avec Stripe",
-      "pickup": "Cueillette gratuite au {market}",
-      "handmade": "Fait à la main, en petites séries"
-    }
+      "pickup": {
+        "title": "Cueillette gratuite au marché",
+        "body": "Payez en ligne, récupérez votre commande le jour du marché."
+      },
+      "shipping": {
+        "title": "Livraison à taux fixe",
+        "body": "Un seul tarif partout au Canada.",
+        "bodyFree": "Un seul tarif partout au Canada, gratuite dès {threshold}."
+      },
+      "handmade": {
+        "title": "Fait à la main",
+        "body": "En petites séries."
+      },
+      "material": {
+        "title": "Acier et argent",
+        "body": "Surtout de l'acier inoxydable, un peu d'argent sterling."
+      },
+      "checkout": {
+        "title": "Paiement sécurisé",
+        "body": "Paiement par carte avec Stripe, en dollars canadiens."
+      }
+    },
+    "hero": {
+      "eyebrow": "Nouveau cette semaine",
+      "title": "Un éclat discret, tous les jours.",
+      "body": "De l'acier inoxydable et de l'argent sterling, dans les tailles que vous portez vraiment.",
+      "ctaNew": "Voir les nouveautés",
+      "ctaPickup": "Comment fonctionne la cueillette"
+    },
+    "categories": "Magasiner par catégorie",
+    "bestSellers": "Meilleurs vendeurs",
+    "allDesigns": "Toutes les créations"
   },
   "footer": {
     "policies": "Politiques",
     "pickup": "Cueillette",
     "about": "À propos",
-    "rights": "© {year} Awenda Jewelry"
+    "rights": "© {year} Awenda Jewelry",
+    "tagline": "Soyez les premiers au courant des nouveautés",
+    "links": "Informations sur la boutique"
   },
   "badges": {
     "soldOut": "Épuisé"
@@ -187,5 +220,9 @@
       "errorTitle": "Une erreur est survenue",
       "errorBody": "Nous n'avons pas pu traiter votre demande. Veuillez réessayer le lien plus tard."
     }
+  },
+  "announcement": {
+    "pickup": "Cueillette gratuite au marché",
+    "shipping": "Livraison à taux fixe partout au Canada"
   }
 }
