@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { env } from "@/lib/env";
 import { createAdminClient } from "@/lib/supabase/admin";
 
-// Hit every 3 days by the Cloudflare Cron Trigger (see wrangler.jsonc) to keep
+// Hit daily by the Cloudflare Cron Trigger (see wrangler.jsonc) and by the
+// GitHub Actions keepalive workflow (which fails loudly) to keep
 // the Supabase Free project from pausing after 7 days of inactivity. Also
 // drops analytics events older than 13 months (Phase 7 retention).
 export async function GET(request: Request) {

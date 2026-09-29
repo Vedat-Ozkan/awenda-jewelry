@@ -17,6 +17,8 @@ export const metadata: Metadata = {
   title: "Awenda Jewelry",
   description: "Awenda Jewelry",
   manifest: "/manifest.webmanifest",
+  icons: { apple: "/apple-touch-icon.png" },
+  appleWebApp: { capable: true, title: "Awenda Admin", statusBarStyle: "default" },
 };
 
 // Root layout for /admin and /auth (Phase 5 step 1 route-group split — see

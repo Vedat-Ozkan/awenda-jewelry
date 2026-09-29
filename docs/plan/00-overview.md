@@ -40,7 +40,7 @@ Business facts that shape the design:
 | Sales model | Hybrid: pay online via Stripe Checkout (**CAD**); fulfillment = **Ship** (flat rate, Canada only) or **Pick up at market** (free). Shipping can be disabled by a settings toggle at launch. |
 | Framework | TypeScript, Next.js (App Router), React, Tailwind. Package manager: `pnpm`. Node 22. |
 | Hosting | **Cloudflare Workers** via `@opennextjs/cloudflare` (free tier; commercial use allowed). |
-| Database | **Supabase Free** — Postgres + pgvector + Auth + Storage. A Cloudflare Cron Trigger pings it every 3 days to prevent idle-pausing. |
+| Database | **Supabase Free** — Postgres + pgvector + Auth + Storage. A Cloudflare Cron Trigger pings it daily (plus a GitHub Actions keepalive that alerts on failure) to prevent idle-pausing. |
 | Embeddings | **Voyage AI multimodal** (`voyage-multimodal-3.5`). Used for storefront "similar styles" only (booth photo matching deferred, 2026-09-16). Fake deterministic provider in tests. |
 | Payments | Stripe Checkout (hosted). Webhook `checkout.session.completed` creates the order and decrements inventory. |
 | Email | Resend (free tier) for order confirmations / shipping notices, EN + FR. |

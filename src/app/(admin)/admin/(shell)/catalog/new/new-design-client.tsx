@@ -98,9 +98,17 @@ export function NewDesignClient({ variantPresets }: { variantPresets: Partial<Re
   async function handleFiles(e: ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? []);
     e.target.value = "";
+    setError(null);
 
     for (const file of files) {
-      const { main, thumb } = await resizeImage(file);
+      let resized: Awaited<ReturnType<typeof resizeImage>>;
+      try {
+        resized = await resizeImage(file);
+      } catch {
+        setError(`Couldn't read ${file.name} — skipped. Use a JPEG, PNG or WebP photo.`);
+        continue;
+      }
+      const { main, thumb } = resized;
       const { id } = await createDraftDesign();
       const previewUrl = URL.createObjectURL(main);
       setDrafts((prev) => [...prev, { id, fileName: file.name, main, thumb, previewUrl, embedStatus: "uploading" }]);
@@ -204,7 +212,8 @@ export function NewDesignClient({ variantPresets }: { variantPresets: Partial<Re
         <h1 className="text-lg font-semibold">New design — Photos</h1>
         <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">Ivory backdrop, top-down, item centered with room around it, no hands.</p>
 
-        <input type="file" accept="image/*" capture="environment" multiple onChange={handleFiles} className="mt-4" />
+        <input type="file" accept="image/*" multiple onChange={handleFiles} className="mt-4" />
+        {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
 
         <ul className="mt-4 flex flex-col gap-2">
           {drafts.map((d) => (

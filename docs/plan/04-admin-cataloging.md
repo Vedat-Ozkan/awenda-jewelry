@@ -21,7 +21,9 @@ for anonymous and non-allowlisted users.
 ## Steps
 
 ### 1. Admin auth
-- Supabase Auth **magic link (email OTP)**. `/admin/login` page: email input → "Send link".
+- Supabase Auth. `/admin/login` page: email + password → "Sign in" (needed for the installed iOS PWA, whose
+  cookies are isolated from Safari, so a magic link can't sign in the app — see DECISIONS.md "Admin PWA
+  alpha fixes"); "Email me a sign-in link instead" sends a **magic link** as a fallback.
   Server-side: reject emails not in `admin_emails` before sending (avoid spamming strangers).
 - Middleware (`src/middleware.ts`): `/admin/*` (except `/admin/login`) requires a session whose
   email is in `admin_emails`; otherwise redirect to login. `requireAdmin()` (Phase 3) used in all admin route handlers and server actions.
@@ -40,7 +42,7 @@ for anonymous and non-allowlisted users.
 - **Verify:** seed data renders; filters and search work (e2e).
 
 ### 4. New design flow (`/admin/catalog/new`) — optimised for speed
-1. **Photo** first: camera input, `multiple` allowed (select many from a folder → one draft
+1. **Photo** first: file input (`accept="image/*"`, no `capture`, so the photo library works), `multiple` allowed (select many from a folder → one draft
    design per file, then step through details for each); show reminder "Ivory backdrop,
    top-down, item centered with room around it, no hands". Preview immediately from the resized `main` blob.
 2. **Category** (8 big buttons) → **Variants**: presets for the category appear as toggle chips

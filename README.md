@@ -103,7 +103,7 @@ in `custom-worker.ts`, which branches on `event.cron` and pings the matching rou
 
 | Cron expression | Route | What it does |
 |---|---|---|
-| `0 6 */3 * *` | `/api/keepalive` | Pings Supabase every 3 days so the free-tier project doesn't idle-pause. |
+| `0 6 * * *` | `/api/keepalive` | Pings Supabase daily so the free-tier project doesn't idle-pause (backed up by the GitHub `keepalive.yml` workflow, which emails on failure). |
 | `0 14 * * *` | `/api/cron/pickup-reminders` | Emails the day-before-market reminder to `awaiting_pickup` orders due tomorrow. |
 
 Both routes require `x-cron-secret: $CRON_SECRET` and can be triggered manually in dev:

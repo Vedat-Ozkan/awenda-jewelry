@@ -450,6 +450,48 @@ as Worker secrets; register the webhook endpoint in the Stripe dashboard).
 **Affects:** Phase 7 file (step 2 migration name, step 3 referrer, step 4 status codes); Phase 9
 (README analytics numbers once the beacon is live).
 
+### Admin PWA alpha fixes                                               (2026-09-29, owner)
+**Decision:**
+- The storefront no longer links `/manifest.webmanifest` (its `start_url` is `/admin`); only
+  `src/app/(admin)/layout.tsx` does, so installing/bookmarking the storefront doesn't offer the
+  admin app.
+- iOS home-screen icon + standalone: `public/apple-touch-icon.png` (180x180, from
+  `icons/icon-512.png`) sits at the site root so iOS also uses it for storefront bookmarks; the
+  admin layout adds `icons.apple` and `appleWebApp` (`capable`, title "Awenda Admin", status bar
+  `default`).
+- New Design's photo input drops `capture="environment"` (it forced camera-only on iOS/Android
+  and blocked picking many photos from the library). A file `resizeImage` can't read is skipped
+  with an inline message instead of aborting the rest of the batch.
+- Password sign-in: an installed iOS PWA has cookies isolated from Safari, so the magic link
+  (opens in Safari) can't complete a PKCE sign-in started in the PWA. `/admin/login` is now
+  email + password, backed by the `signInWithPassword` server action (same `admin_emails` gate;
+  a non-allowed address gets the same "Wrong email or password." as a wrong password and no auth
+  call is made; the server client sets the session cookies). "Email me a sign-in link instead"
+  keeps the magic link as a fallback. An emailed 6-digit code was tried and dropped: the hosted
+  Magic Link template can't be edited on the free tier without custom SMTP.
+- **Owner action (hosted Supabase):** set a password for the allowlisted email: Authentication ->
+  Users -> Add user -> Create new user (email + password, auto-confirm), or reset the password on
+  the existing user.
+**Why:** Alpha testing of the installed admin app on iOS/Android: sign-in from the PWA was
+impossible on iOS, photo selection was camera-only, and the home-screen icon/title were generic.
+**Affects:** Phase 4 steps 1 and 4.
+
+### Closed alpha on workers.dev; keepalive hardened                     (2026-09-29, owner)
+**Decision:** Run a closed alpha at `https://awenda-jewelry.awenda.workers.dev` before Phase 9,
+deploying the Phase 7 branch before its PR merges (Phases 6 and 7 then merge back to back, since
+every `main` merge auto-deploys). Stripe stays in **test mode** for the alpha — nobody can pay.
+`robots.ts` disallows everything while `NEXT_PUBLIC_SITE_URL` is on `*.workers.dev`; the domain
+cutover lifts it. Keepalive: the Cloudflare cron moves from every 3 days to **daily**
+(`0 6 * * *`), and `.github/workflows/keepalive.yml` pings Supabase REST (`public_settings`,
+anon key) and `/api/keepalive` (repo secret `CRON_SECRET`) daily at 18:00 UTC — a failed run
+emails the owner.
+**Why:** The hosted project idle-paused despite the 3-day cron, and nothing reported it. Daily +
+an independent pinger that fails loudly means a broken ping is noticed days before the 7-day
+limit. Admin sign-in is gated by the `admin_emails` table (`pnpm seed:admins` against the hosted
+project), not a Worker secret.
+**Affects:** Phase 1 (cron), Phase 9 (domain cutover lifts noindex; purge alpha rows from
+`analytics_events` before the analytics week).
+
 ## Open — ask the owner before the referenced step
 
 1. ~~Exact domain to buy~~ **Resolved:** `awendajewelry.com` already owned (see Locked). Still

@@ -10,6 +10,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 // env vars just to read NEXT_PUBLIC_SITE_URL.
 const maybeSingle = vi.fn();
 const signInWithOtp = vi.fn();
+const signInWithPasswordMock = vi.fn();
 
 vi.mock("@/lib/env", () => ({ env: { NEXT_PUBLIC_SITE_URL: "http://localhost:3000" } }));
 vi.mock("@/lib/supabase/admin", () => ({
@@ -18,10 +19,10 @@ vi.mock("@/lib/supabase/admin", () => ({
   }),
 }));
 vi.mock("@/lib/supabase/server", () => ({
-  createClient: async () => ({ auth: { signInWithOtp } }),
+  createClient: async () => ({ auth: { signInWithOtp, signInWithPassword: signInWithPasswordMock } }),
 }));
 
-const { requestMagicLink } = await import("./actions");
+const { requestMagicLink, signInWithPassword } = await import("./actions");
 
 describe("requestMagicLink", () => {
   beforeEach(() => {
@@ -52,5 +53,43 @@ describe("requestMagicLink", () => {
         shouldCreateUser: true,
       },
     });
+  });
+});
+
+describe("signInWithPassword", () => {
+  beforeEach(() => {
+    maybeSingle.mockReset();
+    signInWithPasswordMock.mockReset();
+  });
+
+  it("returns a generic error and makes no auth call for an address not in admin_emails", async () => {
+    maybeSingle.mockResolvedValue({ data: null, error: null });
+
+    const result = await signInWithPassword("stranger@example.com", "hunter2");
+
+    expect(result).toEqual({ error: "Wrong email or password." });
+    expect(signInWithPasswordMock).not.toHaveBeenCalled();
+  });
+
+  it("signs in with the normalized email for an allowlisted address", async () => {
+    maybeSingle.mockResolvedValue({ data: { email: "owner@example.com" }, error: null });
+    signInWithPasswordMock.mockResolvedValue({ error: null });
+
+    const result = await signInWithPassword(" Owner@Example.com ", "hunter2");
+
+    expect(result).toEqual({ ok: true });
+    expect(signInWithPasswordMock).toHaveBeenCalledWith({
+      email: "owner@example.com",
+      password: "hunter2",
+    });
+  });
+
+  it("returns the generic error when the password is wrong", async () => {
+    maybeSingle.mockResolvedValue({ data: { email: "owner@example.com" }, error: null });
+    signInWithPasswordMock.mockResolvedValue({ error: { message: "Invalid login credentials" } });
+
+    const result = await signInWithPassword("owner@example.com", "nope");
+
+    expect(result).toEqual({ error: "Wrong email or password." });
   });
 });

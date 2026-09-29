@@ -57,7 +57,6 @@ export async function generateMetadata({
   return {
     title,
     description,
-    manifest: "/manifest.webmanifest",
     alternates: {
       canonical: `${base}/${locale}`,
       languages: Object.fromEntries(routing.locales.map((l) => [l, `${base}/${l}`])),
