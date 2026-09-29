@@ -1,6 +1,7 @@
 import { render } from "@react-email/render";
 import { createElement } from "react";
 import { describe, expect, it } from "vitest";
+import { BackInStockEmail } from "@/lib/email/templates/back-in-stock";
 import { OrderConfirmationEmail } from "@/lib/email/templates/order-confirmation";
 import { PickupReminderEmail } from "@/lib/email/templates/pickup-reminder";
 import { RefundNoticeEmail } from "@/lib/email/templates/refund-notice";
@@ -61,6 +62,18 @@ describe("email templates", () => {
         marketAddress: "TBD",
         marketDate: "Saturday, September 26, 2026",
         pickupInstructions: "TBD",
+      }),
+    );
+    expect(html).toMatchSnapshot();
+  });
+
+  it.each(LOCALES)("back-in-stock renders in %s", async (locale) => {
+    const html = await render(
+      createElement(BackInStockEmail, {
+        locale,
+        designName: "Test Ring",
+        designUrl: `http://localhost:3000/${locale}/p/test-ring`,
+        unsubscribeUrl: "http://localhost:3000/api/leads/unsubscribe?token=00000000-0000-4000-8000-000000000000",
       }),
     );
     expect(html).toMatchSnapshot();

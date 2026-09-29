@@ -6,7 +6,7 @@ import * as cartStore from "./store";
 
 interface CartContextValue {
   lines: CartState;
-  add: (variantId: string, qty: number, maxQty: number) => void;
+  add: (variantId: string, qty: number, maxQty: number, designId?: string) => void;
   setQty: (variantId: string, qty: number, maxQty: number) => void;
   remove: (variantId: string) => void;
   clear: () => void;
@@ -27,7 +27,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const value: CartContextValue = {
     lines,
-    add: (variantId, qty, maxQty) => cartStore.dispatch({ type: "add", variantId, qty, maxQty }),
+    add: (variantId, qty, maxQty, designId) => cartStore.dispatch({ type: "add", variantId, qty, maxQty, designId }),
     setQty: (variantId, qty, maxQty) => cartStore.dispatch({ type: "setQty", variantId, qty, maxQty }),
     remove: (variantId) => cartStore.dispatch({ type: "remove", variantId }),
     clear: () => cartStore.dispatch({ type: "clear" }),

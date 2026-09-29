@@ -7,6 +7,7 @@ import { Button } from "@/components/store/Button";
 import { formatPrice } from "@/components/store/Price";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
+import { track } from "@/lib/analytics/client";
 import { useCart } from "@/lib/cart/CartContext";
 import type { Fulfillment, QuoteResponse } from "@/lib/cart/types";
 import { resolvePhotoUrl } from "@/lib/supabase/storage";
@@ -71,6 +72,7 @@ export function CartClient({ locale }: { locale: Locale }) {
       });
       if (res.ok) {
         const data = (await res.json()) as { url: string };
+        track("begin_checkout");
         window.location.assign(data.url);
         return; // keep the button disabled through the redirect
       }

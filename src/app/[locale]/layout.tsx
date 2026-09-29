@@ -6,6 +6,7 @@ import { Cormorant_Garamond } from "next/font/google";
 import type { ReactNode } from "react";
 import { Footer } from "@/components/store/Footer";
 import { Header } from "@/components/store/Header";
+import { PageViewTracker } from "@/components/store/AnalyticsTrackers";
 import { isLocale, routing } from "@/i18n/routing";
 import { CartProvider } from "@/lib/cart/CartContext";
 import "../globals.css";
@@ -97,6 +98,7 @@ export default async function LocaleLayout({
       <body className="flex min-h-full flex-col bg-ivory font-sans text-ink">
         <NextIntlClientProvider messages={messages}>
           <CartProvider>
+            <PageViewTracker />
             <Header locale={locale} />
             <div className="flex-1">{children}</div>
             <Footer locale={locale} />

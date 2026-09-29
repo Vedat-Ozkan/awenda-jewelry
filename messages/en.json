@@ -144,7 +144,14 @@
       "returnsTitle": "Returns & exchanges",
       "returnsBody": "Our return and exchange policy is being finalized. In the meantime, contact us and we'll sort it out.",
       "privacyTitle": "Privacy",
-      "privacyBody": "We collect only what's needed to fulfill your order. A full privacy policy is coming soon.",
+      "privacyBody": "We collect only what's needed to fulfill your order and to understand how the shop is used. We don't use cookies for tracking, so there is no cookie banner.",
+      "privacyAnalyticsTitle": "Visit statistics",
+      "privacyAnalyticsBody": "We use Cloudflare Web Analytics to count visits, pages and countries. It is cookieless and does not track you across sites or identify you personally.",
+      "privacyEventsTitle": "What we record ourselves",
+      "privacyEventsBody": "To see which designs people look at, we record a few anonymous events on our own servers: pages viewed, designs viewed, items added to the cart and checkouts started. Each event carries a random ID that lives only in your browser tab, your language, whether you're on mobile or desktop, and the website you came from. It holds no name, email or IP address, and events are deleted after 13 months.",
+      "privacyEmailsTitle": "Your email address",
+      "privacyEmailsBody": "If you place an order, we use your details only to process it. If you ask to be notified when a design is back in stock, or subscribe to our newsletter, we store your email address only for that purpose. We never sell it or share it.",
+      "privacyUnsubscribeBody": "Every email we send about a back-in-stock notice or the newsletter has an unsubscribe link, and one click stops all further messages.",
       "tbd": "These policy pages are placeholders while we finalize the details."
     }
   },
@@ -155,5 +162,30 @@
     "notFoundBody": "We couldn't find that page.",
     "backHome": "Back to the shop",
     "dbUnreachable": "We're having trouble loading the shop right now. See you at the market!"
+  },
+  "leads": {
+    "emailLabel": "Email address",
+    "emailPlaceholder": "you@example.com",
+    "error": "Something went wrong. Please check your email address and try again.",
+    "notify": {
+      "title": "Notify me when it's back",
+      "submit": "Notify me",
+      "sending": "Sending…",
+      "success": "Thank you! We'll email you as soon as it's back in stock."
+    },
+    "newsletter": {
+      "title": "Stay in the loop",
+      "submit": "Subscribe",
+      "sending": "Sending…",
+      "success": "Thank you for subscribing!"
+    },
+    "unsubscribe": {
+      "title": "You're unsubscribed",
+      "body": "We won't email you about this again.",
+      "invalidTitle": "Link not valid",
+      "invalidBody": "This unsubscribe link is invalid or has expired.",
+      "errorTitle": "Something went wrong",
+      "errorBody": "We couldn't process your request. Please try the link again later."
+    }
   }
 }

@@ -67,6 +67,34 @@ manually once a key exists — see `docs/manual-tests.md`.
 The orders admin's refund action also needs a real payment to refund against, so its e2e spec
 sets `STRIPE_FAKE_REFUNDS=1` (dev/test only, ignored in production) to skip the Stripe call.
 
+## Analytics and leads
+
+No cookies and no consent banner; the numbers come from two places (DECISIONS.md "Analytics
+and lead capture").
+
+- **Traffic** (visitors, referrers, countries, top pages, Web Vitals): Cloudflare Web
+  Analytics. **Not wired up yet** (Phase 7 step 1 is pending the owner's site token): the plan
+  is a beacon in the storefront layout only (never `/admin`), rendered only when
+  `NEXT_PUBLIC_CF_BEACON_TOKEN` is set. The owner creates the site in the Cloudflare dashboard
+  (Analytics & Logs -> Web Analytics, manual JS snippet) and provides the token.
+- **Funnel** (sessions, design views, add-to-carts, checkouts started): first-party events sent
+  by `src/lib/analytics/client.ts` to `POST /api/track` and stored in `analytics_events`. The
+  only identifier is a random per-tab session id in `sessionStorage`; no IP, cookie or email is
+  stored. Events older than 13 months are deleted by the keepalive cron.
+- **Orders, revenue, AOV, ship vs pickup** come from the `orders` table.
+- **Leads**: "Notify me when it's back" (`stock_notifications`) and the footer newsletter
+  (`newsletter_subscribers`); every email carries an unsubscribe link
+  (`/api/leads/unsubscribe`).
+
+`/admin/analytics` shows all of it for a 7 / 30 / 90-day or custom range (dates are read in the
+market timezone from `/admin/settings`): tiles, sessions and orders by day, revenue by week,
+top viewed designs, **most viewed sold-out designs** (demand you're missing), referrers, locale
+and device split, and the two lead lists with **Export CSV**
+(`/api/admin/stock-notifications.csv`, `/api/admin/newsletter.csv`). The aggregates come from
+one SQL function, `analytics_summary(from, to)` (`supabase/migrations/0013_analytics_functions.sql`),
+which runs as the signed-in admin so the `is_admin()` RLS policies apply. The privacy wording
+is on `/en/policies` and `/fr/policies`.
+
 ## Cron jobs
 
 Two Cloudflare Cron Triggers (`wrangler.jsonc` `triggers.crons`) share the `scheduled()` handler

@@ -3,6 +3,7 @@ import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { getSettings } from "@/lib/catalog";
 import { LanguageSwitcher } from "./LanguageSwitcher";
+import { LeadForm } from "./LeadForm";
 
 // Storefront footer (Phase 5 step 3): market info from settings, language
 // switch, policy links. `/policies`, `/pickup`, `/about` don't exist until
@@ -29,6 +30,9 @@ export async function Footer({ locale }: { locale: Locale }) {
             {t("about")}
           </Link>
         </nav>
+        <div className="max-w-sm">
+          <LeadForm kind="newsletter" />
+        </div>
         <LanguageSwitcher locale={locale} />
         <p className="text-xs text-ink/50">{t("rights", { year: new Date().getFullYear() })}</p>
       </div>

@@ -3,9 +3,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 // Keeps this a unit test — no DB. The real DB path is covered by a curl
 // against a running `pnpm dev` in the Phase 2 verify step.
 const selectMock = vi.fn();
+const deleteLtMock = vi.fn();
 vi.mock("@/lib/supabase/admin", () => ({
   createAdminClient: () => ({
-    from: () => ({ select: () => ({ limit: selectMock }) }),
+    from: () => ({
+      select: () => ({ limit: selectMock }),
+      delete: () => ({ lt: deleteLtMock }),
+    }),
   }),
 }));
 
@@ -17,6 +21,7 @@ describe("GET /api/keepalive", () => {
     vi.stubEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY", "test-anon-key");
     vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "test-service-role-key");
     selectMock.mockResolvedValue({ error: null });
+    deleteLtMock.mockResolvedValue({ error: null });
     vi.resetModules();
   });
 
@@ -51,5 +56,33 @@ describe("GET /api/keepalive", () => {
     );
     expect(res.status).toBe(500);
     expect(await res.json()).toEqual({ ok: false, error: "db unreachable" });
+  });
+
+  it("purges analytics events older than 13 months", async () => {
+    const { GET } = await import("./route");
+    const before = new Date();
+    await GET(
+      new Request("http://localhost/api/keepalive", {
+        headers: { "x-cron-secret": "test-secret" },
+      }),
+    );
+    expect(deleteLtMock).toHaveBeenCalledTimes(1);
+    const [column, cutoff] = deleteLtMock.mock.calls[0];
+    expect(column).toBe("occurred_at");
+    const expected = new Date(before);
+    expected.setUTCMonth(expected.getUTCMonth() - 13);
+    expect(Math.abs(new Date(cutoff).getTime() - expected.getTime())).toBeLessThan(5_000);
+  });
+
+  it("returns 500 when the analytics purge fails", async () => {
+    deleteLtMock.mockResolvedValue({ error: { message: "purge failed" } });
+    const { GET } = await import("./route");
+    const res = await GET(
+      new Request("http://localhost/api/keepalive", {
+        headers: { "x-cron-secret": "test-secret" },
+      }),
+    );
+    expect(res.status).toBe(500);
+    expect(await res.json()).toEqual({ ok: false, error: "purge failed" });
   });
 });

@@ -5,8 +5,9 @@ import path from "node:path";
 // sendEmail() (./send.ts) writes here instead of calling Resend whenever
 // RESEND_API_KEY is unset. `to`/`subject` are stashed as HTML comments so a
 // captured file doubles as a readable preview (open it in a browser) and
-// round-trips through readCapturedEmails() for tests.
-const CAPTURE_DIR = path.join(process.cwd(), "tmp", "emails");
+// round-trips through readCapturedEmails() for tests. EMAIL_CAPTURE_DIR lets a
+// test file use its own directory so parallel files don't clear each other's.
+const captureDir = () => process.env.EMAIL_CAPTURE_DIR ?? path.join(process.cwd(), "tmp", "emails");
 
 export interface CapturedEmail {
   file: string;
@@ -26,8 +27,8 @@ function slugify(subject: string): string {
 }
 
 export async function captureEmail(to: string, subject: string, html: string): Promise<string> {
-  await mkdir(CAPTURE_DIR, { recursive: true });
-  const file = path.join(CAPTURE_DIR, `${Date.now()}-${slugify(subject)}.html`);
+  await mkdir(captureDir(), { recursive: true });
+  const file = path.join(captureDir(), `${Date.now()}-${slugify(subject)}.html`);
   await writeFile(file, `<!-- to: ${to} -->\n<!-- subject: ${subject} -->\n${html}`, "utf8");
   return file;
 }
@@ -35,13 +36,13 @@ export async function captureEmail(to: string, subject: string, html: string): P
 export async function readCapturedEmails(): Promise<CapturedEmail[]> {
   let names: string[];
   try {
-    names = await readdir(CAPTURE_DIR);
+    names = await readdir(captureDir());
   } catch {
     return [];
   }
   const emails: CapturedEmail[] = [];
   for (const name of names.sort()) {
-    const file = path.join(CAPTURE_DIR, name);
+    const file = path.join(captureDir(), name);
     const raw = await readFile(file, "utf8");
     const to = raw.match(/<!-- to: (.*) -->/)?.[1] ?? "";
     const subject = raw.match(/<!-- subject: (.*) -->/)?.[1] ?? "";
@@ -52,5 +53,5 @@ export async function readCapturedEmails(): Promise<CapturedEmail[]> {
 }
 
 export async function clearCapturedEmails(): Promise<void> {
-  await rm(CAPTURE_DIR, { recursive: true, force: true });
+  await rm(captureDir(), { recursive: true, force: true });
 }

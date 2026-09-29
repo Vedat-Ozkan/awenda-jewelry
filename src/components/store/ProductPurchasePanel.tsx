@@ -5,12 +5,15 @@ import { useState } from "react";
 import { useCart } from "@/lib/cart/CartContext";
 import type { Variant } from "@/lib/catalog";
 import { Button } from "./Button";
+import { LeadForm } from "./LeadForm";
 
 // Product page variant picker + quantity stepper + Add to cart (Phase 5
 // step 5, cart wiring in step 6). Only reached when at least one variant is
 // in stock — the page shows the sold-out panel instead when every variant
-// is at 0.
-export function ProductPurchasePanel({ variants }: { variants: Variant[] }) {
+// is at 0. Sold-out variants stay selectable (the "— Sold out" label conveys the
+// state) so choosing one swaps the purchase controls for the Phase 7 "notify me"
+// form for that variant.
+export function ProductPurchasePanel({ designId, variants }: { designId: string; variants: Variant[] }) {
   const t = useTranslations("product");
   const cart = useCart();
   const inStock = variants.filter((v) => v.qty_on_hand > 0);
@@ -27,7 +30,7 @@ export function ProductPurchasePanel({ variants }: { variants: Variant[] }) {
 
   function handleAdd() {
     if (!selected) return;
-    cart.add(selected.id, qty, selected.qty_on_hand);
+    cart.add(selected.id, qty, selected.qty_on_hand, designId);
     setAdded(true);
   }
 
@@ -43,12 +46,11 @@ export function ProductPurchasePanel({ variants }: { variants: Variant[] }) {
                 <button
                   key={v.id}
                   type="button"
-                  disabled={soldOut}
                   aria-pressed={v.id === selectedId}
                   onClick={() => selectVariant(v.id)}
                   className={`rounded-full border border-gold px-3 py-1 text-sm transition-colors ${
                     v.id === selectedId ? "bg-gold text-ivory" : "text-ink"
-                  } ${soldOut ? "cursor-not-allowed opacity-40" : "hover:bg-gold/10"}`}
+                  } ${soldOut ? "opacity-40" : "hover:bg-gold/10"}`}
                 >
                   {v.label}
                   {soldOut ? ` — ${t("soldOut")}` : ""}
@@ -59,32 +61,40 @@ export function ProductPurchasePanel({ variants }: { variants: Variant[] }) {
         </fieldset>
       )}
 
-      <div className="mb-4 flex items-center gap-2">
-        <label htmlFor="quantity" className="text-sm text-ink/70">
-          {t("quantity")}
-        </label>
-        <input
-          id="quantity"
-          type="number"
-          min={1}
-          max={selected?.qty_on_hand ?? 1}
-          value={qty}
-          onChange={(e) => {
-            const max = selected?.qty_on_hand ?? 1;
-            const value = Number(e.target.value) || 1;
-            setQty(Math.min(Math.max(1, value), max));
-          }}
-          className="w-16 rounded border border-ink/20 px-2 py-1"
-        />
-      </div>
+      {selected && selected.qty_on_hand <= 0 ? (
+        <section id="notify-me">
+          <LeadForm key={selected.id} kind="notify" designId={designId} variantId={selected.id} />
+        </section>
+      ) : (
+        <>
+          <div className="mb-4 flex items-center gap-2">
+            <label htmlFor="quantity" className="text-sm text-ink/70">
+              {t("quantity")}
+            </label>
+            <input
+              id="quantity"
+              type="number"
+              min={1}
+              max={selected?.qty_on_hand ?? 1}
+              value={qty}
+              onChange={(e) => {
+                const max = selected?.qty_on_hand ?? 1;
+                const value = Number(e.target.value) || 1;
+                setQty(Math.min(Math.max(1, value), max));
+              }}
+              className="w-16 rounded border border-ink/20 px-2 py-1"
+            />
+          </div>
 
-      <Button type="button" data-testid="add-to-cart" disabled={!selected} onClick={handleAdd}>
-        {t("addToCart")}
-      </Button>
-      {added && (
-        <p role="status" className="mt-2 text-sm text-gold">
-          {t("added")}
-        </p>
+          <Button type="button" data-testid="add-to-cart" disabled={!selected} onClick={handleAdd}>
+            {t("addToCart")}
+          </Button>
+          {added && (
+            <p role="status" className="mt-2 text-sm text-gold">
+              {t("added")}
+            </p>
+          )}
+        </>
       )}
     </div>
   );

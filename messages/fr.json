@@ -144,7 +144,14 @@
       "returnsTitle": "Retours et échanges",
       "returnsBody": "Notre politique de retour et d'échange est en cours de finalisation. Entre-temps, contactez-nous et nous nous en occuperons.",
       "privacyTitle": "Confidentialité",
-      "privacyBody": "Nous recueillons seulement ce qui est nécessaire pour traiter votre commande. Une politique de confidentialité complète s'en vient bientôt.",
+      "privacyBody": "Nous recueillons seulement ce qui est nécessaire pour traiter votre commande et comprendre comment la boutique est utilisée. Nous n'utilisons aucun témoin (cookie) de suivi, donc il n'y a pas de bandeau de témoins.",
+      "privacyAnalyticsTitle": "Statistiques de visite",
+      "privacyAnalyticsBody": "Nous utilisons Cloudflare Web Analytics pour compter les visites, les pages et les pays. Cet outil n'utilise pas de témoins, ne vous suit pas d'un site à l'autre et ne vous identifie pas personnellement.",
+      "privacyEventsTitle": "Ce que nous enregistrons nous-mêmes",
+      "privacyEventsBody": "Pour savoir quels modèles intéressent les gens, nous enregistrons quelques événements anonymes sur nos propres serveurs : pages consultées, modèles consultés, articles ajoutés au panier et paiements amorcés. Chaque événement comporte un identifiant aléatoire qui reste seulement dans l'onglet de votre navigateur, votre langue, le type d'appareil (mobile ou ordinateur) et le site d'où vous venez. Il ne contient ni nom, ni courriel, ni adresse IP, et les événements sont supprimés après 13 mois.",
+      "privacyEmailsTitle": "Votre adresse courriel",
+      "privacyEmailsBody": "Si vous passez une commande, nous utilisons vos renseignements uniquement pour la traiter. Si vous demandez à être avisé du retour en stock d'un modèle ou que vous vous abonnez à notre infolettre, nous conservons votre adresse courriel uniquement à cette fin. Nous ne la vendons ni ne la partageons.",
+      "privacyUnsubscribeBody": "Chaque courriel d'avis de retour en stock ou d'infolettre contient un lien de désabonnement, et un seul clic met fin à tous les envois.",
       "tbd": "Ces pages de politiques sont temporaires, le temps d'en finaliser les détails."
     }
   },
@@ -155,5 +162,30 @@
     "notFoundBody": "Nous n'avons pas trouvé cette page.",
     "backHome": "Retour à la boutique",
     "dbUnreachable": "Nous avons de la difficulté à charger la boutique en ce moment. À bientôt au marché !"
+  },
+  "leads": {
+    "emailLabel": "Adresse courriel",
+    "emailPlaceholder": "vous@exemple.com",
+    "error": "Une erreur est survenue. Veuillez vérifier votre adresse courriel et réessayer.",
+    "notify": {
+      "title": "Me prévenir du retour en stock",
+      "submit": "Me prévenir",
+      "sending": "Envoi…",
+      "success": "Merci ! Nous vous écrirons dès que cet article sera de retour en stock."
+    },
+    "newsletter": {
+      "title": "Restez informé·e",
+      "submit": "S'abonner",
+      "sending": "Envoi…",
+      "success": "Merci de votre abonnement !"
+    },
+    "unsubscribe": {
+      "title": "Vous êtes désabonné·e",
+      "body": "Nous ne vous écrirons plus à ce sujet.",
+      "invalidTitle": "Lien non valide",
+      "invalidBody": "Ce lien de désabonnement est invalide ou a expiré.",
+      "errorTitle": "Une erreur est survenue",
+      "errorBody": "Nous n'avons pas pu traiter votre demande. Veuillez réessayer le lien plus tard."
+    }
   }
 }

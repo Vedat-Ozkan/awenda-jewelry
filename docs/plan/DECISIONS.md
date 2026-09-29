@@ -431,6 +431,25 @@ the colour for "similar styles" embeddings.
 into `handleCheckout`); Phase 9 (set `STRIPE_WEBHOOK_SECRET`, `RESEND_API_KEY`, `EMAIL_FROM`
 as Worker secrets; register the webhook endpoint in the Stripe dashboard).
 
+### Phase 7 plan drift                                                  (2026-09-28, agent)
+**Decision:**
+- Migrations are `0012_analytics.sql` (tables, RLS) and `0013_analytics_functions.sql`
+  (`analytics_summary(p_from, p_to)` → jsonb, security invoker, local-day buckets in
+  `settings.market_timezone`), not `0005`. Orders exclude `refunded`/`cancelled`.
+- `referrer_host`: the `Referer` header on a beacon is always our own page, so the client sends
+  `document.referrer` in the body on a session's first `page_view` only; the server keeps the
+  hostname and drops it when it equals our own host.
+- Lead routes return 204 for success/duplicate/honeypot, but 400 for a bad body or unknown
+  design and 500 for unexpected DB errors. A repeat submit re-arms the row (clears
+  `notified_at` / `unsubscribed_at`; token unchanged).
+- Sold-out variant buttons are selectable (no longer `disabled`); choosing one swaps
+  add-to-cart for the notify-me form with that `variant_id`.
+- Back-in-stock emails are sent from the bulk restock action only (per plan); failed sends
+  leave `notified_at` null so the next restock retries.
+- Step 1 (Cloudflare beacon) held pending Open #18; steps 2–6 built first (owner-approved).
+**Affects:** Phase 7 file (step 2 migration name, step 3 referrer, step 4 status codes); Phase 9
+(README analytics numbers once the beacon is live).
+
 ## Open — ask the owner before the referenced step
 
 1. ~~Exact domain to buy~~ **Resolved:** `awendajewelry.com` already owned (see Locked). Still

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
+import { DesignViewTracker } from "@/components/store/AnalyticsTrackers";
+import { LeadForm } from "@/components/store/LeadForm";
 import { Gallery, type GalleryImage } from "@/components/store/Gallery";
 import { formatPrice, Price } from "@/components/store/Price";
 import { ProductCard } from "@/components/store/ProductCard";
@@ -105,6 +107,7 @@ export default async function ProductPage({ params }: { params: Promise<{ locale
   return (
     <main className="mx-auto max-w-6xl px-4 py-8 md:px-8">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <DesignViewTracker designId={design.id} />
 
       <div className="grid gap-8 md:grid-cols-2">
         <Gallery images={images} alt={design.name} />
@@ -123,11 +126,12 @@ export default async function ProductPage({ params }: { params: Promise<{ locale
               <div>
                 <p className="font-medium text-ink">{tProduct("soldOutTitle")}</p>
                 <p className="text-sm text-ink/70">{tProduct("soldOutBody")}</p>
-                {/* Phase 7: "Notify me when back in stock" email form goes here. */}
-                <section id="notify-me" />
+                <section id="notify-me" className="mt-4">
+                  <LeadForm kind="notify" designId={design.id} />
+                </section>
               </div>
             ) : (
-              <ProductPurchasePanel variants={design.variants} />
+              <ProductPurchasePanel designId={design.id} variants={design.variants} />
             )}
           </div>
 

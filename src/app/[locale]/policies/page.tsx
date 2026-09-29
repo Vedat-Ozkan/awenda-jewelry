@@ -24,6 +24,18 @@ export default async function PoliciesPage() {
       <section className="mt-6">
         <h2 className="font-serif text-xl text-ink">{t("privacyTitle")}</h2>
         <p className="mt-2 text-ink/80">{t("privacyBody")}</p>
+
+        <div data-testid="privacy-details">
+          <h3 className="mt-4 font-medium text-ink">{t("privacyAnalyticsTitle")}</h3>
+          <p className="mt-1 text-ink/80">{t("privacyAnalyticsBody")}</p>
+
+          <h3 className="mt-4 font-medium text-ink">{t("privacyEventsTitle")}</h3>
+          <p className="mt-1 text-ink/80">{t("privacyEventsBody")}</p>
+
+          <h3 className="mt-4 font-medium text-ink">{t("privacyEmailsTitle")}</h3>
+          <p className="mt-1 text-ink/80">{t("privacyEmailsBody")}</p>
+          <p className="mt-2 text-ink/80">{t("privacyUnsubscribeBody")}</p>
+        </div>
       </section>
 
       <p className="mt-8 text-xs text-ink/50">{t("tbd")}</p>
