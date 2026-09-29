@@ -1,3 +1,4 @@
+import { track } from "@/lib/analytics/client";
 import { cartReducer, type CartAction, type CartState } from "./reducer";
 
 const STORAGE_KEY = "awenda-cart";
@@ -43,8 +44,14 @@ function ensureInitialized() {
 
 export function dispatch(action: CartAction) {
   ensureInitialized();
+  const previous = state;
   state = cartReducer(state, action);
   writeToStorage(state);
+  if (action.type === "add") {
+    const qtyOf = (lines: CartState) => lines.find((l) => l.variantId === action.variantId)?.qty ?? 0;
+    // Skip adds the reducer clamped away (already at max stock).
+    if (qtyOf(state) > qtyOf(previous)) track("add_to_cart", { designId: action.designId, variantId: action.variantId });
+  }
   for (const listener of listeners) listener();
 }
 

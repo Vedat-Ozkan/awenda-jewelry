@@ -3,6 +3,7 @@
 import { revalidatePath, revalidateTag } from "next/cache";
 import { z } from "zod";
 import { requireAdminFromCookies } from "@/lib/auth";
+import { sendBackInStockNotices } from "@/lib/email/leads";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 // Bulk operations from the catalog list's selection bar (Phase 4 step 8).
@@ -73,6 +74,10 @@ export async function restockDesigns(ids: string[], qty: number, note?: string):
     p_note: note,
   });
   if (error) throw error;
+
+  // Phase 7 step 4: tell anyone waiting on these designs. Never throws — the
+  // restock has already committed.
+  await sendBackInStockNotices(parsedIds).catch((err) => console.error("back-in-stock notices failed", err));
 
   revalidatePath("/admin/catalog");
   revalidateTag("catalog", "minutes");

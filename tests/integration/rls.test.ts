@@ -41,12 +41,40 @@ describe("RLS", () => {
     "inventory_movements",
     "settings",
     "admin_emails",
+    "analytics_events",
+    "stock_notifications",
+    "newsletter_subscribers",
   ] as const)("anon selecting %s returns no rows", async (table) => {
     // Deny-by-default RLS with a table-level grant: PostgREST returns 200
     // with an empty array, not an error. Observed locally.
     const { data, error } = await anon.from(table).select("*");
     expect(error).toBeNull();
     expect(data).toEqual([]);
+  });
+
+  // Phase 7 step 2: writes to these tables only ever go through routes using
+  // the service client, so an anon insert must be rejected by RLS.
+  it("anon cannot insert into analytics_events", async () => {
+    const { error } = await anon
+      .from("analytics_events")
+      .insert({ event: "page_view", session_id: randomUUID(), locale: "en", path: "/en" });
+    expect(error).not.toBeNull();
+    expect(error?.message).toContain("row-level security");
+  });
+
+  it("anon cannot insert into stock_notifications", async () => {
+    const { data: design } = await service.from("designs").select("id").eq("slug", ACTIVE_SLUG).single();
+    const { error } = await anon
+      .from("stock_notifications")
+      .insert({ email: `rls-${randomUUID()}@example.com`, design_id: design!.id });
+    expect(error).not.toBeNull();
+    expect(error?.message).toContain("row-level security");
+  });
+
+  it("anon cannot insert into newsletter_subscribers", async () => {
+    const { error } = await anon.from("newsletter_subscribers").insert({ email: `rls-${randomUUID()}@example.com` });
+    expect(error).not.toBeNull();
+    expect(error?.message).toContain("row-level security");
   });
 
   it("anon cannot execute adjust_inventory", async () => {

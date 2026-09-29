@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import { createServiceClient } from "../tests/helpers/local-supabase";
 
 // Phase 5 steps 4, 5, 7, 10. Runs against supabase/seed.sql's 16 designs.
@@ -18,12 +18,17 @@ test("/en/c/earring shows only earring cards, sold-out after in-stock with the b
   await expect(cards.nth(1).getByText("Sold out")).toBeVisible();
 });
 
-test("product page lists only in-stock variants enabled and shows 4 similar cards", async ({ page }) => {
+test("product page marks sold-out variants, offers notify-me for them, and shows 4 similar cards", async ({ page }) => {
   await page.goto("/en/p/silver-ring-7");
 
   await expect(page.getByRole("button", { name: "6", exact: true })).toBeEnabled();
   await expect(page.getByRole("button", { name: "7", exact: true })).toBeEnabled();
-  await expect(page.getByRole("button", { name: "8 — Sold out" })).toBeDisabled();
+  const soldOut = page.getByRole("button", { name: "8 — Sold out" });
+  await expect(soldOut).toBeVisible();
+  await expect(page.getByTestId("add-to-cart")).toBeVisible();
+  await soldOut.click();
+  await expect(page.getByTestId("notify-form")).toBeVisible();
+  await expect(page.getByTestId("add-to-cart")).toHaveCount(0);
   await expect(page.getByTestId("similar-styles").locator('a[href^="/en/p/"]')).toHaveCount(4);
 });
 

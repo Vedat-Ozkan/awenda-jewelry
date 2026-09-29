@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { bareInputClass, chipClass, errorClass, mutedClass, pillClass, primaryButton, statusChipClass } from "@/components/admin/ui";
 import { markPickedUp } from "./actions";
 
 const currency = new Intl.NumberFormat("en-CA", { style: "currency", currency: "CAD" });
@@ -30,13 +31,6 @@ interface Row {
 function statusLabel(status: string): string {
   return status.replace(/_/g, " ");
 }
-
-const chipClass = (active: boolean) =>
-  `rounded-full border px-3 py-1 text-sm ${
-    active
-      ? "border-black bg-black text-white dark:border-white dark:bg-white dark:text-black"
-      : "border-black/[.15] dark:border-white/[.2]"
-  }`;
 
 // List + Pickups tab (Phase 6 step 6): filter chips and search are client
 // state, not URL search params — the "Picked up" one-tap button updates a
@@ -79,14 +73,23 @@ export function OrdersList({ orders }: { orders: Row[] }) {
   }
 
   return (
-    <div className="mt-4">
-      <div className="flex flex-wrap gap-2">
+    <div className="mt-5">
+      <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 md:mx-0 md:flex-wrap md:overflow-visible md:px-0">
         {STATUS_FILTERS.map((f) => (
-          <button key={f.key} type="button" onClick={() => setFilter(f.key)} className={chipClass(filter === f.key)}>
+          <button
+            key={f.key}
+            type="button"
+            onClick={() => setFilter(f.key)}
+            className={`${chipClass(filter === f.key)} shrink-0`}
+          >
             {f.label}
           </button>
         ))}
-        <button type="button" onClick={() => setFilter("pickups")} className={chipClass(filter === "pickups")}>
+        <button
+          type="button"
+          onClick={() => setFilter("pickups")}
+          className={`${chipClass(filter === "pickups")} shrink-0`}
+        >
           Pickups
         </button>
       </div>
@@ -97,35 +100,36 @@ export function OrdersList({ orders }: { orders: Row[] }) {
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         aria-label="Search orders"
-        className="mt-3 w-full rounded border border-black/[.15] px-2 py-1.5 text-sm dark:border-white/[.2]"
+        className={`${bareInputClass} mt-3 md:max-w-sm`}
       />
 
-      {error && <p className="mt-3 text-sm text-red-600 dark:text-red-400">{error}</p>}
+      {error && <p className={errorClass}>{error}</p>}
 
-      {filtered.length === 0 && <p className="mt-4 text-sm text-zinc-600 dark:text-zinc-400">No orders match.</p>}
+      {filtered.length === 0 && <p className={`${mutedClass} mt-5`}>No orders match.</p>}
 
       <ul className="mt-4 flex flex-col gap-2">
         {filtered.map((o) => (
           <li
             key={o.id}
-            className="flex items-center gap-3 rounded border border-black/[.08] p-2 dark:border-white/[.145]"
+            className="flex items-center gap-3 rounded-3xl bg-surface p-4 shadow-[0_1px_0_rgba(30,31,36,0.07)]"
           >
-            <Link href={`/admin/orders/${o.id}`} className="flex-1">
-              <p className="text-sm font-medium">{o.customer_name || o.customer_email}</p>
-              <p className="text-xs text-zinc-600 dark:text-zinc-400">
-                <span className="rounded bg-zinc-100 px-1.5 py-0.5 dark:bg-zinc-800">
-                  {o.fulfillment === "ship" ? "Ship" : "Pickup"}
-                </span>{" "}
-                · {statusLabel(o.status)} · {o.itemCount} item{o.itemCount === 1 ? "" : "s"} ·{" "}
-                {currency.format(o.total_cents / 100)}
+            <Link href={`/admin/orders/${o.id}`} className="min-w-0 flex-1">
+              <p className="truncate text-sm font-semibold text-ink">{o.customer_name || o.customer_email}</p>
+              <p className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted">
+                <span className={pillClass}>{o.fulfillment === "ship" ? "Ship" : "Pickup"}</span>
+                <span className={statusChipClass(o.status)}>{statusLabel(o.status)}</span>
+                <span>
+                  {o.itemCount} item{o.itemCount === 1 ? "" : "s"}
+                </span>
               </p>
             </Link>
+            <span className="text-sm font-semibold tabular-nums text-ink">{currency.format(o.total_cents / 100)}</span>
             {filter === "pickups" && o.status === "awaiting_pickup" && (
               <button
                 type="button"
                 disabled={pendingId === o.id}
                 onClick={() => handlePickedUp(o.id)}
-                className="rounded border border-black/[.15] px-2 py-1 text-sm dark:border-white/[.2]"
+                className={primaryButton}
               >
                 Picked up
               </button>

@@ -1,27 +1,41 @@
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
-import { CATEGORIES, type Sort } from "@/lib/catalog";
+import { CATEGORIES, type Metal, type Sort } from "@/lib/catalog";
 import type { Database } from "@/lib/supabase/database.types";
 
 type Category = Database["public"]["Enums"]["category"];
 
-// Catalog-page category tabs (Phase 5 step 4): "All" + the 8 categories,
+// Catalog-page category tabs (Phase 5 step 4): "All" + the 8 categories as
+// white pills (active: ink), scrolling sideways on a phone,
 // reusing Header's `nav` translations. Distinct from Header's own top nav
 // (chunk A, step 3) — these live on the catalog pages themselves and carry
 // the current `sort` selection across tab switches, which the header links
 // don't need to do.
-export async function CategoryTabs({ locale, active, sort }: { locale: Locale; active?: Category; sort: Sort }) {
+export async function CategoryTabs({
+  locale,
+  active,
+  sort,
+  metal,
+}: {
+  locale: Locale;
+  active?: Category;
+  sort: Sort;
+  metal?: Metal;
+}) {
   const t = await getTranslations("nav");
-  const query = sort === "newest" ? "" : `?sort=${sort}`;
+  const params = new URLSearchParams();
+  if (metal) params.set("metal", metal);
+  if (sort !== "newest") params.set("sort", sort);
+  const query = params.size > 0 ? `?${params.toString()}` : "";
 
   const pill = (isActive: boolean) =>
-    isActive
-      ? "shrink-0 rounded-full bg-gold px-4 py-1.5 text-ivory"
-      : "shrink-0 rounded-full px-4 py-1.5 text-ink/70 decoration-gold decoration-2 underline-offset-4 hover:text-ink hover:underline";
+    `inline-flex min-h-11 shrink-0 items-center rounded-full px-[18px] text-sm font-medium transition-colors ${
+      isActive ? "bg-ink text-white" : "bg-white text-ink hover:bg-mist"
+    }`;
 
   return (
-    <nav className="mb-6 flex gap-2 overflow-x-auto text-sm [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+    <nav className="-mx-3 mb-3 flex gap-2 overflow-x-auto px-3 [scrollbar-width:none] md:mx-0 md:mb-4 md:flex-wrap md:px-0 [&::-webkit-scrollbar]:hidden">
       <Link
         href={`/${query}`}
         locale={locale}

@@ -40,7 +40,7 @@ Business facts that shape the design:
 | Sales model | Hybrid: pay online via Stripe Checkout (**CAD**); fulfillment = **Ship** (flat rate, Canada only) or **Pick up at market** (free). Shipping can be disabled by a settings toggle at launch. |
 | Framework | TypeScript, Next.js (App Router), React, Tailwind. Package manager: `pnpm`. Node 22. |
 | Hosting | **Cloudflare Workers** via `@opennextjs/cloudflare` (free tier; commercial use allowed). |
-| Database | **Supabase Free** — Postgres + pgvector + Auth + Storage. A Cloudflare Cron Trigger pings it every 3 days to prevent idle-pausing. |
+| Database | **Supabase Free** — Postgres + pgvector + Auth + Storage. A Cloudflare Cron Trigger pings it daily (plus a GitHub Actions keepalive that alerts on failure) to prevent idle-pausing. |
 | Embeddings | **Voyage AI multimodal** (`voyage-multimodal-3.5`). Used for storefront "similar styles" only (booth photo matching deferred, 2026-09-16). Fake deterministic provider in tests. |
 | Payments | Stripe Checkout (hosted). Webhook `checkout.session.completed` creates the order and decrements inventory. |
 | Email | Resend (free tier) for order confirmations / shipping notices, EN + FR. |
@@ -49,7 +49,7 @@ Business facts that shape the design:
 | Variants | Every design has ≥1 variant row (`label`, `qty_on_hand`). "One size" is a variant. Size is never inferred from photos. |
 | Stock model | Online stock separate from market stock; no reconciliation at launch. Deferred design: SKU tags (`R-047`). |
 | Analytics | Cloudflare Web Analytics (cookieless) + first-party funnel events + `/admin/analytics`; leads via notify-me and newsletter. No GA4. |
-| Testing | Vitest unit + integration (against local Supabase), Playwright e2e for cataloging, storefront, checkout, analytics. GitHub Actions CI on every PR. |
+| Testing | **Playwright e2e** for all behaviour (cataloging, storefront, checkout, analytics); Vitest only for integration tests against local Supabase (RLS, DB functions). **No unit tests** (2026-09-29). GitHub Actions CI on every PR. |
 | Repo | Public GitHub repo, code only. Secrets in env, data only in Supabase. README doubles as a case study. |
 | Brand | "Awenda Jewelry". Logo exists (owner will provide files). Domain `awendajewelry.com` already owned (registered via Etsy Pattern / Tucows) — recovery + DNS move in Phase 9. |
 | Budget | $0/mo hosting + domain (~$10/yr) + Stripe per-transaction fees. |
@@ -121,7 +121,7 @@ Each phase is one branch and one PR. Do them in order; later phases assume earli
 6. **Never commit secrets.** `.env.local` is gitignored. Use `.env.example` for names only.
 7. **Keep running costs at $0.** Do not enable paid tiers, paid add-ons, or new vendors without a
    `STOP` question.
-8. **Tests are part of the step**, not a follow-up. A step that adds logic adds its test.
+8. **Tests are part of the step**, not a follow-up. A step that adds behaviour adds its **e2e** test (DB rules: an integration test). No unit tests — where a phase file asks for a unit test, write an e2e test instead.
 9. **Update this plan when reality differs.** If a library, API or limit differs from what is
    written here, fix the plan file in the same PR and note it in `DECISIONS.md`.
 10. **Bilingual by default.** Any user-facing string goes through `next-intl` messages

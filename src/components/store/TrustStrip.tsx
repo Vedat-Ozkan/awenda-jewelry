@@ -67,36 +67,83 @@ export function HandmadeIcon() {
   );
 }
 
-const ICONS = [ShippingIcon, PickupIcon, HandmadeIcon];
+// Tile icon paths from the Silver Mist canvas (24px grid, accent stroke).
+const TILE_ICONS = {
+  pickup: "M12 21s-7-6.1-7-11a7 7 0 0 1 14 0c0 4.9-7 11-7 11zM12 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z",
+  shipping: "M3 7h11v9H3zM14 10h4l3 3v3h-7zM7 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM17 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4z",
+  handmade: "M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M18 6l-2.5 2.5M8.5 15.5 6 18",
+  material: "M12 3l8 4v6c0 4-3.5 7-8 8-4.5-1-8-4-8-8V7z",
+  checkout: "M6 11V8a6 6 0 0 1 12 0v3M5 11h14v10H5z",
+} as const;
 
-// Home-page trust strip (Phase 5 step 4, DECISIONS.md "Storefront design
-// references" — Luzzo's hero -> trust strip structure): 3 items, the first
-// driven by the shipping settings, the other two static.
+// Home-page trust tiles (Silver Mist): pickup, shipping (or "made by hand"
+// when shipping is turned off in settings), material, checkout. Copy makes no
+// durability claims (DECISIONS.md "Visual redesign"). 2 columns on phones and
+// tablets, 4 from lg; icons only from lg, as on the phone canvas.
 export async function TrustStrip({ locale, settings }: { locale: Locale; settings: Settings }) {
   const t = await getTranslations("home.trust");
 
-  let shippingItem: string;
-  if (!settings.shippingEnabled) {
-    shippingItem = t("pickupOnly");
-  } else if (settings.freeShippingThresholdCents != null) {
-    shippingItem = t("shipping", { threshold: formatPrice(settings.freeShippingThresholdCents, locale) });
-  } else {
-    shippingItem = t("shippingFlat");
-  }
+  const shippingTile = settings.shippingEnabled
+    ? {
+        icon: TILE_ICONS.shipping,
+        title: t("shipping.title"),
+        body:
+          settings.freeShippingThresholdCents != null
+            ? t("shipping.bodyFree", {
+                threshold: formatPrice(settings.freeShippingThresholdCents, locale),
+              })
+            : t("shipping.body"),
+      }
+    : {
+        icon: TILE_ICONS.handmade,
+        title: t("handmade.title"),
+        body: t("handmade.body"),
+      };
 
-  const items = [shippingItem, t("pickup", { market: settings.marketName ?? "" }), t("handmade")];
+  const tiles = [
+    {
+      icon: TILE_ICONS.pickup,
+      title: t("pickup.title"),
+      body: t("pickup.body"),
+    },
+    shippingTile,
+    {
+      icon: TILE_ICONS.material,
+      title: t("material.title"),
+      body: t("material.body"),
+    },
+    {
+      icon: TILE_ICONS.checkout,
+      title: t("checkout.title"),
+      body: t("checkout.body"),
+    },
+  ];
 
   return (
-    <ul className="mb-10 grid grid-cols-1 gap-6 border-y border-gold-muted py-6 text-center text-sm text-ink/70 sm:grid-cols-3">
-      {items.map((item, i) => {
-        const Icon = ICONS[i];
-        return (
-          <li key={item} className="flex flex-col items-center gap-2">
-            <Icon />
-            {item}
-          </li>
-        );
-      })}
+    <ul className="grid grid-cols-2 gap-2.5 lg:grid-cols-4 lg:gap-4">
+      {tiles.map((tile) => (
+        <li
+          key={tile.title}
+          className="flex flex-col gap-1.5 rounded-[18px] bg-mist p-4 lg:gap-2 lg:rounded-[20px] lg:p-6"
+        >
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 24 24"
+            width="26"
+            height="26"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="hidden text-accent lg:block"
+          >
+            <path d={tile.icon} />
+          </svg>
+          <span className="text-sm font-semibold lg:text-base">{tile.title}</span>
+          <span className="text-[13px] leading-snug text-muted lg:text-sm lg:leading-normal">{tile.body}</span>
+        </li>
+      ))}
     </ul>
   );
 }

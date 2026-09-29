@@ -1,4 +1,5 @@
 import { getTranslations } from "next-intl/server";
+import { buttonClasses } from "@/components/store/Button";
 import { Link } from "@/i18n/navigation";
 
 // Localized 404 for `notFound()` calls anywhere under `[locale]` (Phase 5
@@ -11,12 +12,16 @@ export default async function LocaleNotFound() {
   const t = await getTranslations("errors");
 
   return (
-    <main className="mx-auto flex max-w-2xl flex-col items-center gap-3 px-4 py-24 text-center">
-      <h1 className="font-serif text-2xl text-ink">{t("notFoundTitle")}</h1>
-      <p className="text-ink/70">{t("notFoundBody")}</p>
-      <Link href="/" className="underline">
-        {t("backHome")}
-      </Link>
+    <main className="mx-auto w-full max-w-3xl px-3 py-10 md:px-10 lg:py-20">
+      <div className="flex flex-col items-center gap-3 rounded-3xl bg-white px-6 py-14 text-center lg:rounded-[28px]">
+        <h1 className="font-serif text-[32px] leading-[1.1] font-normal tracking-[-0.01em] lg:text-[40px]">
+          {t("notFoundTitle")}
+        </h1>
+        <p className="mb-2 text-muted">{t("notFoundBody")}</p>
+        <Link href="/" className={buttonClasses("primary", "lg")}>
+          {t("backHome")}
+        </Link>
+      </div>
     </main>
   );
 }

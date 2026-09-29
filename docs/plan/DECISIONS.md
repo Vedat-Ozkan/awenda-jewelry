@@ -431,6 +431,116 @@ the colour for "similar styles" embeddings.
 into `handleCheckout`); Phase 9 (set `STRIPE_WEBHOOK_SECRET`, `RESEND_API_KEY`, `EMAIL_FROM`
 as Worker secrets; register the webhook endpoint in the Stripe dashboard).
 
+### Phase 7 plan drift                                                  (2026-09-28, agent)
+**Decision:**
+- Migrations are `0012_analytics.sql` (tables, RLS) and `0013_analytics_functions.sql`
+  (`analytics_summary(p_from, p_to)` → jsonb, security invoker, local-day buckets in
+  `settings.market_timezone`), not `0005`. Orders exclude `refunded`/`cancelled`.
+- `referrer_host`: the `Referer` header on a beacon is always our own page, so the client sends
+  `document.referrer` in the body on a session's first `page_view` only; the server keeps the
+  hostname and drops it when it equals our own host.
+- Lead routes return 204 for success/duplicate/honeypot, but 400 for a bad body or unknown
+  design and 500 for unexpected DB errors. A repeat submit re-arms the row (clears
+  `notified_at` / `unsubscribed_at`; token unchanged).
+- Sold-out variant buttons are selectable (no longer `disabled`); choosing one swaps
+  add-to-cart for the notify-me form with that `variant_id`.
+- Back-in-stock emails are sent from the bulk restock action only (per plan); failed sends
+  leave `notified_at` null so the next restock retries.
+- Step 1 (Cloudflare beacon) held pending Open #18; steps 2–6 built first (owner-approved).
+**Affects:** Phase 7 file (step 2 migration name, step 3 referrer, step 4 status codes); Phase 9
+(README analytics numbers once the beacon is live).
+
+### Admin PWA alpha fixes                                               (2026-09-29, owner)
+**Decision:**
+- The storefront no longer links `/manifest.webmanifest` (its `start_url` is `/admin`); only
+  `src/app/(admin)/layout.tsx` does, so installing/bookmarking the storefront doesn't offer the
+  admin app.
+- iOS home-screen icon + standalone: `public/apple-touch-icon.png` (180x180, from
+  `icons/icon-512.png`) sits at the site root so iOS also uses it for storefront bookmarks; the
+  admin layout adds `icons.apple` and `appleWebApp` (`capable`, title "Awenda Admin", status bar
+  `default`).
+- New Design's photo input drops `capture="environment"` (it forced camera-only on iOS/Android
+  and blocked picking many photos from the library). A file `resizeImage` can't read is skipped
+  with an inline message instead of aborting the rest of the batch.
+- Password sign-in: an installed iOS PWA has cookies isolated from Safari, so the magic link
+  (opens in Safari) can't complete a PKCE sign-in started in the PWA. `/admin/login` is now
+  email + password, backed by the `signInWithPassword` server action (same `admin_emails` gate;
+  a non-allowed address gets the same "Wrong email or password." as a wrong password and no auth
+  call is made; the server client sets the session cookies). "Email me a sign-in link instead"
+  keeps the magic link as a fallback. An emailed 6-digit code was tried and dropped: the hosted
+  Magic Link template can't be edited on the free tier without custom SMTP.
+- **Owner action (hosted Supabase):** set a password for the allowlisted email: Authentication ->
+  Users -> Add user -> Create new user (email + password, auto-confirm), or reset the password on
+  the existing user.
+**Why:** Alpha testing of the installed admin app on iOS/Android: sign-in from the PWA was
+impossible on iOS, photo selection was camera-only, and the home-screen icon/title were generic.
+**Affects:** Phase 4 steps 1 and 4.
+
+### Closed alpha on workers.dev; keepalive hardened                     (2026-09-29, owner)
+**Decision:** Run a closed alpha at `https://awenda-jewelry.awenda.workers.dev` before Phase 9,
+deploying the Phase 7 branch before its PR merges (Phases 6 and 7 then merge back to back, since
+every `main` merge auto-deploys). Stripe stays in **test mode** for the alpha — nobody can pay.
+`robots.ts` disallows everything while `NEXT_PUBLIC_SITE_URL` is on `*.workers.dev`; the domain
+cutover lifts it. Keepalive: the Cloudflare cron moves from every 3 days to **daily**
+(`0 6 * * *`), and `.github/workflows/keepalive.yml` pings Supabase REST (`public_settings`,
+anon key) and `/api/keepalive` (repo secret `CRON_SECRET`) daily at 18:00 UTC — a failed run
+emails the owner. `pnpm run deploy` runs `scripts/deploy.sh`, which exports the `NEXT_PUBLIC_*`
+values from `wrangler.jsonc` before building — they are inlined at build time, and a local build
+otherwise takes them from `.env.local` (the first alpha deploy shipped `127.0.0.1` photo URLs and
+a `localhost` sitemap); `next.config.ts` excludes `tmp/` (captured dev emails) from file tracing.
+**Why:** The hosted project idle-paused despite the 3-day cron, and nothing reported it. Daily +
+an independent pinger that fails loudly means a broken ping is noticed days before the 7-day
+limit. Admin sign-in is gated by the `admin_emails` table (`pnpm seed:admins` against the hosted
+project), not a Worker secret.
+**Affects:** Phase 1 (cron), Phase 9 (domain cutover lifts noindex; purge alpha rows from
+`analytics_events` before the analytics week).
+
+### Visual redesign: "Silver Mist" for storefront and admin             (2026-09-29, owner)
+**Decision:** Replace the ivory/gold look with the "R3·3 Silver Mist" direction chosen on the
+design canvas (https://claude.ai/artifact/V19pjei1NY4XRH1k26AWaa, boards `R3-3-Desktop` and
+`R3-3-Mobile`), for **both** the storefront and `/admin`.
+- Palette: page `#F7F8F8`, surface white `#FFFFFF`, mist `#E9E8EE` (tiles, chips, announcement
+  bar), photo well `#EEEFF1`, ink `#1E1F24`, muted text `#585A63`, accent `#5C5A6E` (Bag button,
+  eyebrow labels, icons). No gold.
+- Type: Newsreader (400/500) for whole headings and the wordmark only; Figtree (400/500/600) for
+  everything else. **Never switch typeface mid-sentence**, no italics for emphasis.
+- Shape: floating white pill navbar (desktop: logo · links · EN/FR · search · Bag pill; phone:
+  logo · menu · Bag pill); pill buttons (≥44 px targets); 20–28 px card radii; white product
+  cards with a steel/silver material label.
+- Layout: hero photo with a floating white card; category tiles (rounded squares); best sellers;
+  4 trust tiles; white rounded newsletter footer. Phone-first: every screen must work at 390 px,
+  laptop 1280 and large desktop (content capped and centred).
+- Materials: mostly stainless steel, some sterling silver — nav and filters say so. No durability
+  claims (waterproof, tarnish-free) until the owner confirms them.
+**Why:** The previous visual pass read as bland; the owner iterated three rounds on the canvas and
+chose R3·3. The admin PWA is used daily on a phone and should share the look.
+**Affects:** Phase 5 storefront components, admin shell and pages; supersedes the ivory/gold
+palette and Cormorant/Geist fonts from the "Storefront: warm, gold-accented visual pass" work.
+
+### Testing: e2e only, no unit tests                                    (2026-09-29, owner)
+**Decision:** No unit tests. Behaviour is covered by Playwright e2e (write the spec when missing);
+Vitest stays only for integration tests against local Supabase in `tests/integration/` (RLS,
+views, DB functions, webhook/inventory rules). The 20 unit-test files under `src/` and the email
+snapshots were deleted; `src/lib/supabase/local.test.ts` moved to
+`tests/integration/local-supabase.test.ts`. Phase files that ask for unit tests mean e2e now.
+**Why:** Owner's call — e2e tests exercise what customers and the admin actually do; unit tests
+of mocked internals were slowing changes down.
+**Affects:** CLAUDE.md, 00-overview.md (Testing row, rule 8), every phase file's verify steps.
+
+### Structured metal on designs: stainless steel / sterling silver      (2026-09-29, owner)
+**Decision:** The business sells mostly **stainless steel** and some **sterling silver**. `designs`
+gets `metal` (enum `metal`: `stainless_steel` | `sterling_silver`, not null, default
+`stainless_steel`; migration `0014_design_metal.sql`), exposed in `public_designs`. The storefront
+filters (`?metal=`) and labels by it; admin sets it on the New Design details screen and the edit
+page, and shows it in the catalog list and CSV export. Free-text `material_en` / `material_fr`
+stay for detail ("316L, 18k PVD"). No durability claims are attached to either metal.
+**Why:** Silver Mist nav and filters say "stainless steel / sterling silver"; a structured column
+is filterable and cannot drift like free text.
+**Affects:** Phase 4 admin forms and list, Phase 5 catalog query and listing pages, seed data.
+**Deploy note:** Migration 0014 defaults every existing hosted row to `stainless_steel`. After
+`supabase db push`, the owner must reclassify sterling-silver designs in /admin (edit page,
+metal select).
+
 ## Open — ask the owner before the referenced step
 
 1. ~~Exact domain to buy~~ **Resolved:** `awendajewelry.com` already owned (see Locked). Still
@@ -457,9 +567,10 @@ as Worker secrets; register the webhook endpoint in the Stripe dashboard).
 15. ~~When to create the hosted Supabase project~~ **Resolved 2026-09-16** — created at Phase 3 (see Locked).
 16. ~~Matching margin on the gray tray~~ **Superseded 2026-09-16** — photo matching dropped; booth integration deferred.
 17. **Physical tag / label choice** — deferred with Phases 7–8 (only needed when stock is merged).
-18. **Cloudflare Web Analytics site token** — owner creates the site in the Cloudflare dashboard
-    (Analytics & Logs → Web Analytics → Add site, hostname `awendajewelry.com` + the workers.dev
-    URL) and provides the token for `NEXT_PUBLIC_CF_BEACON_TOKEN`. Needed at Phase 7 step 1.
+18. ~~Cloudflare Web Analytics site token~~ **Resolved 2026-09-29** — token provided and set as
+    `NEXT_PUBLIC_CF_BEACON_TOKEN` in `wrangler.jsonc` (and read by `scripts/deploy.sh`); the site
+    is `awenda-jewelry.awenda.workers.dev`. Add `awendajewelry.com` to the same Web Analytics
+    site at Phase 9 (domain cutover).
 19. ~~Product spec fields~~ **Resolved 2026-09-16** — material EN/FR + dimensions, optional (see Locked).
 20. **Restock on refund after delivery** — `refundOrder` always restores stock via a `refund`
     movement, including for `shipped` / `picked_up` orders (right for a return, wrong for

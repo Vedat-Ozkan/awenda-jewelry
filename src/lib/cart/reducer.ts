@@ -7,7 +7,8 @@ export type CartState = CartLine[];
 
 export type CartAction =
   | { type: "hydrate"; lines: CartState }
-  | { type: "add"; variantId: string; qty: number; maxQty: number }
+  // designId is only for analytics (store.ts); the reducer ignores it.
+  | { type: "add"; variantId: string; qty: number; maxQty: number; designId?: string }
   | { type: "setQty"; variantId: string; qty: number; maxQty: number }
   | { type: "remove"; variantId: string }
   | { type: "clear" };

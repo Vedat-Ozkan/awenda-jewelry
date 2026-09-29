@@ -3,6 +3,17 @@
 import { useState } from "react";
 import type { SettingsInput } from "@/lib/settings/schema";
 import type { Database } from "@/lib/supabase/database.types";
+import {
+  cardClass,
+  errorClass,
+  h2Class,
+  hintClass,
+  inputClass,
+  labelClass,
+  noticeClass,
+  primaryButton,
+  textareaClass,
+} from "@/components/admin/ui";
 import { saveSettings } from "./actions";
 
 type Settings = Database["public"]["Tables"]["settings"]["Row"];
@@ -66,8 +77,8 @@ function toFormState(settings: Settings): FormState {
   };
 }
 
-const inputClass = "mt-1 block w-full rounded border border-black/[.15] px-3 py-2 text-sm dark:border-white/[.2]";
-const labelClass = "mt-4 block text-sm font-medium";
+const checkboxRow = "mt-4 flex min-h-11 items-center gap-3 text-sm font-medium";
+const checkbox = "h-5 w-5 accent-accent";
 
 // Settings form (Phase 4 step 9): one server action (saveSettings) over the
 // whole row. Dollar amounts are edited as CAD strings and converted to
@@ -128,180 +139,190 @@ export function SettingsForm({ settings }: { settings: Settings }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="mt-4 max-w-lg">
-      <label className={labelClass}>
-        Market name
-        <input
-          type="text"
-          value={form.marketName}
-          onChange={(e) => update({ marketName: e.target.value })}
-          className={inputClass}
-        />
-      </label>
-
-      <label className={labelClass}>
-        Market address
-        <input
-          type="text"
-          value={form.marketAddress}
-          onChange={(e) => update({ marketAddress: e.target.value })}
-          className={inputClass}
-        />
-      </label>
-
-      <label className={labelClass}>
-        Market day
-        <select
-          value={form.marketWeekday}
-          onChange={(e) => update({ marketWeekday: Number(e.target.value) })}
-          className={inputClass}
-        >
-          {WEEKDAYS.map((w) => (
-            <option key={w.value} value={w.value}>
-              {w.label}
-            </option>
-          ))}
-        </select>
-      </label>
-
-      <div className="mt-4 flex gap-2">
-        <label className="flex-1 text-sm font-medium">
-          Open time
+    <form onSubmit={handleSubmit} className="mt-6">
+      <section className={cardClass}>
+        <h2 className={h2Class}>Market</h2>
+        <label className="mt-3 block text-sm font-medium">
+          Market name
           <input
-            type="time"
-            value={form.marketOpenTime}
-            onChange={(e) => update({ marketOpenTime: e.target.value })}
+            type="text"
+            value={form.marketName}
+            onChange={(e) => update({ marketName: e.target.value })}
             className={inputClass}
           />
         </label>
-        <label className="flex-1 text-sm font-medium">
-          Close time
+
+        <label className={labelClass}>
+          Market address
           <input
-            type="time"
-            value={form.marketCloseTime}
-            onChange={(e) => update({ marketCloseTime: e.target.value })}
+            type="text"
+            value={form.marketAddress}
+            onChange={(e) => update({ marketAddress: e.target.value })}
             className={inputClass}
           />
         </label>
-      </div>
 
-      <label className={labelClass}>
-        Market timezone (IANA)
-        <input
-          type="text"
-          value={form.marketTimezone}
-          onChange={(e) => update({ marketTimezone: e.target.value })}
-          placeholder="America/Toronto"
-          className={inputClass}
-        />
-      </label>
+        <label className={labelClass}>
+          Market day
+          <select
+            value={form.marketWeekday}
+            onChange={(e) => update({ marketWeekday: Number(e.target.value) })}
+            className={inputClass}
+          >
+            {WEEKDAYS.map((w) => (
+              <option key={w.value} value={w.value}>
+                {w.label}
+              </option>
+            ))}
+          </select>
+        </label>
 
-      <label className={labelClass}>
-        Closed until
-        <input
-          type="date"
-          value={form.marketClosedUntil}
-          onChange={(e) => update({ marketClosedUntil: e.target.value })}
-          className={inputClass}
-        />
-      </label>
+        <div className="mt-4 flex gap-3">
+          <label className="min-w-0 flex-1 text-sm font-medium">
+            Open time
+            <input
+              type="time"
+              value={form.marketOpenTime}
+              onChange={(e) => update({ marketOpenTime: e.target.value })}
+              className={inputClass}
+            />
+          </label>
+          <label className="min-w-0 flex-1 text-sm font-medium">
+            Close time
+            <input
+              type="time"
+              value={form.marketCloseTime}
+              onChange={(e) => update({ marketCloseTime: e.target.value })}
+              className={inputClass}
+            />
+          </label>
+        </div>
 
-      <label className={labelClass}>
-        Closed note (EN)
-        <input
-          type="text"
-          value={form.marketClosedNoteEn}
-          onChange={(e) => update({ marketClosedNoteEn: e.target.value })}
-          className={inputClass}
-        />
-      </label>
-      <label className={labelClass}>
-        Closed note (FR)
-        <span className="ml-1 text-xs text-zinc-500">Optional — falls back to English on the storefront</span>
-        <input
-          type="text"
-          value={form.marketClosedNoteFr}
-          onChange={(e) => update({ marketClosedNoteFr: e.target.value })}
-          className={inputClass}
-        />
-      </label>
+        <label className={labelClass}>
+          Market timezone (IANA)
+          <input
+            type="text"
+            value={form.marketTimezone}
+            onChange={(e) => update({ marketTimezone: e.target.value })}
+            placeholder="America/Toronto"
+            className={inputClass}
+          />
+        </label>
+      </section>
 
-      <label className={labelClass}>
-        Pickup instructions (EN)
-        <textarea
-          value={form.pickupInstructionsEn}
-          onChange={(e) => update({ pickupInstructionsEn: e.target.value })}
-          className={inputClass}
-        />
-      </label>
-      <label className={labelClass}>
-        Pickup instructions (FR)
-        <span className="ml-1 text-xs text-zinc-500">Optional — falls back to English on the storefront</span>
-        <textarea
-          value={form.pickupInstructionsFr}
-          onChange={(e) => update({ pickupInstructionsFr: e.target.value })}
-          className={inputClass}
-        />
-      </label>
+      <section className={`${cardClass} mt-4`}>
+        <h2 className={h2Class}>Closures and pickup</h2>
+        <label className="mt-3 block text-sm font-medium">
+          Closed until
+          <input
+            type="date"
+            value={form.marketClosedUntil}
+            onChange={(e) => update({ marketClosedUntil: e.target.value })}
+            className={inputClass}
+          />
+        </label>
 
-      <label className="mt-4 flex items-center gap-2 text-sm font-medium">
-        <input
-          type="checkbox"
-          checked={form.shippingEnabled}
-          onChange={(e) => update({ shippingEnabled: e.target.checked })}
-        />
-        Shipping enabled
-      </label>
+        <label className={labelClass}>
+          Closed note (EN)
+          <input
+            type="text"
+            value={form.marketClosedNoteEn}
+            onChange={(e) => update({ marketClosedNoteEn: e.target.value })}
+            className={inputClass}
+          />
+        </label>
+        <label className={labelClass}>
+          Closed note (FR)
+          <span className={hintClass}>Optional — falls back to English on the storefront</span>
+          <input
+            type="text"
+            value={form.marketClosedNoteFr}
+            onChange={(e) => update({ marketClosedNoteFr: e.target.value })}
+            className={inputClass}
+          />
+        </label>
 
-      <label className={labelClass}>
-        Flat shipping rate (CAD)
-        <input
-          type="text"
-          inputMode="decimal"
-          value={form.shippingFlatDollars}
-          onChange={(e) => update({ shippingFlatDollars: e.target.value })}
-          className={inputClass}
-        />
-      </label>
-      <label className={labelClass}>
-        Free shipping threshold (CAD, blank = never free)
-        <input
-          type="text"
-          inputMode="decimal"
-          value={form.freeShippingThresholdDollars}
-          onChange={(e) => update({ freeShippingThresholdDollars: e.target.value })}
-          className={inputClass}
-        />
-      </label>
+        <label className={labelClass}>
+          Pickup instructions (EN)
+          <textarea
+            value={form.pickupInstructionsEn}
+            onChange={(e) => update({ pickupInstructionsEn: e.target.value })}
+            className={textareaClass}
+          />
+        </label>
+        <label className={labelClass}>
+          Pickup instructions (FR)
+          <span className={hintClass}>Optional — falls back to English on the storefront</span>
+          <textarea
+            value={form.pickupInstructionsFr}
+            onChange={(e) => update({ pickupInstructionsFr: e.target.value })}
+            className={textareaClass}
+          />
+        </label>
+      </section>
 
-      <label className="mt-4 flex items-center gap-2 text-sm font-medium">
-        <input
-          type="checkbox"
-          checked={form.stripeTaxEnabled}
-          onChange={(e) => update({ stripeTaxEnabled: e.target.checked })}
-        />
-        Stripe tax enabled
-        <span className="text-xs text-zinc-500">(display only until Phase 6)</span>
-      </label>
+      <section className={`${cardClass} mt-4`}>
+        <h2 className={h2Class}>Shipping and tax</h2>
+        <label className={`${checkboxRow} mt-2!`}>
+          <input
+            type="checkbox"
+            checked={form.shippingEnabled}
+            onChange={(e) => update({ shippingEnabled: e.target.checked })}
+            className={checkbox}
+          />
+          Shipping enabled
+        </label>
 
-      <label className={labelClass}>
-        Variant presets (JSON)
-        <textarea
-          value={form.variantPresetsJson}
-          onChange={(e) => update({ variantPresetsJson: e.target.value })}
-          rows={12}
-          className={`${inputClass} font-mono text-xs`}
-        />
-      </label>
+        <label className={labelClass}>
+          Flat shipping rate (CAD)
+          <input
+            type="text"
+            inputMode="decimal"
+            value={form.shippingFlatDollars}
+            onChange={(e) => update({ shippingFlatDollars: e.target.value })}
+            className={inputClass}
+          />
+        </label>
+        <label className={labelClass}>
+          Free shipping threshold (CAD, blank = never free)
+          <input
+            type="text"
+            inputMode="decimal"
+            value={form.freeShippingThresholdDollars}
+            onChange={(e) => update({ freeShippingThresholdDollars: e.target.value })}
+            className={inputClass}
+          />
+        </label>
 
-      {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
-      {saved && !error && <p className="mt-2 text-sm text-green-700">Saved.</p>}
+        <label className={checkboxRow}>
+          <input
+            type="checkbox"
+            checked={form.stripeTaxEnabled}
+            onChange={(e) => update({ stripeTaxEnabled: e.target.checked })}
+            className={checkbox}
+          />
+          Stripe tax enabled
+          <span className="text-xs font-normal text-muted">(display only until Phase 6)</span>
+        </label>
+      </section>
 
-      <button
-        type="submit"
-        disabled={saving}
-        className="mt-6 rounded bg-black px-4 py-2 text-sm text-white disabled:opacity-40 dark:bg-white dark:text-black"
-      >
+      <section className={`${cardClass} mt-4`}>
+        <h2 className={h2Class}>Variant presets</h2>
+        <label className="mt-3 block text-sm font-medium">
+          Variant presets (JSON)
+          <textarea
+            value={form.variantPresetsJson}
+            onChange={(e) => update({ variantPresetsJson: e.target.value })}
+            rows={12}
+            className={`${textareaClass} font-mono text-sm`}
+          />
+        </label>
+      </section>
+
+      {error && <p className={errorClass}>{error}</p>}
+      {saved && !error && <p className={noticeClass}>Saved.</p>}
+
+      <button type="submit" disabled={saving} className={`${primaryButton} mt-6 h-12 w-full md:w-auto`}>
         Save
       </button>
     </form>

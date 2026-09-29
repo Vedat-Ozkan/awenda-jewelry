@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
+import { DesignViewTracker } from "@/components/store/AnalyticsTrackers";
+import { LeadForm } from "@/components/store/LeadForm";
 import { Gallery, type GalleryImage } from "@/components/store/Gallery";
 import { formatPrice, Price } from "@/components/store/Price";
 import { ProductCard } from "@/components/store/ProductCard";
@@ -63,8 +65,10 @@ export async function generateMetadata({
   };
 }
 
-// `/[locale]/p/[slug]` (Phase 5 step 5, Nazzar/Mejuri reference: gallery
-// left / details right, price + add-to-cart high on the page).
+// `/[locale]/p/[slug]` (Phase 5 step 5; Silver Mist layout). Phone: gallery,
+// purchase card, details, similar styles, stacked. From lg: gallery + details
+// in the left column and the purchase card sticky in the right column (it is
+// the short one, so it can stay in view while the left column scrolls).
 export default async function ProductPage({ params }: { params: Promise<{ locale: Locale; slug: string }> }) {
   const { locale, slug } = await params;
 
@@ -77,10 +81,11 @@ export default async function ProductPage({ params }: { params: Promise<{ locale
     notFound();
   }
 
-  const [tProduct, tNav, tBadges, settings, similar] = await Promise.all([
+  const [tProduct, tNav, tBadges, tMetal, settings, similar] = await Promise.all([
     getTranslations("product"),
     getTranslations("nav"),
     getTranslations("badges"),
+    getTranslations("catalog.metal"),
     getSettings(),
     getSimilar(design.id, 4, locale),
   ]);
@@ -102,78 +107,101 @@ export default async function ProductPage({ params }: { params: Promise<{ locale
     },
   };
 
+  const specs = [
+    { label: tProduct("metal"), value: tMetal(design.metal) },
+    ...(design.material ? [{ label: tProduct("material"), value: design.material }] : []),
+    ...(design.dimensions ? [{ label: tProduct("dimensions"), value: design.dimensions }] : []),
+  ];
+
+  const delivery = [
+    ...(settings.shippingEnabled
+      ? [
+          {
+            key: "shipping",
+            icon: <ShippingIcon />,
+            text:
+              settings.freeShippingThresholdCents != null
+                ? tProduct("trust.shipping", { threshold: formatPrice(settings.freeShippingThresholdCents, locale) })
+                : tProduct("trust.shippingFlat"),
+          },
+        ]
+      : []),
+    ...(settings.marketName
+      ? [{ key: "pickup", icon: <PickupIcon />, text: tProduct("trust.pickup", { market: settings.marketName }) }]
+      : []),
+    { key: "returns", icon: <HandmadeIcon />, text: tProduct("trust.returns") },
+  ];
+
   return (
-    <main className="mx-auto max-w-6xl px-4 py-8 md:px-8">
+    <main className="mx-auto w-full max-w-[1360px] px-3 pb-10 pt-3 md:px-10 lg:pb-20 lg:pt-6">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <DesignViewTracker designId={design.id} />
 
-      <div className="grid gap-8 md:grid-cols-2">
-        <Gallery images={images} alt={design.name} />
+      <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_460px] lg:gap-x-10 lg:gap-y-6 xl:grid-cols-[minmax(0,1fr)_500px]">
+        <div className="lg:col-start-1 lg:row-start-1">
+          <Gallery images={images} alt={design.name} />
+        </div>
 
-        <div>
-          <p className="text-sm text-ink/60">{tNav(design.category)}</p>
-          <h1 className="font-serif text-3xl text-ink">{design.name}</h1>
-          <p className="mt-1 text-xl text-ink">
-            <Price cents={design.price_cents} locale={locale} />
-          </p>
-
-          {design.description && <p className="mt-4 text-ink/80">{design.description}</p>}
-
-          <div className="mt-6">
-            {allSoldOut ? (
-              <div>
-                <p className="font-medium text-ink">{tProduct("soldOutTitle")}</p>
-                <p className="text-sm text-ink/70">{tProduct("soldOutBody")}</p>
-                {/* Phase 7: "Notify me when back in stock" email form goes here. */}
-                <section id="notify-me" />
-              </div>
-            ) : (
-              <ProductPurchasePanel variants={design.variants} />
-            )}
+        <section className="flex flex-col gap-5 rounded-3xl bg-white p-6 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:sticky lg:top-6 lg:self-start lg:rounded-[28px] lg:p-8">
+          <div className="flex flex-col gap-2.5">
+            <p className="text-xs font-semibold uppercase tracking-[0.1em] text-accent lg:text-[13px]">
+              {tNav(design.category)}
+            </p>
+            <h1 className="font-serif text-[40px] leading-[1.02] font-normal tracking-[-0.02em] lg:text-[48px]">
+              {design.name}
+            </h1>
+            <p className="text-xl font-medium">
+              <Price cents={design.price_cents} locale={locale} />
+            </p>
+            {design.description && <p className="leading-relaxed text-muted">{design.description}</p>}
           </div>
 
-          {(design.material || design.dimensions) && (
-            <dl className="mt-6 space-y-1 border-t border-gold-muted pt-4 text-sm text-ink/70">
-              {design.material && (
-                <div className="flex gap-2">
-                  <dt className="font-medium text-ink">{tProduct("material")}</dt>
-                  <dd>{design.material}</dd>
-                </div>
-              )}
-              {design.dimensions && (
-                <div className="flex gap-2">
-                  <dt className="font-medium text-ink">{tProduct("dimensions")}</dt>
-                  <dd>{design.dimensions}</dd>
-                </div>
-              )}
-            </dl>
+          {allSoldOut ? (
+            <div className="flex flex-col gap-2 rounded-2xl bg-mist p-5">
+              <p className="font-semibold">{tProduct("soldOutTitle")}</p>
+              <p className="text-sm text-muted">{tProduct("soldOutBody")}</p>
+              <section id="notify-me" className="mt-2">
+                <LeadForm kind="notify" designId={design.id} />
+              </section>
+            </div>
+          ) : (
+            <ProductPurchasePanel designId={design.id} variants={design.variants} />
           )}
+        </section>
 
-          <ul className="mt-6 space-y-2 text-sm text-ink/60">
-            {settings.shippingEnabled && (
-              <li className="flex items-center gap-2">
-                <ShippingIcon />
-                {settings.freeShippingThresholdCents != null
-                  ? tProduct("trust.shipping", { threshold: formatPrice(settings.freeShippingThresholdCents, locale) })
-                  : tProduct("trust.shippingFlat")}
+        <div className="flex flex-col gap-3 lg:col-start-1 lg:row-start-2 lg:gap-4">
+          <dl className="rounded-3xl bg-white p-6 lg:rounded-[28px] lg:p-8">
+            {specs.map((spec) => (
+              <div key={spec.label} className="flex items-center gap-3 py-2">
+                <span aria-hidden="true" className="flex size-6 shrink-0 items-center justify-center rounded-full bg-mist text-accent">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M5 12.5l4.5 4.5L19 7.5" />
+                  </svg>
+                </span>
+                <dt className="font-medium">{spec.label}</dt>
+                <dd className="text-muted">{spec.value}</dd>
+              </div>
+            ))}
+          </dl>
+
+          <ul className="grid gap-3 md:grid-cols-[repeat(auto-fit,minmax(170px,1fr))] lg:gap-4">
+            {delivery.map((item) => (
+              <li key={item.key} className="flex items-center gap-3 rounded-[20px] bg-mist p-4 text-sm lg:flex-col lg:items-start lg:gap-3 lg:p-5">
+                <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-white text-accent">
+                  {item.icon}
+                </span>
+                {item.text}
               </li>
-            )}
-            {settings.marketName && (
-              <li className="flex items-center gap-2">
-                <PickupIcon />
-                {tProduct("trust.pickup", { market: settings.marketName })}
-              </li>
-            )}
-            <li className="flex items-center gap-2">
-              <HandmadeIcon />
-              {tProduct("trust.returns")}
-            </li>
+            ))}
           </ul>
         </div>
       </div>
 
-      <section className="mt-16">
-        <h2 className="mb-4 font-serif text-2xl text-ink">{tProduct("similar")}</h2>
-        <div data-testid="similar-styles" className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-4">
+      <section className="pt-10 lg:pt-20">
+        <h2 className="mb-4 px-1 font-serif text-[32px] font-normal tracking-[-0.01em] lg:mb-7 lg:px-0 lg:text-[52px]">
+          {tProduct("similar")}
+        </h2>
+        <div data-testid="similar-styles" className="grid grid-cols-2 gap-2.5 lg:grid-cols-4 lg:gap-4">
           {similar.map((d) => (
             <ProductCard key={d.id} design={d} locale={locale} soldOutLabel={tBadges("soldOut")} />
           ))}

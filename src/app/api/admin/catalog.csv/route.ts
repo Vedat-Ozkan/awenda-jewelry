@@ -20,7 +20,7 @@ export async function GET(request: Request) {
   const supabase = createAdminClient();
   const { data: designs, error: designsError } = await supabase
     .from("designs")
-    .select("id, slug, name_en, category, status, price_cents")
+    .select("id, slug, name_en, category, metal, status, price_cents")
     .order("slug");
   if (designsError) throw designsError;
 
@@ -37,11 +37,11 @@ export async function GET(request: Request) {
     variantsByDesign.set(design_id, list);
   }
 
-  const rows = [["slug", "name_en", "category", "status", "price_cents", "variant_label", "qty_on_hand"]];
+  const rows = [["slug", "name_en", "category", "metal", "status", "price_cents", "variant_label", "qty_on_hand"]];
   for (const d of designs) {
     const designVariants = variantsByDesign.get(d.id) ?? [];
     for (const v of designVariants) {
-      rows.push([d.slug, d.name_en, d.category, d.status, String(d.price_cents), v.label, String(v.qty_on_hand)]);
+      rows.push([d.slug, d.name_en, d.category, d.metal, d.status, String(d.price_cents), v.label, String(v.qty_on_hand)]);
     }
   }
 

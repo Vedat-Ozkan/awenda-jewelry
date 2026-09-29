@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import { createServiceClient } from "../tests/helpers/local-supabase";
 
 // Phase 5 step 6. Kept to 3 tests per the owner's "keep tests lean"

@@ -1,3 +1,4 @@
+import { h1Class, mutedClass } from "@/components/admin/ui";
 import { createClient } from "@/lib/supabase/server";
 import { SettingsForm } from "./settings-form";
 
@@ -15,9 +16,9 @@ export default async function AdminSettingsPage() {
   if (nextMarketDateError) throw nextMarketDateError;
 
   return (
-    <div className="p-4">
-      <h1 className="text-lg font-semibold">Settings</h1>
-      <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+    <div className="mx-auto max-w-2xl">
+      <h1 className={h1Class}>Settings</h1>
+      <p className={`${mutedClass} mt-1`}>
         Next market date: {nextMarketDate ?? "Not configured"}
       </p>
       <SettingsForm settings={settings} />

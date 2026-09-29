@@ -33,3 +33,34 @@ export async function requestMagicLink(email: string): Promise<{ message: string
 
   return { message: GENERIC_MESSAGE };
 }
+
+const PASSWORD_ERROR = "Wrong email or password.";
+
+// Installed iOS PWAs don't share cookies with Safari, so the emailed link
+// (which opens in Safari) can't sign in the app; a password can. Same
+// allowlist gate as requestMagicLink: a non-allowed address gets the same
+// failure as a wrong password and no auth call is made.
+export async function signInWithPassword(
+  email: string,
+  password: string,
+): Promise<{ ok: true } | { error: string }> {
+  const normalized = email.trim().toLowerCase();
+
+  const { data, error } = await createAdminClient()
+    .from("admin_emails")
+    .select("email")
+    .eq("email", normalized)
+    .maybeSingle();
+  if (error) throw error;
+  if (!data) return { error: PASSWORD_ERROR };
+
+  // The server client so the session cookies are set on this response.
+  const supabase = await createClient();
+  const { error: signInError } = await supabase.auth.signInWithPassword({
+    email: normalized,
+    password,
+  });
+  if (signInError) return { error: PASSWORD_ERROR };
+
+  return { ok: true };
+}
