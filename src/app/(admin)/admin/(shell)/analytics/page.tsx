@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { BarChart } from "@/components/admin/BarChart";
+import { bareInputClass, cardClass, chipClass, h1Class, h2Class, mutedClass, primaryButton } from "@/components/admin/ui";
 import {
   countNewsletterSubscribers,
   countStockNotifications,
@@ -30,9 +31,9 @@ const isoDay = (iso: string) => shortDate.format(new Date(`${iso}T00:00:00Z`));
 
 function Tile({ id, label, children }: { id: string; label: string; children: ReactNode }) {
   return (
-    <div data-testid={`tile-${id}`} className="rounded border border-black/[.08] p-3">
-      <div className="text-xs text-zinc-600">{label}</div>
-      <div className="mt-1 text-xl font-semibold tabular-nums">{children}</div>
+    <div data-testid={`tile-${id}`} className="rounded-3xl bg-surface p-4 shadow-[0_1px_0_rgba(30,31,36,0.07)]">
+      <div className="text-xs font-medium text-muted">{label}</div>
+      <div className="mt-1.5 text-2xl font-semibold tabular-nums text-ink">{children}</div>
     </div>
   );
 }
@@ -51,17 +52,17 @@ function DataTable({
   empty: string;
 }) {
   return (
-    <section data-testid={`table-${id}`} className="mt-6">
-      <h2 className="text-sm font-semibold">{title}</h2>
+    <section data-testid={`table-${id}`} className={`${cardClass} mt-4`}>
+      <h2 className={h2Class}>{title}</h2>
       {rows.length === 0 ? (
-        <p className="mt-1 text-sm text-zinc-600">{empty}</p>
+        <p className={`${mutedClass} mt-1`}>{empty}</p>
       ) : (
-        <div className="mt-1 overflow-x-auto">
+        <div className="mt-2 overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead>
-              <tr className="text-zinc-600">
+              <tr className="text-xs text-muted">
                 {headers.map((h, i) => (
-                  <th key={h} className={`py-1 font-normal ${i > 0 ? "pl-3 text-right" : "pr-3"}`}>
+                  <th key={h} className={`py-1.5 font-medium ${i > 0 ? "pl-3 text-right" : "pr-3"}`}>
                     {h}
                   </th>
                 ))}
@@ -69,9 +70,9 @@ function DataTable({
             </thead>
             <tbody>
               {rows.map((row, r) => (
-                <tr key={r} className="border-t border-black/[.06]">
+                <tr key={r} className="border-t border-ink/10">
                   {row.map((cell, i) => (
-                    <td key={i} className={`py-1.5 ${i > 0 ? "pl-3 text-right tabular-nums" : "pr-3"}`}>
+                    <td key={i} className={`py-2.5 ${i > 0 ? "pl-3 text-right tabular-nums" : "pr-3"}`}>
                       {cell}
                     </td>
                   ))}
@@ -84,9 +85,6 @@ function DataTable({
     </section>
   );
 }
-
-const chipClass = (active: boolean) =>
-  `rounded-full border px-3 py-1 text-sm ${active ? "border-black bg-black text-white" : "border-black/[.15]"}`;
 
 // Analytics (Phase 7 step 5): server component. Everything is RLS-enforced via
 // the admin's cookie session; the aggregates come from analytics_summary()
@@ -124,39 +122,39 @@ export default async function AdminAnalyticsPage({
   const sessionsShare = (n: number) => (summary.sessions > 0 ? ` (${percent.format(n / summary.sessions)})` : "");
 
   return (
-    <div className="p-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-lg font-semibold">Analytics</h1>
-        <a href={CF_DASHBOARD_URL} target="_blank" rel="noreferrer" className="text-sm underline">
+    <div>
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+        <h1 className={h1Class}>Analytics</h1>
+        <a href={CF_DASHBOARD_URL} target="_blank" rel="noreferrer" className="text-sm font-medium text-accent underline underline-offset-4">
           Cloudflare Web Analytics (traffic detail)
         </a>
       </div>
 
-      <div className="mt-4 flex flex-wrap items-center gap-2">
+      <div className="mt-5 flex flex-wrap items-center gap-2">
         {PRESET_DAYS.map((days) => (
           <Link key={days} href={`/admin/analytics?range=${days}`} className={chipClass(range.preset === days)}>
             {days} days
           </Link>
         ))}
-        <form method="get" className="flex flex-wrap items-center gap-2 text-sm">
-          <label className="flex items-center gap-1">
-            From
-            <input type="date" name="from" defaultValue={range.from} required className="rounded border border-black/[.15] px-2 py-1" />
-          </label>
-          <label className="flex items-center gap-1">
-            To
-            <input type="date" name="to" defaultValue={range.to} required className="rounded border border-black/[.15] px-2 py-1" />
-          </label>
-          <button type="submit" className={chipClass(range.preset === null)}>
-            Apply
-          </button>
-        </form>
       </div>
-      <p className="mt-2 text-xs text-zinc-600" data-testid="analytics-range">
+      <form method="get" className="mt-3 flex flex-wrap items-end gap-2 text-sm">
+        <label className="min-w-0 flex-1 basis-36 text-xs font-medium text-muted">
+          From
+          <input type="date" name="from" defaultValue={range.from} required className={`${bareInputClass} mt-1`} />
+        </label>
+        <label className="min-w-0 flex-1 basis-36 text-xs font-medium text-muted">
+          To
+          <input type="date" name="to" defaultValue={range.to} required className={`${bareInputClass} mt-1`} />
+        </label>
+        <button type="submit" className={`${range.preset === null ? primaryButton : chipClass(false)} h-12`}>
+          Apply
+        </button>
+      </form>
+      <p className="mt-3 text-xs text-muted" data-testid="analytics-range">
         {range.from} to {range.to} ({timeZone})
       </p>
 
-      <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-3">
+      <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-3">
         <Tile id="sessions" label="Sessions">
           {summary.sessions}
         </Tile>
@@ -186,7 +184,7 @@ export default async function AdminAnalyticsPage({
         </Tile>
       </div>
 
-      <div className="mt-6 grid gap-3 lg:grid-cols-2">
+      <div className="mt-4 grid grid-cols-[minmax(0,1fr)] gap-3 lg:grid-cols-2">
         <BarChart
           title="Sessions by day"
           data={summary.by_day.map((d) => ({ label: isoDay(d.day), value: d.sessions }))}
@@ -238,8 +236,8 @@ export default async function AdminAnalyticsPage({
         empty="No sessions in this range."
       />
 
-      <h2 className="mt-10 text-base font-semibold">Leads</h2>
-      <div className="mt-2 grid grid-cols-2 gap-3">
+      <h2 className="mt-10 font-serif text-2xl font-medium tracking-tight">Leads</h2>
+      <div className="mt-3 grid grid-cols-2 gap-3">
         <Tile id="stock-leads" label="Notify-me sign-ups (active / total)">
           {stockCounts.active} / {stockCounts.total}
         </Tile>
@@ -248,33 +246,33 @@ export default async function AdminAnalyticsPage({
         </Tile>
       </div>
 
-      <section data-testid="leads-stock" className="mt-6">
+      <section data-testid="leads-stock" className={`${cardClass} mt-4`}>
         <div className="flex items-center justify-between gap-3">
-          <h2 className="text-sm font-semibold">Notify me when it&apos;s back</h2>
-          <a href="/api/admin/stock-notifications.csv" className="text-sm underline">
+          <h2 className={h2Class}>Notify me when it&apos;s back</h2>
+          <a href="/api/admin/stock-notifications.csv" className="inline-flex h-11 items-center text-sm font-medium text-accent underline underline-offset-4">
             Export CSV
           </a>
         </div>
         {stockNotifications.length === 0 ? (
-          <p className="mt-1 text-sm text-zinc-600">No sign-ups yet.</p>
+          <p className={`${mutedClass} mt-1`}>No sign-ups yet.</p>
         ) : (
-          <div className="mt-1 overflow-x-auto">
-            <table className="w-full text-left text-sm">
+          <div className="mt-2 overflow-x-auto">
+            <table className="w-full min-w-[520px] text-left text-sm">
               <thead>
-                <tr className="text-zinc-600">
-                  <th className="py-1 pr-3 font-normal">Email</th>
-                  <th className="py-1 pr-3 font-normal">Design</th>
-                  <th className="py-1 pr-3 font-normal">Signed up</th>
-                  <th className="py-1 font-normal">Notified</th>
+                <tr className="text-xs text-muted">
+                  <th className="py-1.5 pr-3 font-medium">Email</th>
+                  <th className="py-1.5 pr-3 font-medium">Design</th>
+                  <th className="py-1.5 pr-3 font-medium">Signed up</th>
+                  <th className="py-1.5 font-medium">Notified</th>
                 </tr>
               </thead>
               <tbody>
                 {stockNotifications.map((r) => (
-                  <tr key={`${r.email}|${r.designSlug}`} className="border-t border-black/[.06]">
-                    <td className="py-1.5 pr-3">{r.email}</td>
-                    <td className="py-1.5 pr-3">{r.designName}</td>
-                    <td className="py-1.5 pr-3">{dateTime.format(new Date(r.createdAt))}</td>
-                    <td className="py-1.5">
+                  <tr key={`${r.email}|${r.designSlug}`} className="border-t border-ink/10">
+                    <td className="py-2.5 pr-3">{r.email}</td>
+                    <td className="py-2.5 pr-3">{r.designName}</td>
+                    <td className="py-2.5 pr-3">{dateTime.format(new Date(r.createdAt))}</td>
+                    <td className="py-2.5">
                       {r.unsubscribedAt ? "Unsubscribed" : r.notifiedAt ? dateTime.format(new Date(r.notifiedAt)) : "No"}
                     </td>
                   </tr>
@@ -284,37 +282,37 @@ export default async function AdminAnalyticsPage({
           </div>
         )}
         {stockCounts.total > LEAD_ROWS_SHOWN && (
-          <p className="mt-1 text-xs text-zinc-600">Showing the latest {LEAD_ROWS_SHOWN}; export for all.</p>
+          <p className="mt-1 text-xs text-muted">Showing the latest {LEAD_ROWS_SHOWN}; export for all.</p>
         )}
       </section>
 
-      <section data-testid="leads-newsletter" className="mt-6">
+      <section data-testid="leads-newsletter" className={`${cardClass} mt-4`}>
         <div className="flex items-center justify-between gap-3">
-          <h2 className="text-sm font-semibold">Newsletter subscribers</h2>
-          <a href="/api/admin/newsletter.csv" className="text-sm underline">
+          <h2 className={h2Class}>Newsletter subscribers</h2>
+          <a href="/api/admin/newsletter.csv" className="inline-flex h-11 items-center text-sm font-medium text-accent underline underline-offset-4">
             Export CSV
           </a>
         </div>
         {subscribers.length === 0 ? (
-          <p className="mt-1 text-sm text-zinc-600">No subscribers yet.</p>
+          <p className={`${mutedClass} mt-1`}>No subscribers yet.</p>
         ) : (
-          <div className="mt-1 overflow-x-auto">
-            <table className="w-full text-left text-sm">
+          <div className="mt-2 overflow-x-auto">
+            <table className="w-full min-w-[520px] text-left text-sm">
               <thead>
-                <tr className="text-zinc-600">
-                  <th className="py-1 pr-3 font-normal">Email</th>
-                  <th className="py-1 pr-3 font-normal">Locale</th>
-                  <th className="py-1 pr-3 font-normal">Subscribed</th>
-                  <th className="py-1 font-normal">Status</th>
+                <tr className="text-xs text-muted">
+                  <th className="py-1.5 pr-3 font-medium">Email</th>
+                  <th className="py-1.5 pr-3 font-medium">Locale</th>
+                  <th className="py-1.5 pr-3 font-medium">Subscribed</th>
+                  <th className="py-1.5 font-medium">Status</th>
                 </tr>
               </thead>
               <tbody>
                 {subscribers.map((r) => (
-                  <tr key={r.email} className="border-t border-black/[.06]">
-                    <td className="py-1.5 pr-3">{r.email}</td>
-                    <td className="py-1.5 pr-3">{r.locale.toUpperCase()}</td>
-                    <td className="py-1.5 pr-3">{dateTime.format(new Date(r.createdAt))}</td>
-                    <td className="py-1.5">{r.unsubscribedAt ? "Unsubscribed" : "Active"}</td>
+                  <tr key={r.email} className="border-t border-ink/10">
+                    <td className="py-2.5 pr-3">{r.email}</td>
+                    <td className="py-2.5 pr-3">{r.locale.toUpperCase()}</td>
+                    <td className="py-2.5 pr-3">{dateTime.format(new Date(r.createdAt))}</td>
+                    <td className="py-2.5">{r.unsubscribedAt ? "Unsubscribed" : "Active"}</td>
                   </tr>
                 ))}
               </tbody>
@@ -322,7 +320,7 @@ export default async function AdminAnalyticsPage({
           </div>
         )}
         {subscriberCounts.total > LEAD_ROWS_SHOWN && (
-          <p className="mt-1 text-xs text-zinc-600">Showing the latest {LEAD_ROWS_SHOWN}; export for all.</p>
+          <p className="mt-1 text-xs text-muted">Showing the latest {LEAD_ROWS_SHOWN}; export for all.</p>
         )}
       </section>
     </div>

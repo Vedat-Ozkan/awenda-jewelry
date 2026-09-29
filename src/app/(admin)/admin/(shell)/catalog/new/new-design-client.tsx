@@ -5,6 +5,24 @@ import { useState } from "react";
 import type { ChangeEvent } from "react";
 import { resizeImage } from "@/lib/images/resize";
 import type { Database } from "@/lib/supabase/database.types";
+import {
+  bareInputClass,
+  cardClass,
+  chipClass,
+  errorClass,
+  h1Class,
+  h2Class,
+  hintClass,
+  inputClass,
+  labelClass,
+  mutedClass,
+  optionClass,
+  outlineButton,
+  primaryButton,
+  statusChipClass,
+  stepperClass,
+  textareaClass,
+} from "@/components/admin/ui";
 import { createDraftDesign, saveDesignDetails } from "./actions";
 
 type Category = Database["public"]["Enums"]["category"];
@@ -216,27 +234,35 @@ export function NewDesignClient({ variantPresets }: { variantPresets: Partial<Re
   }
 
   if (screen === "photos") {
+    const uploading = drafts.some((d) => d.embedStatus === "uploading");
     return (
-      <div className="p-4" data-testid="new-design">
-        <h1 className="text-lg font-semibold">New design — Photos</h1>
-        <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">Ivory backdrop, top-down, item centered with room around it, no hands.</p>
+      <div className="mx-auto max-w-2xl" data-testid="new-design">
+        <h1 className={h1Class}>New design</h1>
+        <p className={`${mutedClass} mt-1`}>
+          Step 1 of 2 · Photos. Ivory backdrop, top-down, item centered with room around it, no hands.
+        </p>
 
-        <input type="file" accept="image/*" multiple onChange={handleFiles} className="mt-4" />
-        {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+        <label className="mt-6 flex min-h-44 cursor-pointer flex-col items-center justify-center gap-2 rounded-3xl border-2 border-dashed border-accent/40 bg-surface px-6 py-8 text-center transition-colors hover:bg-mist/50 focus-within:border-accent focus-within:ring-2 focus-within:ring-accent/40">
+          <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="text-accent" aria-hidden="true">
+            <path d="M4 8h3l1.5-2h7L17 8h3v11H4z" />
+            <circle cx="12" cy="13" r="3.5" />
+          </svg>
+          <span className="text-lg font-semibold text-ink">Take or choose photos</span>
+          <span className={mutedClass}>One design per photo. Pick as many as you like.</span>
+          <input type="file" accept="image/*" multiple onChange={handleFiles} className="sr-only" />
+        </label>
+        {error && <p className={errorClass}>{error}</p>}
 
         <ul className="mt-4 flex flex-col gap-2">
           {drafts.map((d) => (
-            <li
-              key={d.id}
-              className="flex items-center gap-3 rounded border border-black/[.08] p-2 dark:border-white/[.145]"
-            >
+            <li key={d.id} className="flex items-center gap-3 rounded-3xl bg-surface p-2 pr-4 shadow-[0_1px_0_rgba(30,31,36,0.07)]">
               {/* eslint-disable-next-line @next/next/no-img-element -- local blob preview, not worth next/image config */}
-              <img src={d.previewUrl} alt="" className="h-12 w-12 rounded object-cover" />
-              <span className="flex-1 text-sm">{d.fileName}</span>
-              {d.embedStatus === "uploading" && <span className="text-xs text-zinc-500">Uploading…</span>}
-              {d.embedStatus === "done" && <span className="text-xs text-green-700">Ready</span>}
+              <img src={d.previewUrl} alt="" className="h-16 w-16 shrink-0 rounded-2xl bg-well object-cover" />
+              <span className="min-w-0 flex-1 truncate text-sm font-medium">{d.fileName}</span>
+              {d.embedStatus === "uploading" && <span className={statusChipClass("draft")}>Uploading…</span>}
+              {d.embedStatus === "done" && <span className={statusChipClass("awaiting_pickup")}>Ready</span>}
               {d.embedStatus === "error" && (
-                <button type="button" onClick={() => retry(d)} className="text-xs text-red-600 underline">
+                <button type="button" onClick={() => retry(d)} className="inline-flex min-h-11 items-center text-sm font-medium text-red-700 underline underline-offset-4">
                   Embedding failed — retry
                 </button>
               )}
@@ -246,9 +272,9 @@ export function NewDesignClient({ variantPresets }: { variantPresets: Partial<Re
 
         <button
           type="button"
-          disabled={drafts.length === 0 || drafts.some((d) => d.embedStatus === "uploading")}
+          disabled={drafts.length === 0 || uploading}
           onClick={() => setScreen("details")}
-          className="mt-4 rounded bg-black px-4 py-2 text-white disabled:opacity-40 dark:bg-white dark:text-black"
+          className={`${primaryButton} mt-6 h-12 w-full md:w-auto`}
         >
           Next
         </button>
@@ -261,68 +287,46 @@ export function NewDesignClient({ variantPresets }: { variantPresets: Partial<Re
   const presets = variantPresets[form.category] ?? [];
 
   return (
-    <div className="p-4" data-testid="new-design">
-      <h1 className="text-lg font-semibold">
-        New design — Details{drafts.length > 1 ? ` (${index + 1}/${drafts.length})` : ""}
-      </h1>
+    <div className="mx-auto max-w-2xl" data-testid="new-design">
+      <h1 className={h1Class}>New design</h1>
+      <p className={`${mutedClass} mt-1`}>
+        Step 2 of 2 · Details{drafts.length > 1 ? ` (${index + 1}/${drafts.length})` : ""}
+      </p>
 
-      <div className="mt-4">
-        <span className="block text-sm font-medium">Category</span>
-        <div className="mt-1 grid grid-cols-4 gap-2">
+      <section className={`${cardClass} mt-6`}>
+        <span className={h2Class}>Category</span>
+        <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
           {CATEGORIES.map((c) => (
-            <button
-              key={c}
-              type="button"
-              onClick={() => updateForm(draft.id, { category: c })}
-              className={`rounded border px-2 py-3 text-sm ${
-                form.category === c
-                  ? "border-black bg-black text-white dark:border-white dark:bg-white dark:text-black"
-                  : "border-black/[.15] dark:border-white/[.2]"
-              }`}
-            >
+            <button key={c} type="button" onClick={() => updateForm(draft.id, { category: c })} className={optionClass(form.category === c)}>
               {c}
             </button>
           ))}
         </div>
-      </div>
 
-      <div className="mt-4">
-        <span className="block text-sm font-medium">Metal</span>
-        <div className="mt-1 grid grid-cols-2 gap-2">
+        <span className={`${h2Class} mt-5 block`}>Metal</span>
+        <div className="mt-2 grid grid-cols-2 gap-2">
           {METALS.map((m) => (
             <button
               key={m.value}
               type="button"
               aria-pressed={form.metal === m.value}
               onClick={() => updateForm(draft.id, { metal: m.value })}
-              className={`rounded border px-2 py-3 text-sm ${
-                form.metal === m.value
-                  ? "border-black bg-black text-white dark:border-white dark:bg-white dark:text-black"
-                  : "border-black/[.15] dark:border-white/[.2]"
-              }`}
+              className={optionClass(form.metal === m.value)}
             >
               {m.label}
             </button>
           ))}
         </div>
-      </div>
+      </section>
 
-      <div className="mt-4">
-        <span className="block text-sm font-medium">Variants</span>
-        <div className="mt-1 flex flex-wrap gap-2">
+      <section className={`${cardClass} mt-4`}>
+        <span className={h2Class}>Variants</span>
+        <div className="mt-2 flex flex-wrap gap-2">
           {presets.map((label) => {
             const variant = form.variants.find((v) => v.label === label);
             return (
               <div key={label} className="flex items-center gap-1">
-                <button
-                  type="button"
-                  onClick={() => toggleVariant(draft.id, label)}
-                  className={`rounded-full border px-3 py-1 text-sm ${
-                    variant
-                      ? "border-black bg-black text-white dark:border-white dark:bg-white dark:text-black"
-                      : "border-black/[.15] dark:border-white/[.2]"
-                  }`}
-                >
+                <button type="button" onClick={() => toggleVariant(draft.id, label)} className={chipClass(!!variant)}>
                   {label}
                 </button>
                 {variant && (
@@ -331,16 +335,16 @@ export function NewDesignClient({ variantPresets }: { variantPresets: Partial<Re
                       type="button"
                       aria-label={`Decrease ${label}`}
                       onClick={() => setVariantQty(draft.id, label, variant.qty - 1)}
-                      className="rounded border border-black/[.15] px-2 dark:border-white/[.2]"
+                      className={stepperClass}
                     >
                       -
                     </button>
-                    <span>{variant.qty}</span>
+                    <span className="min-w-5 text-center font-semibold tabular-nums">{variant.qty}</span>
                     <button
                       type="button"
                       aria-label={`Increase ${label}`}
                       onClick={() => setVariantQty(draft.id, label, variant.qty + 1)}
-                      className="rounded border border-black/[.15] px-2 dark:border-white/[.2]"
+                      className={stepperClass}
                     >
                       +
                     </button>
@@ -350,123 +354,112 @@ export function NewDesignClient({ variantPresets }: { variantPresets: Partial<Re
             );
           })}
         </div>
-        <div className="mt-2 flex gap-2">
+        <div className="mt-3 flex gap-2">
           <input
             type="text"
             placeholder="Custom label"
+            aria-label="Custom label"
             value={form.customLabel}
             onChange={(e) => updateForm(draft.id, { customLabel: e.target.value })}
-            className="rounded border border-black/[.15] px-2 py-1 text-sm dark:border-white/[.2]"
+            className={`${bareInputClass} min-w-0 flex-1`}
           />
-          <button
-            type="button"
-            onClick={() => addCustomVariant(draft.id)}
-            className="rounded border border-black/[.15] px-2 py-1 text-sm dark:border-white/[.2]"
-          >
+          <button type="button" onClick={() => addCustomVariant(draft.id)} className={outlineButton}>
             + custom
           </button>
         </div>
-      </div>
+      </section>
 
-      <label className="mt-4 block text-sm font-medium">
-        Name (EN)
-        <input
-          type="text"
-          value={form.nameEn}
-          onChange={(e) => updateForm(draft.id, { nameEn: e.target.value })}
-          className="mt-1 block w-full rounded border border-black/[.15] px-3 py-2 dark:border-white/[.2]"
-        />
-      </label>
+      <section className={`${cardClass} mt-4`}>
+        <label className="block text-sm font-medium">
+          Name (EN)
+          <input
+            type="text"
+            value={form.nameEn}
+            onChange={(e) => updateForm(draft.id, { nameEn: e.target.value })}
+            className={inputClass}
+          />
+        </label>
 
-      <label className="mt-4 block text-sm font-medium">
-        Name (FR)
-        <span className="ml-1 text-xs text-zinc-500">Optional — falls back to English on the storefront</span>
-        <input
-          type="text"
-          value={form.nameFr}
-          onChange={(e) => updateForm(draft.id, { nameFr: e.target.value })}
-          className="mt-1 block w-full rounded border border-black/[.15] px-3 py-2 dark:border-white/[.2]"
-        />
-      </label>
+        <label className={labelClass}>
+          Name (FR)
+          <span className={hintClass}>Optional — falls back to English on the storefront</span>
+          <input
+            type="text"
+            value={form.nameFr}
+            onChange={(e) => updateForm(draft.id, { nameFr: e.target.value })}
+            className={inputClass}
+          />
+        </label>
 
-      <label className="mt-4 block text-sm font-medium">
-        Price (CAD)
-        <input
-          type="text"
-          inputMode="decimal"
-          value={form.priceInput}
-          onChange={(e) => updateForm(draft.id, { priceInput: e.target.value })}
-          className="mt-1 block w-full rounded border border-black/[.15] px-3 py-2 dark:border-white/[.2]"
-        />
-      </label>
+        <label className={labelClass}>
+          Price (CAD)
+          <input
+            type="text"
+            inputMode="decimal"
+            value={form.priceInput}
+            onChange={(e) => updateForm(draft.id, { priceInput: e.target.value })}
+            className={inputClass}
+          />
+        </label>
 
-      <label className="mt-4 block text-sm font-medium">
-        Description (EN)
-        <textarea
-          value={form.descriptionEn}
-          onChange={(e) => updateForm(draft.id, { descriptionEn: e.target.value })}
-          className="mt-1 block w-full rounded border border-black/[.15] px-3 py-2 dark:border-white/[.2]"
-        />
-      </label>
+        <label className={labelClass}>
+          Description (EN)
+          <textarea
+            value={form.descriptionEn}
+            onChange={(e) => updateForm(draft.id, { descriptionEn: e.target.value })}
+            className={textareaClass}
+          />
+        </label>
 
-      <label className="mt-4 block text-sm font-medium">
-        Description (FR)
-        <span className="ml-1 text-xs text-zinc-500">Optional — falls back to English on the storefront</span>
-        <textarea
-          value={form.descriptionFr}
-          onChange={(e) => updateForm(draft.id, { descriptionFr: e.target.value })}
-          className="mt-1 block w-full rounded border border-black/[.15] px-3 py-2 dark:border-white/[.2]"
-        />
-      </label>
+        <label className={labelClass}>
+          Description (FR)
+          <span className={hintClass}>Optional — falls back to English on the storefront</span>
+          <textarea
+            value={form.descriptionFr}
+            onChange={(e) => updateForm(draft.id, { descriptionFr: e.target.value })}
+            className={textareaClass}
+          />
+        </label>
 
-      <label className="mt-4 block text-sm font-medium">
-        Material (EN)
-        <input
-          type="text"
-          value={form.materialEn}
-          onChange={(e) => updateForm(draft.id, { materialEn: e.target.value })}
-          className="mt-1 block w-full rounded border border-black/[.15] px-3 py-2 dark:border-white/[.2]"
-        />
-      </label>
+        <label className={labelClass}>
+          Material (EN)
+          <input
+            type="text"
+            value={form.materialEn}
+            onChange={(e) => updateForm(draft.id, { materialEn: e.target.value })}
+            className={inputClass}
+          />
+        </label>
 
-      <label className="mt-4 block text-sm font-medium">
-        Material (FR)
-        <span className="ml-1 text-xs text-zinc-500">Optional — falls back to English on the storefront</span>
-        <input
-          type="text"
-          value={form.materialFr}
-          onChange={(e) => updateForm(draft.id, { materialFr: e.target.value })}
-          className="mt-1 block w-full rounded border border-black/[.15] px-3 py-2 dark:border-white/[.2]"
-        />
-      </label>
+        <label className={labelClass}>
+          Material (FR)
+          <span className={hintClass}>Optional — falls back to English on the storefront</span>
+          <input
+            type="text"
+            value={form.materialFr}
+            onChange={(e) => updateForm(draft.id, { materialFr: e.target.value })}
+            className={inputClass}
+          />
+        </label>
 
-      <label className="mt-4 block text-sm font-medium">
-        Dimensions
-        <input
-          type="text"
-          value={form.dimensions}
-          onChange={(e) => updateForm(draft.id, { dimensions: e.target.value })}
-          className="mt-1 block w-full rounded border border-black/[.15] px-3 py-2 dark:border-white/[.2]"
-        />
-      </label>
+        <label className={labelClass}>
+          Dimensions
+          <input
+            type="text"
+            value={form.dimensions}
+            onChange={(e) => updateForm(draft.id, { dimensions: e.target.value })}
+            className={inputClass}
+          />
+        </label>
+      </section>
 
-      {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+      {error && <p className={errorClass}>{error}</p>}
 
-      <div className="mt-6 flex gap-2">
-        <button
-          type="button"
-          disabled={saving}
-          onClick={() => submit(false)}
-          className="rounded border border-black/[.15] px-4 py-2 text-sm dark:border-white/[.2]"
-        >
+      <div className="mt-6 grid grid-cols-2 gap-2 md:flex">
+        <button type="button" disabled={saving} onClick={() => submit(false)} className={`${outlineButton} h-12`}>
           Save as draft
         </button>
-        <button
-          type="button"
-          disabled={saving}
-          onClick={() => submit(true)}
-          className="rounded bg-black px-4 py-2 text-sm text-white dark:bg-white dark:text-black"
-        >
+        <button type="button" disabled={saving} onClick={() => submit(true)} className={`${primaryButton} h-12`}>
           Publish
         </button>
       </div>

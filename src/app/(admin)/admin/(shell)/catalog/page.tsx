@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/lib/supabase/database.types";
+import { bareInputClass, h1Class, primaryButton, softButton } from "@/components/admin/ui";
 import { CatalogList } from "./catalog-list";
 
 type Category = Database["public"]["Enums"]["category"];
@@ -59,28 +60,21 @@ export default async function AdminCatalogPage({
   const rows = designs.map((d) => ({ ...d, totalQty: totalQtyByDesign.get(d.id) ?? 0 }));
 
   return (
-    <div className="p-4">
-      <div className="flex items-center justify-between gap-3">
-        <h1 className="text-lg font-semibold">Catalog</h1>
-        <div className="flex items-center gap-3 text-sm">
-          <a href="/api/admin/catalog.csv" className="underline">
+    <div>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className={h1Class}>Catalog</h1>
+        <div className="flex items-center gap-2">
+          <a href="/api/admin/catalog.csv" className={softButton}>
             Export CSV
           </a>
-          <Link
-            href="/admin/catalog/new"
-            className="rounded bg-black px-3 py-1.5 text-white dark:bg-white dark:text-black"
-          >
+          <Link href="/admin/catalog/new" className={`${primaryButton}`}>
             New design
           </Link>
         </div>
       </div>
 
-      <form method="get" className="mt-4 flex flex-wrap gap-2">
-        <select
-          name="category"
-          defaultValue={category ?? ""}
-          className="rounded border border-black/[.15] px-2 py-1.5 text-sm dark:border-white/[.2]"
-        >
+      <form method="get" className="mt-5 grid grid-cols-2 gap-2 md:flex md:flex-wrap">
+        <select name="category" defaultValue={category ?? ""} aria-label="Category" className={`${bareInputClass} md:w-auto`}>
           <option value="">All categories</option>
           {CATEGORIES.map((c) => (
             <option key={c} value={c}>
@@ -88,11 +82,7 @@ export default async function AdminCatalogPage({
             </option>
           ))}
         </select>
-        <select
-          name="status"
-          defaultValue={status ?? ""}
-          className="rounded border border-black/[.15] px-2 py-1.5 text-sm dark:border-white/[.2]"
-        >
+        <select name="status" defaultValue={status ?? ""} aria-label="Status" className={`${bareInputClass} md:w-auto`}>
           <option value="">All statuses</option>
           {STATUSES.map((s) => (
             <option key={s} value={s}>
@@ -104,10 +94,11 @@ export default async function AdminCatalogPage({
           type="search"
           name="q"
           placeholder="Search name"
+          aria-label="Search name"
           defaultValue={q ?? ""}
-          className="rounded border border-black/[.15] px-2 py-1.5 text-sm dark:border-white/[.2]"
+          className={`${bareInputClass} col-span-2 md:w-64`}
         />
-        <button type="submit" className="rounded border border-black/[.15] px-3 py-1.5 text-sm dark:border-white/[.2]">
+        <button type="submit" className={`${primaryButton} col-span-2 h-12 md:h-11`}>
           Filter
         </button>
       </form>
