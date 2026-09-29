@@ -541,6 +541,21 @@ is filterable and cannot drift like free text.
 `supabase db push`, the owner must reclassify sterling-silver designs in /admin (edit page,
 metal select).
 
+### AI product photos via Codex (local batch)                           (2026-09-29, owner)
+**Decision:** Product photos get two AI images, generated locally in a manual batch the owner runs
+a few times a week (`/ai-photos`, plan `10-ai-photos.md`): a cleaned-up **studio shot** that
+becomes the **main** image, and a **model shot**. Gallery order: studio, model, then the 1–2 real
+photos (kept, never deleted). Generation uses **Codex CLI's built-in `image_gen`** through the
+owner's ChatGPT Plus login — no API key, no new paid vendor. Claude drives the batch, checks every
+image against the real photos (retry ≤2, else skip) and the owner approves in-session before
+upload. **No "AI" label** on the storefront (owner's choice). No queue: every design with real
+photos and `ai_photos_at is null` is pending.
+**Why:** The owner wants on-model and studio imagery without paying per image; Claude cannot
+generate images, Codex (ChatGPT Plus) can, and a 2026-09-29 test kept a necklace's details intact
+in a model-shot edit. Review + approval guard against the model altering the piece.
+**Affects:** New phase 10; migration 0015; Storage usage (~3 extra images per design, within the
+free 1 GB); Plus usage limits (image turns cost 3–5× a text turn).
+
 ## Open — ask the owner before the referenced step
 
 1. ~~Exact domain to buy~~ **Resolved:** `awendajewelry.com` already owned (see Locked). Still

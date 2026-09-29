@@ -102,6 +102,7 @@ Each phase is one branch and one PR. Do them in order; later phases assume earli
 | 7 | `07-analytics.md` | Cloudflare Web Analytics, first-party funnel events, `/admin/analytics`, notify-me + newsletter leads | 5, 6 |
 | — | `deferred/07-booth-logging.md`, `deferred/08-reconciliation.md` | **Deferred** until stock is merged (SKU tags) | — |
 | 9 | `09-launch.md` | Domain, DNS, Stripe live mode, policies pages, backups, monitoring, README case study | 1–7 |
+| 10 | `10-ai-photos.md` | Manual `/ai-photos` batch: Codex (ChatGPT Plus) studio + model shots, Claude QA, owner approval, upload | 3, 4 |
 
 ---
 
