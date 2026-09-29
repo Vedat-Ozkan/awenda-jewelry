@@ -527,6 +527,17 @@ snapshots were deleted; `src/lib/supabase/local.test.ts` moved to
 of mocked internals were slowing changes down.
 **Affects:** CLAUDE.md, 00-overview.md (Testing row, rule 8), every phase file's verify steps.
 
+### Structured metal on designs: stainless steel / sterling silver      (2026-09-29, owner)
+**Decision:** The business sells mostly **stainless steel** and some **sterling silver**. `designs`
+gets `metal` (enum `metal`: `stainless_steel` | `sterling_silver`, not null, default
+`stainless_steel`; migration `0014_design_metal.sql`), exposed in `public_designs`. The storefront
+filters (`?metal=`) and labels by it; admin sets it on the New Design details screen and the edit
+page, and shows it in the catalog list and CSV export. Free-text `material_en` / `material_fr`
+stay for detail ("316L, 18k PVD"). No durability claims are attached to either metal.
+**Why:** Silver Mist nav and filters say "stainless steel / sterling silver"; a structured column
+is filterable and cannot drift like free text.
+**Affects:** Phase 4 admin forms and list, Phase 5 catalog query and listing pages, seed data.
+
 ## Open — ask the owner before the referenced step
 
 1. ~~Exact domain to buy~~ **Resolved:** `awendajewelry.com` already owned (see Locked). Still

@@ -128,7 +128,7 @@ test.describe("admin catalog", () => {
     const csv = Buffer.concat(chunks).toString("utf8");
 
     const lines = csv.trim().split("\n");
-    expect(lines[0]).toBe("slug,name_en,category,status,price_cents,variant_label,qty_on_hand");
+    expect(lines[0]).toBe("slug,name_en,category,metal,status,price_cents,variant_label,qty_on_hand");
     expect(csv).toContain("silver-necklace-16");
   });
 });

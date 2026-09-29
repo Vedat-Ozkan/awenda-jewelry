@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import type { Sort } from "@/lib/catalog";
 
@@ -18,6 +19,7 @@ export function SortControl({ sort }: { sort: Sort }) {
   const t = useTranslations("catalog.sort");
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   return (
     <label className="mb-6 flex items-center gap-2 text-sm text-ink/70">
@@ -26,7 +28,12 @@ export function SortControl({ sort }: { sort: Sort }) {
         value={sort}
         onChange={(e) => {
           const value = e.target.value as Sort;
-          router.replace(value === "newest" ? pathname : `${pathname}?sort=${value}`);
+          // Keep the other params (e.g. `?metal=`) when switching sort.
+          const params = new URLSearchParams(searchParams);
+          if (value === "newest") params.delete("sort");
+          else params.set("sort", value);
+          const query = params.toString();
+          router.replace(query ? `${pathname}?${query}` : pathname);
         }}
         className="rounded border border-ink/20 bg-ivory px-2 py-1 text-ink"
       >

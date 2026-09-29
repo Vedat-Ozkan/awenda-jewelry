@@ -26,6 +26,8 @@ const STATUSES: [DesignStatus, ...DesignStatus[]] = ["draft", "active", "archive
 const updateDesignSchema = z.object({
   slug: z.string().min(1),
   category: z.enum(CATEGORIES),
+  // Optional so callers that predate the metal field leave it unchanged.
+  metal: z.enum(["stainless_steel", "sterling_silver"]).optional(),
   nameEn: z.string().min(1),
   nameFr: z.string().optional(),
   descriptionEn: z.string().optional(),
@@ -79,6 +81,7 @@ export async function updateDesign(id: string, data: UpdateDesignInput): Promise
       slug: newSlug,
       previous_slugs: previousSlugs,
       category: parsed.category,
+      ...(parsed.metal ? { metal: parsed.metal } : {}),
       name_en: parsed.nameEn,
       name_fr: parsed.nameFr?.trim() || null,
       description_en: parsed.descriptionEn?.trim() || null,

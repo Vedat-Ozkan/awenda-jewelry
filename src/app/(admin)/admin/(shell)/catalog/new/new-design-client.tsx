@@ -8,6 +8,12 @@ import type { Database } from "@/lib/supabase/database.types";
 import { createDraftDesign, saveDesignDetails } from "./actions";
 
 type Category = Database["public"]["Enums"]["category"];
+type Metal = Database["public"]["Enums"]["metal"];
+
+const METALS: { value: Metal; label: string }[] = [
+  { value: "stainless_steel", label: "Stainless steel" },
+  { value: "sterling_silver", label: "Sterling silver" },
+];
 
 const CATEGORIES: Category[] = [
   "ring",
@@ -42,6 +48,7 @@ interface VariantEntry {
 
 interface DetailsForm {
   category: Category;
+  metal: Metal;
   nameEn: string;
   nameFr: string;
   priceInput: string;
@@ -57,6 +64,7 @@ interface DetailsForm {
 function emptyForm(): DetailsForm {
   return {
     category: "ring",
+    metal: "stainless_steel",
     nameEn: "",
     nameFr: "",
     priceInput: "",
@@ -182,6 +190,7 @@ export function NewDesignClient({ variantPresets }: { variantPresets: Partial<Re
         draft.id,
         {
           category: form.category,
+          metal: form.metal,
           nameEn: form.nameEn.trim() || "Untitled",
           nameFr: form.nameFr,
           priceCents,
@@ -272,6 +281,27 @@ export function NewDesignClient({ variantPresets }: { variantPresets: Partial<Re
               }`}
             >
               {c}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="mt-4">
+        <span className="block text-sm font-medium">Metal</span>
+        <div className="mt-1 grid grid-cols-2 gap-2">
+          {METALS.map((m) => (
+            <button
+              key={m.value}
+              type="button"
+              aria-pressed={form.metal === m.value}
+              onClick={() => updateForm(draft.id, { metal: m.value })}
+              className={`rounded border px-2 py-3 text-sm ${
+                form.metal === m.value
+                  ? "border-black bg-black text-white dark:border-white dark:bg-white dark:text-black"
+                  : "border-black/[.15] dark:border-white/[.2]"
+              }`}
+            >
+              {m.label}
             </button>
           ))}
         </div>

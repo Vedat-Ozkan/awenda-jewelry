@@ -35,7 +35,7 @@ export default async function AdminCatalogPage({
 
   let query = supabase
     .from("designs")
-    .select("id, slug, category, name_en, name_fr, price_cents, status, thumb_image_path")
+    .select("id, slug, category, metal, name_en, name_fr, price_cents, status, thumb_image_path")
     .order("created_at", { ascending: false });
   if (category) query = query.eq("category", category as Category);
   if (status) query = query.eq("status", status as Status);

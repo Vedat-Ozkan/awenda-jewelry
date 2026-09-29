@@ -1,7 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
-import { CATEGORIES, type Sort } from "@/lib/catalog";
+import { CATEGORIES, type Metal, type Sort } from "@/lib/catalog";
 import type { Database } from "@/lib/supabase/database.types";
 
 type Category = Database["public"]["Enums"]["category"];
@@ -11,9 +11,22 @@ type Category = Database["public"]["Enums"]["category"];
 // (chunk A, step 3) — these live on the catalog pages themselves and carry
 // the current `sort` selection across tab switches, which the header links
 // don't need to do.
-export async function CategoryTabs({ locale, active, sort }: { locale: Locale; active?: Category; sort: Sort }) {
+export async function CategoryTabs({
+  locale,
+  active,
+  sort,
+  metal,
+}: {
+  locale: Locale;
+  active?: Category;
+  sort: Sort;
+  metal?: Metal;
+}) {
   const t = await getTranslations("nav");
-  const query = sort === "newest" ? "" : `?sort=${sort}`;
+  const params = new URLSearchParams();
+  if (metal) params.set("metal", metal);
+  if (sort !== "newest") params.set("sort", sort);
+  const query = params.size > 0 ? `?${params.toString()}` : "";
 
   const pill = (isActive: boolean) =>
     isActive

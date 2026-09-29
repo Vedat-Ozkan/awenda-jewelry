@@ -39,6 +39,7 @@ interface Row {
   id: string;
   slug: string;
   category: string;
+  metal: "stainless_steel" | "sterling_silver";
   name_en: string;
   name_fr: string | null;
   price_cents: number;
@@ -46,6 +47,8 @@ interface Row {
   thumb_image_path: string | null;
   totalQty: number;
 }
+
+const METAL_LABELS = { stainless_steel: "Stainless steel", sterling_silver: "Sterling silver" } as const;
 
 // Seed rows point at public/seed/<slug>.svg (served as a static file, not a
 // Storage object — see DECISIONS.md "Phase 2 plan drift"); everything else
@@ -116,7 +119,7 @@ export function CatalogList({ designs }: { designs: Row[] }) {
                 <Link href={`/admin/catalog/${d.id}`} className="flex-1">
                   <p className="text-sm font-medium">{d.name_en}</p>
                   <p className="text-xs text-zinc-600 dark:text-zinc-400">
-                    {d.category} · {currency.format(d.price_cents / 100)} · qty {d.totalQty} · {d.status}
+                    {d.category} · {METAL_LABELS[d.metal]} · {currency.format(d.price_cents / 100)} · qty {d.totalQty} · {d.status}
                   </p>
                 </Link>
               </li>
@@ -133,6 +136,7 @@ export function CatalogList({ designs }: { designs: Row[] }) {
               <th className="p-2">Photo</th>
               <th className="p-2">Name</th>
               <th className="p-2">Category</th>
+              <th className="p-2">Metal</th>
               <th className="p-2">Price</th>
               <th className="p-2">Qty</th>
               <th className="p-2">Status</th>
@@ -161,6 +165,7 @@ export function CatalogList({ designs }: { designs: Row[] }) {
                     </Link>
                   </td>
                   <td className="p-2">{d.category}</td>
+                  <td className="p-2">{METAL_LABELS[d.metal]}</td>
                   <td className="p-2">{currency.format(d.price_cents / 100)}</td>
                   <td className="p-2">{d.totalQty}</td>
                   <td className="p-2">{d.status}</td>

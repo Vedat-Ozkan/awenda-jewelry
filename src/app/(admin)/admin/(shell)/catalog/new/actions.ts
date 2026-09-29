@@ -45,6 +45,7 @@ const CATEGORIES: [Category, ...Category[]] = [
 
 const detailsSchema = z.object({
   category: z.enum(CATEGORIES),
+  metal: z.enum(["stainless_steel", "sterling_silver"]).default("stainless_steel"),
   nameEn: z.string().min(1),
   nameFr: z.string().optional(),
   priceCents: z.number().int().positive(),
@@ -95,6 +96,7 @@ export async function saveDesignDetails(
     .update({
       slug,
       category: parsed.category,
+      metal: parsed.metal,
       name_en: parsed.nameEn,
       name_fr: parsed.nameFr?.trim() || null,
       price_cents: parsed.priceCents,

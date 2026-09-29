@@ -19,6 +19,12 @@ import {
 
 type Category = Database["public"]["Enums"]["category"];
 type DesignStatus = Database["public"]["Enums"]["design_status"];
+type Metal = Database["public"]["Enums"]["metal"];
+
+const METALS: { value: Metal; label: string }[] = [
+  { value: "stainless_steel", label: "Stainless steel" },
+  { value: "sterling_silver", label: "Sterling silver" },
+];
 
 const CATEGORIES: Category[] = [
   "necklace",
@@ -39,6 +45,7 @@ interface Design {
   slug: string;
   previous_slugs: string[];
   category: Category;
+  metal: Metal;
   name_en: string;
   name_fr: string | null;
   description_en: string | null;
@@ -101,6 +108,7 @@ export function EditDesignClient({
   const [form, setForm] = useState({
     slug: design.slug,
     category: design.category,
+    metal: design.metal,
     nameEn: design.name_en,
     nameFr: design.name_fr ?? "",
     descriptionEn: design.description_en ?? "",
@@ -127,6 +135,7 @@ export function EditDesignClient({
       await updateDesign(design.id, {
         slug: form.slug,
         category: form.category,
+        metal: form.metal,
         nameEn: form.nameEn,
         nameFr: form.nameFr,
         descriptionEn: form.descriptionEn,
@@ -411,6 +420,21 @@ export function EditDesignClient({
           {CATEGORIES.map((c) => (
             <option key={c} value={c}>
               {c}
+            </option>
+          ))}
+        </select>
+      </label>
+
+      <label className={labelClass}>
+        Metal
+        <select
+          value={form.metal}
+          onChange={(e) => setForm((f) => ({ ...f, metal: e.target.value as Metal }))}
+          className={inputClass}
+        >
+          {METALS.map((m) => (
+            <option key={m.value} value={m.value}>
+              {m.label}
             </option>
           ))}
         </select>
