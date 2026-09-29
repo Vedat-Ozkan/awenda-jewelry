@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import exifr from "exifr";
 
 // Exercises src/lib/images/resize.ts (browser-only, no Node imports) via

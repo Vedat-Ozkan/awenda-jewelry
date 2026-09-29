@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 // Phase 5 step 1 (i18n scaffold) + step 3 (design system). Folds in what
 // e2e/home.spec.ts used to check (now deleted — the "/" -> "/en" redirect

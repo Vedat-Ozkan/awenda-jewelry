@@ -227,6 +227,7 @@ export type Database = {
           main_image_path: string | null
           material_en: string | null
           material_fr: string | null
+          metal: Database["public"]["Enums"]["metal"]
           name_en: string
           name_fr: string | null
           previous_slugs: string[]
@@ -248,6 +249,7 @@ export type Database = {
           main_image_path?: string | null
           material_en?: string | null
           material_fr?: string | null
+          metal?: Database["public"]["Enums"]["metal"]
           name_en: string
           name_fr?: string | null
           previous_slugs?: string[]
@@ -269,6 +271,7 @@ export type Database = {
           main_image_path?: string | null
           material_en?: string | null
           material_fr?: string | null
+          metal?: Database["public"]["Enums"]["metal"]
           name_en?: string
           name_fr?: string | null
           previous_slugs?: string[]
@@ -658,6 +661,7 @@ export type Database = {
           main_image_path: string | null
           material_en: string | null
           material_fr: string | null
+          metal: Database["public"]["Enums"]["metal"] | null
           name_en: string | null
           name_fr: string | null
           price_cents: number | null
@@ -818,6 +822,7 @@ export type Database = {
         | "pendant"
       design_status: "draft" | "active" | "archived"
       fulfillment_type: "ship" | "pickup"
+      metal: "stainless_steel" | "sterling_silver"
       movement_reason:
         | "catalog"
         | "restock"
@@ -983,6 +988,7 @@ export const Constants = {
       ],
       design_status: ["draft", "active", "archived"],
       fulfillment_type: ["ship", "pickup"],
+      metal: ["stainless_steel", "sterling_silver"],
       movement_reason: [
         "catalog",
         "restock",

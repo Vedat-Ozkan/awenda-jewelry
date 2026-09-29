@@ -17,6 +17,10 @@ export default defineConfig({
       EMBEDDINGS_PROVIDER: "fake",
       NEXT_PUBLIC_SITE_URL: "http://localhost:3000",
       CRON_SECRET: "test-secret",
+      // Dummy Cloudflare Web Analytics token so storefront-beacon.spec.ts
+      // can check the beacon renders (Cloudflare requests are stubbed for every
+      // spec in e2e/fixtures.ts).
+      NEXT_PUBLIC_CF_BEACON_TOKEN: "e2e-beacon-token",
       // Local Supabase (`pnpm supabase start`) always serves on this port
       // with this anon key — it's the fixed CLI demo JWT (see
       // supabase/config.toml `[api] port = 54321`; the key itself comes

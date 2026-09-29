@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import type { Sort } from "@/lib/catalog";
 
@@ -18,17 +19,23 @@ export function SortControl({ sort }: { sort: Sort }) {
   const t = useTranslations("catalog.sort");
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   return (
-    <label className="mb-6 flex items-center gap-2 text-sm text-ink/70">
+    <label className="flex items-center gap-2 text-sm text-muted">
       {t("label")}
       <select
         value={sort}
         onChange={(e) => {
           const value = e.target.value as Sort;
-          router.replace(value === "newest" ? pathname : `${pathname}?sort=${value}`);
+          // Keep the other params (e.g. `?metal=`) when switching sort.
+          const params = new URLSearchParams(searchParams);
+          if (value === "newest") params.delete("sort");
+          else params.set("sort", value);
+          const query = params.toString();
+          router.replace(query ? `${pathname}?${query}` : pathname);
         }}
-        className="rounded border border-ink/20 bg-ivory px-2 py-1 text-ink"
+        className="h-11 appearance-none rounded-full bg-white bg-[url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%2212%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%231e1f24%22 stroke-width=%222.5%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><path d=%22M6 9l6 6 6-6%22/></svg>')] bg-[position:right_16px_center] bg-no-repeat pl-4 pr-10 text-sm font-medium text-ink"
       >
         {OPTIONS.map((o) => (
           <option key={o.value} value={o.value}>

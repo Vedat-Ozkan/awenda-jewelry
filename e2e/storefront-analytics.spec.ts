@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import { createServiceClient } from "../tests/helpers/local-supabase";
 
 // Phase 7 step 3. Browse home -> product -> add to cart; the funnel events
@@ -10,7 +10,7 @@ test("home -> product -> add to cart records page_view, design_view and add_to_c
   const since = new Date().toISOString();
 
   await page.goto("/en");
-  await page.locator('a[href="/en/p/hoop-earring-os"]').click();
+  await page.locator('#catalog a[href="/en/p/hoop-earring-os"]').click();
   await expect(page).toHaveURL(/\/en\/p\/hoop-earring-os/);
   await page.getByTestId("add-to-cart").click();
   await expect(page.getByTestId("cart-count")).toHaveText("1");

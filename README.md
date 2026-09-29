@@ -73,10 +73,10 @@ No cookies and no consent banner; the numbers come from two places (DECISIONS.md
 and lead capture").
 
 - **Traffic** (visitors, referrers, countries, top pages, Web Vitals): Cloudflare Web
-  Analytics. **Not wired up yet** (Phase 7 step 1 is pending the owner's site token): the plan
-  is a beacon in the storefront layout only (never `/admin`), rendered only when
-  `NEXT_PUBLIC_CF_BEACON_TOKEN` is set. The owner creates the site in the Cloudflare dashboard
-  (Analytics & Logs -> Web Analytics, manual JS snippet) and provides the token.
+  Analytics. The beacon is rendered by the storefront layout only (never `/admin`), and only
+  when `NEXT_PUBLIC_CF_BEACON_TOKEN` is set (it is in `wrangler.jsonc`; `pnpm run deploy`
+  exports it for the build). The Web Analytics site is `awenda-jewelry.awenda.workers.dev`;
+  add `awendajewelry.com` to it at the Phase 9 cutover.
 - **Funnel** (sessions, design views, add-to-carts, checkouts started): first-party events sent
   by `src/lib/analytics/client.ts` to `POST /api/track` and stored in `analytics_events`. The
   only identifier is a random per-tab session id in `sessionStorage`; no IP, cookie or email is
@@ -142,6 +142,9 @@ curl -H "x-cron-secret: $CRON_SECRET" localhost:3000/api/cron/pickup-reminders
 - In CI, `.github/workflows/deploy.yml` runs `pnpm run deploy` after `ci.yml` succeeds on
   `main`, using the repo secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` (the owner
   adds these in GitHub repo settings; agents cannot).
+- After `supabase db push` applies migration 0014, every existing hosted design is
+  `stainless_steel`. The owner must reclassify sterling-silver designs in /admin (edit page,
+  metal select).
 
 ## Status
 

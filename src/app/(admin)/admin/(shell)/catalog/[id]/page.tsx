@@ -14,7 +14,7 @@ export default async function EditDesignPage({ params }: { params: Promise<{ id:
   const { data: design, error: designError } = await supabase
     .from("designs")
     .select(
-      "id, slug, previous_slugs, category, name_en, name_fr, description_en, description_fr, material_en, material_fr, dimensions, price_cents, status, main_image_path, thumb_image_path",
+      "id, slug, previous_slugs, category, metal, name_en, name_fr, description_en, description_fr, material_en, material_fr, dimensions, price_cents, status, main_image_path, thumb_image_path",
     )
     .eq("id", id)
     .maybeSingle();

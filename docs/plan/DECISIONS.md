@@ -495,6 +495,52 @@ project), not a Worker secret.
 **Affects:** Phase 1 (cron), Phase 9 (domain cutover lifts noindex; purge alpha rows from
 `analytics_events` before the analytics week).
 
+### Visual redesign: "Silver Mist" for storefront and admin             (2026-09-29, owner)
+**Decision:** Replace the ivory/gold look with the "R3·3 Silver Mist" direction chosen on the
+design canvas (https://claude.ai/artifact/V19pjei1NY4XRH1k26AWaa, boards `R3-3-Desktop` and
+`R3-3-Mobile`), for **both** the storefront and `/admin`.
+- Palette: page `#F7F8F8`, surface white `#FFFFFF`, mist `#E9E8EE` (tiles, chips, announcement
+  bar), photo well `#EEEFF1`, ink `#1E1F24`, muted text `#585A63`, accent `#5C5A6E` (Bag button,
+  eyebrow labels, icons). No gold.
+- Type: Newsreader (400/500) for whole headings and the wordmark only; Figtree (400/500/600) for
+  everything else. **Never switch typeface mid-sentence**, no italics for emphasis.
+- Shape: floating white pill navbar (desktop: logo · links · EN/FR · search · Bag pill; phone:
+  logo · menu · Bag pill); pill buttons (≥44 px targets); 20–28 px card radii; white product
+  cards with a steel/silver material label.
+- Layout: hero photo with a floating white card; category tiles (rounded squares); best sellers;
+  4 trust tiles; white rounded newsletter footer. Phone-first: every screen must work at 390 px,
+  laptop 1280 and large desktop (content capped and centred).
+- Materials: mostly stainless steel, some sterling silver — nav and filters say so. No durability
+  claims (waterproof, tarnish-free) until the owner confirms them.
+**Why:** The previous visual pass read as bland; the owner iterated three rounds on the canvas and
+chose R3·3. The admin PWA is used daily on a phone and should share the look.
+**Affects:** Phase 5 storefront components, admin shell and pages; supersedes the ivory/gold
+palette and Cormorant/Geist fonts from the "Storefront: warm, gold-accented visual pass" work.
+
+### Testing: e2e only, no unit tests                                    (2026-09-29, owner)
+**Decision:** No unit tests. Behaviour is covered by Playwright e2e (write the spec when missing);
+Vitest stays only for integration tests against local Supabase in `tests/integration/` (RLS,
+views, DB functions, webhook/inventory rules). The 20 unit-test files under `src/` and the email
+snapshots were deleted; `src/lib/supabase/local.test.ts` moved to
+`tests/integration/local-supabase.test.ts`. Phase files that ask for unit tests mean e2e now.
+**Why:** Owner's call — e2e tests exercise what customers and the admin actually do; unit tests
+of mocked internals were slowing changes down.
+**Affects:** CLAUDE.md, 00-overview.md (Testing row, rule 8), every phase file's verify steps.
+
+### Structured metal on designs: stainless steel / sterling silver      (2026-09-29, owner)
+**Decision:** The business sells mostly **stainless steel** and some **sterling silver**. `designs`
+gets `metal` (enum `metal`: `stainless_steel` | `sterling_silver`, not null, default
+`stainless_steel`; migration `0014_design_metal.sql`), exposed in `public_designs`. The storefront
+filters (`?metal=`) and labels by it; admin sets it on the New Design details screen and the edit
+page, and shows it in the catalog list and CSV export. Free-text `material_en` / `material_fr`
+stay for detail ("316L, 18k PVD"). No durability claims are attached to either metal.
+**Why:** Silver Mist nav and filters say "stainless steel / sterling silver"; a structured column
+is filterable and cannot drift like free text.
+**Affects:** Phase 4 admin forms and list, Phase 5 catalog query and listing pages, seed data.
+**Deploy note:** Migration 0014 defaults every existing hosted row to `stainless_steel`. After
+`supabase db push`, the owner must reclassify sterling-silver designs in /admin (edit page,
+metal select).
+
 ## Open — ask the owner before the referenced step
 
 1. ~~Exact domain to buy~~ **Resolved:** `awendajewelry.com` already owned (see Locked). Still
@@ -521,9 +567,10 @@ project), not a Worker secret.
 15. ~~When to create the hosted Supabase project~~ **Resolved 2026-09-16** — created at Phase 3 (see Locked).
 16. ~~Matching margin on the gray tray~~ **Superseded 2026-09-16** — photo matching dropped; booth integration deferred.
 17. **Physical tag / label choice** — deferred with Phases 7–8 (only needed when stock is merged).
-18. **Cloudflare Web Analytics site token** — owner creates the site in the Cloudflare dashboard
-    (Analytics & Logs → Web Analytics → Add site, hostname `awendajewelry.com` + the workers.dev
-    URL) and provides the token for `NEXT_PUBLIC_CF_BEACON_TOKEN`. Needed at Phase 7 step 1.
+18. ~~Cloudflare Web Analytics site token~~ **Resolved 2026-09-29** — token provided and set as
+    `NEXT_PUBLIC_CF_BEACON_TOKEN` in `wrangler.jsonc` (and read by `scripts/deploy.sh`); the site
+    is `awenda-jewelry.awenda.workers.dev`. Add `awendajewelry.com` to the same Web Analytics
+    site at Phase 9 (domain cutover).
 19. ~~Product spec fields~~ **Resolved 2026-09-16** — material EN/FR + dimensions, optional (see Locked).
 20. **Restock on refund after delivery** — `refundOrder` always restores stock via a `refund`
     movement, including for `shipped` / `picked_up` orders (right for a return, wrong for

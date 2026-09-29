@@ -1,16 +1,22 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Figtree, Newsreader } from "next/font/google";
 import "../globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+// Same fonts as the storefront root layout (DECISIONS.md "Visual redesign:
+// Silver Mist"); the admin restyle (a later chunk) uses them.
+const newsreader = Newsreader({
+  variable: "--font-newsreader",
   subsets: ["latin"],
+  axes: ["opsz"],
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const figtree = Figtree({
+  variable: "--font-figtree",
   subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -18,7 +24,11 @@ export const metadata: Metadata = {
   description: "Awenda Jewelry",
   manifest: "/manifest.webmanifest",
   icons: { apple: "/apple-touch-icon.png" },
-  appleWebApp: { capable: true, title: "Awenda Admin", statusBarStyle: "default" },
+  appleWebApp: {
+    capable: true,
+    title: "Awenda Admin",
+    statusBarStyle: "default",
+  },
 };
 
 // Root layout for /admin and /auth (Phase 5 step 1 route-group split — see
@@ -30,10 +40,7 @@ export const metadata: Metadata = {
 // and /admin/login, /admin/dev/* don't need one.
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
+    <html lang="en" className={`${newsreader.variable} ${figtree.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );

@@ -3,11 +3,10 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { FormEvent } from "react";
+import { inputClass, primaryButton } from "@/components/admin/ui";
 import { requestMagicLink, signInWithPassword } from "./actions";
 
-const inputClass = "rounded border border-black/[.15] px-3 py-2 dark:border-white/[.2]";
-const buttonClass =
-  "rounded bg-black px-4 py-2 text-white disabled:opacity-50 dark:bg-white dark:text-black";
+const labelClass = "block text-sm font-medium text-ink";
 
 export function LoginForm() {
   const router = useRouter();
@@ -46,8 +45,8 @@ export function LoginForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex w-full max-w-sm flex-col gap-4">
-      <label className="flex flex-col gap-1 text-sm">
+    <form onSubmit={handleSubmit} className="flex w-full flex-col gap-4">
+      <label className={labelClass}>
         Email
         <input
           type="email"
@@ -58,7 +57,7 @@ export function LoginForm() {
           className={inputClass}
         />
       </label>
-      <label className="flex flex-col gap-1 text-sm">
+      <label className={labelClass}>
         Password
         <input
           type="password"
@@ -69,19 +68,23 @@ export function LoginForm() {
           className={inputClass}
         />
       </label>
-      <button type="submit" disabled={pending} className={buttonClass}>
+      <button type="submit" disabled={pending} className={`${primaryButton} mt-1 h-12 w-full`}>
         {pending ? "Signing in…" : "Sign in"}
       </button>
-      {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
+      {error && (
+        <p role="alert" className="text-sm font-medium text-red-700">
+          {error}
+        </p>
+      )}
       <button
         type="button"
         onClick={handleMagicLink}
         disabled={pending || email.trim().length === 0}
-        className="text-sm text-zinc-600 underline disabled:opacity-50 dark:text-zinc-400"
+        className="inline-flex h-11 items-center justify-center rounded-full text-sm font-medium text-accent underline underline-offset-4 disabled:opacity-50"
       >
         Email me a sign-in link instead
       </button>
-      {message && <p className="text-sm text-zinc-600 dark:text-zinc-400">{message}</p>}
+      {message && <p className="text-center text-sm text-muted">{message}</p>}
     </form>
   );
 }

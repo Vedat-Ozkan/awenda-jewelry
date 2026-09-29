@@ -8,36 +8,75 @@
     "earring": "Earrings",
     "bangle": "Bangles",
     "chain": "Chains",
-    "pendant": "Pendants"
+    "pendant": "Pendants",
+    "shopAll": "Shop all",
+    "newIn": "New in"
   },
   "header": {
     "wordmark": "Awenda Jewelry",
     "tagline": "Handmade jewelry, sold online and at the weekly market",
-    "cart": "Cart",
-    "language": "Language"
+    "cart": "Bag",
+    "language": "Language",
+    "menu": "Menu",
+    "closeMenu": "Close menu",
+    "primaryNav": "Main"
   },
   "home": {
     "cta": "Shop all",
     "nextPickup": "Next pickup: {date} at {market}",
     "marketClosed": "We're skipping the market until {date}.",
     "trust": {
-      "shipping": "Free shipping over {threshold}",
-      "shippingFlat": "Flat-rate shipping within Canada",
-      "pickupOnly": "Secure checkout with Stripe",
-      "pickup": "Free pickup at {market}",
-      "handmade": "Handmade in small batches"
-    }
+      "pickup": {
+        "title": "Free market pickup",
+        "body": "Pay online, collect on market day."
+      },
+      "shipping": {
+        "title": "Flat-rate shipping",
+        "body": "One rate anywhere in Canada.",
+        "bodyFree": "One rate anywhere in Canada, free over {threshold}."
+      },
+      "handmade": {
+        "title": "Made by hand",
+        "body": "In small batches."
+      },
+      "material": {
+        "title": "Steel & silver",
+        "body": "Mostly stainless steel, some sterling silver."
+      },
+      "checkout": {
+        "title": "Secure checkout",
+        "body": "Card payments by Stripe, in CAD."
+      }
+    },
+    "hero": {
+      "eyebrow": "New this week",
+      "title": "Quiet shine for every day.",
+      "body": "Stainless steel and sterling silver, in the sizes you actually wear.",
+      "ctaNew": "Shop new in",
+      "ctaPickup": "How pickup works"
+    },
+    "categories": "Shop by category",
+    "newIn": "New in",
+    "allDesigns": "All designs"
   },
   "footer": {
     "policies": "Policies",
     "pickup": "Pickup",
     "about": "About",
-    "rights": "© {year} Awenda Jewelry"
+    "rights": "© {year} Awenda Jewelry",
+    "tagline": "Hear about new pieces first",
+    "links": "Store information"
   },
   "badges": {
     "soldOut": "Sold out"
   },
   "catalog": {
+    "metal": {
+      "label": "Metal",
+      "all": "All metals",
+      "stainless_steel": "Stainless steel",
+      "sterling_silver": "Sterling silver"
+    },
     "sort": {
       "label": "Sort",
       "newest": "Newest",
@@ -50,11 +89,14 @@
     "variant": "Size",
     "soldOut": "Sold out",
     "quantity": "Quantity",
-    "addToCart": "Add to cart",
-    "added": "Added to cart",
+    "quantityDecrease": "Decrease quantity",
+    "quantityIncrease": "Increase quantity",
+    "addToCart": "Add to bag",
+    "added": "Added to bag",
     "soldOutTitle": "Sold out",
     "soldOutBody": "This design is sold out for now.",
     "similar": "Similar styles",
+    "metal": "Metal",
     "material": "Material",
     "dimensions": "Dimensions",
     "trust": {
@@ -65,10 +107,10 @@
     }
   },
   "cart": {
-    "title": "Your cart",
-    "empty": "Your cart is empty.",
+    "title": "Your bag",
+    "empty": "Your bag is empty.",
     "backToShop": "Back to the shop",
-    "loading": "Loading your cart…",
+    "loading": "Loading your bag…",
     "quantity": "Quantity",
     "remove": "Remove",
     "unavailableItem": "Item",
@@ -89,7 +131,7 @@
       "progress": "Add {amount} more for free shipping",
       "unlocked": "Free shipping unlocked"
     },
-    "loadError": "We couldn't load your cart right now. Please try again in a moment."
+    "loadError": "We couldn't load your bag right now. Please try again in a moment."
   },
   "checkout": {
     "pickupMessage": "Your order will be ready for pickup at the market on {date}.",
@@ -187,5 +229,9 @@
       "errorTitle": "Something went wrong",
       "errorBody": "We couldn't process your request. Please try the link again later."
     }
+  },
+  "announcement": {
+    "pickup": "Free pickup at the market",
+    "shipping": "Flat-rate shipping in Canada"
   }
 }

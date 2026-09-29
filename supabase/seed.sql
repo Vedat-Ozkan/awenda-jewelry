@@ -51,6 +51,10 @@ insert into designs (id, slug, category, name_en, name_fr, price_cents, status, 
 ('a0000000-0000-4000-8000-000000000015', 'heart-pendant-os', 'pendant', 'Heart Pendant', 'Pendentif Cœur', 2900, 'active', 'seed/heart-pendant-os.svg', 'seed/heart-pendant-os.svg'),
 ('a0000000-0000-4000-8000-000000000016', 'star-pendant-os', 'pendant', 'Star Pendant', null, 3400, 'active', 'seed/star-pendant-os.svg', 'seed/star-pendant-os.svg');
 
+-- Most of the catalog is stainless steel (the column default); the "Silver *"
+-- designs are sterling silver so the storefront metal filter is testable.
+update designs set metal = 'sterling_silver' where slug like 'silver-%';
+
 -- Variants, seeded directly (not via adjust_inventory). Several are at 0;
 -- stud-earring-os's only variant is 0, making it fully sold out.
 insert into variants (id, design_id, label, qty_on_hand, sort_order) values

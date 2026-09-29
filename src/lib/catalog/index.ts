@@ -4,6 +4,9 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import type { Database } from "@/lib/supabase/database.types";
 import { createAnonClient } from "./client";
 import { localize } from "./localize";
+import { METALS, type Metal } from "./metals";
+
+export { METALS, type Metal };
 
 type Category = Database["public"]["Enums"]["category"];
 // public_designs/public_settings are views (0004_rls.sql), so generated
@@ -32,6 +35,10 @@ export function isCategory(value: string): value is Category {
   return (CATEGORIES as string[]).includes(value);
 }
 
+export function isMetal(value: unknown): value is Metal {
+  return typeof value === "string" && (METALS as string[]).includes(value);
+}
+
 export type Sort = "newest" | "price_asc" | "price_desc";
 
 export interface Variant {
@@ -44,9 +51,13 @@ export interface DesignCard {
   id: string;
   slug: string;
   category: Category;
+  metal: Metal;
   name: string;
   price_cents: number;
   thumb_image_path: string | null;
+  // Localized material label (material_fr falls back to material_en);
+  // free text, null when the owner left it blank.
+  material: string | null;
   total_qty: number;
   status: Status;
   created_at: string;
@@ -110,19 +121,27 @@ function toDesignCard(row: PublicDesignRow, locale: Locale): DesignCard {
     id: row.id!,
     slug: row.slug!,
     category: row.category!,
+    metal: row.metal!,
     name: localize(row, locale).name,
     price_cents: row.price_cents!,
     thumb_image_path: row.thumb_image_path,
+    material: localize(row, locale).material,
     total_qty: row.total_qty ?? 0,
     status: row.status as Status,
     created_at: row.created_at!,
   };
 }
 
-async function fetchDesigns(category: Category | undefined, sort: Sort, locale: Locale): Promise<DesignCard[]> {
+async function fetchDesigns(
+  category: Category | undefined,
+  sort: Sort,
+  locale: Locale,
+  metal: Metal | undefined,
+): Promise<DesignCard[]> {
   const supabase = createAnonClient();
   let query = supabase.from("public_designs").select("*");
   if (category) query = query.eq("category", category);
+  if (metal) query = query.eq("metal", metal);
 
   if (sort === "price_asc") query = query.order("price_cents", { ascending: true });
   else if (sort === "price_desc") query = query.order("price_cents", { ascending: false });
@@ -142,10 +161,10 @@ const getCachedDesigns = unstable_cache(fetchDesigns, ["catalog", "designs"], {
 // Storefront catalog list (Phase 5 step 2). `public_designs` already
 // excludes drafts (0004_rls.sql).
 export function getDesigns(
-  { category, sort = "newest" }: { category?: Category; sort?: Sort } = {},
+  { category, metal, sort = "newest" }: { category?: Category; metal?: Metal; sort?: Sort } = {},
   locale: Locale = "en",
 ): Promise<DesignCard[]> {
-  return getCachedDesigns(category, sort, locale);
+  return getCachedDesigns(category, sort, locale, metal);
 }
 
 async function fetchDesignBySlug(slug: string, locale: Locale): Promise<DesignDetail | null> {

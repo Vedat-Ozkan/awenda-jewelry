@@ -12,11 +12,11 @@ export async function CatalogGrid({ designs, locale }: { designs: DesignCard[]; 
   const sorted = sortForCatalog(designs);
 
   if (sorted.length === 0) {
-    return <p className="text-sm text-ink/70">{tCatalog("empty")}</p>;
+    return <p className="rounded-[20px] bg-white px-6 py-10 text-center text-muted">{tCatalog("empty")}</p>;
   }
 
   return (
-    <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 md:grid-cols-4">
+    <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-4 md:grid-cols-4">
       {sorted.map((design) => (
         <ProductCard key={design.id} design={design} locale={locale} soldOutLabel={tBadges("soldOut")} />
       ))}
