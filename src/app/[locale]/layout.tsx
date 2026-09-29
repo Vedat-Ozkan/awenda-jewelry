@@ -3,6 +3,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { Figtree, Newsreader } from "next/font/google";
+import Script from "next/script";
 import type { ReactNode } from "react";
 import { AnnouncementBar } from "@/components/store/AnnouncementBar";
 import { Footer } from "@/components/store/Footer";
@@ -96,6 +97,10 @@ export default async function LocaleLayout({
   setRequestLocale(locale);
 
   const messages = await getMessages();
+  // Cloudflare Web Analytics (Phase 7 step 1): cookieless traffic beacon,
+  // storefront only (the admin has its own root layout) and only when the
+  // site token is configured.
+  const beaconToken = process.env.NEXT_PUBLIC_CF_BEACON_TOKEN;
 
   return (
     <html lang={locale} className={`${newsreader.variable} ${figtree.variable} h-full antialiased`}>
@@ -109,6 +114,13 @@ export default async function LocaleLayout({
             <Footer locale={locale} />
           </CartProvider>
         </NextIntlClientProvider>
+        {beaconToken && (
+          <Script
+            src="https://static.cloudflareinsights.com/beacon.min.js"
+            data-cf-beacon={JSON.stringify({ token: beaconToken })}
+            strategy="afterInteractive"
+          />
+        )}
       </body>
     </html>
   );

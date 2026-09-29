@@ -71,6 +71,12 @@
     "soldOut": "Épuisé"
   },
   "catalog": {
+    "metal": {
+      "label": "Métal",
+      "all": "Tous les métaux",
+      "stainless_steel": "Acier inoxydable",
+      "sterling_silver": "Argent sterling"
+    },
     "sort": {
       "label": "Trier",
       "newest": "Plus récent",
@@ -83,11 +89,14 @@
     "variant": "Taille",
     "soldOut": "Épuisé",
     "quantity": "Quantité",
+    "quantityDecrease": "Diminuer la quantité",
+    "quantityIncrease": "Augmenter la quantité",
     "addToCart": "Ajouter au panier",
     "added": "Ajouté au panier",
     "soldOutTitle": "Épuisé",
     "soldOutBody": "Cette pièce est épuisée pour le moment.",
     "similar": "Styles similaires",
+    "metal": "Métal",
     "material": "Matériau",
     "dimensions": "Dimensions",
     "trust": {

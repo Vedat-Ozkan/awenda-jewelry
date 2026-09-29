@@ -48,16 +48,15 @@ export function LeadForm({
 
   if (status === "done") {
     return (
-      <p role="status" data-testid={`${kind}-success`} className="text-sm text-gold">
+      <p role="status" data-testid={`${kind}-success`} className="text-sm font-medium text-accent">
         {t(`${kind}.success`)}
       </p>
     );
   }
 
-  // The footer newsletter (Silver Mist) is a single mist pill: the input and
-  // the button share it, and the label is visually hidden because the footer
-  // heading above the form says what it is. The notify form keeps the stacked
-  // layout.
+  // Silver Mist: both forms are a single mist pill holding the input and the
+  // button. The newsletter's label is visually hidden because the footer
+  // heading above the form says what it is; the notify form shows its label.
   const pill = kind === "newsletter";
 
   return (
@@ -65,7 +64,7 @@ export function LeadForm({
       <label htmlFor={inputId} className={pill ? "sr-only" : "text-sm font-medium text-ink"}>
         {t(`${kind}.title`)}
       </label>
-      <div className={pill ? "flex gap-1.5 rounded-full bg-mist p-[5px] lg:p-1.5" : "flex flex-wrap gap-2"}>
+      <div className="flex gap-1.5 rounded-full bg-mist p-[5px] lg:p-1.5">
         <input
           id={inputId}
           type="email"
@@ -77,11 +76,9 @@ export function LeadForm({
           placeholder={t("emailPlaceholder")}
           aria-label={t("emailLabel")}
           data-testid={`${kind}-email`}
-          className={
-            pill
-              ? "h-11 min-w-0 flex-1 rounded-full bg-transparent px-3.5 text-[15px] placeholder:text-muted lg:h-12 lg:w-[260px] lg:flex-none lg:px-[18px]"
-              : "min-w-0 flex-1 rounded border border-ink/20 bg-white px-3 py-2 text-sm"
-          }
+          className={`h-11 min-w-0 flex-1 rounded-full bg-transparent px-3.5 text-[15px] placeholder:text-muted lg:h-12 lg:px-[18px] ${
+            pill ? "lg:w-[260px] lg:flex-none" : ""
+          }`}
         />
         <input
           type="text"
@@ -97,13 +94,13 @@ export function LeadForm({
           type="submit"
           disabled={status === "sending"}
           data-testid={`${kind}-submit`}
-          className={pill ? "shrink-0 lg:h-12" : undefined}
+          className="shrink-0 lg:h-12"
         >
           {status === "sending" ? t(`${kind}.sending`) : t(`${kind}.submit`)}
         </Button>
       </div>
       {status === "error" && (
-        <p role="alert" className="text-sm text-red-700">
+        <p role="alert" className="px-1 text-sm text-red-700">
           {t("error")}
         </p>
       )}

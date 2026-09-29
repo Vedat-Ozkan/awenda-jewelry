@@ -71,6 +71,12 @@
     "soldOut": "Sold out"
   },
   "catalog": {
+    "metal": {
+      "label": "Metal",
+      "all": "All metals",
+      "stainless_steel": "Stainless steel",
+      "sterling_silver": "Sterling silver"
+    },
     "sort": {
       "label": "Sort",
       "newest": "Newest",
@@ -83,11 +89,14 @@
     "variant": "Size",
     "soldOut": "Sold out",
     "quantity": "Quantity",
-    "addToCart": "Add to cart",
-    "added": "Added to cart",
+    "quantityDecrease": "Decrease quantity",
+    "quantityIncrease": "Increase quantity",
+    "addToCart": "Add to bag",
+    "added": "Added to bag",
     "soldOutTitle": "Sold out",
     "soldOutBody": "This design is sold out for now.",
     "similar": "Similar styles",
+    "metal": "Metal",
     "material": "Material",
     "dimensions": "Dimensions",
     "trust": {
@@ -98,10 +107,10 @@
     }
   },
   "cart": {
-    "title": "Your cart",
-    "empty": "Your cart is empty.",
+    "title": "Your bag",
+    "empty": "Your bag is empty.",
     "backToShop": "Back to the shop",
-    "loading": "Loading your cart…",
+    "loading": "Loading your bag…",
     "quantity": "Quantity",
     "remove": "Remove",
     "unavailableItem": "Item",
@@ -122,7 +131,7 @@
       "progress": "Add {amount} more for free shipping",
       "unlocked": "Free shipping unlocked"
     },
-    "loadError": "We couldn't load your cart right now. Please try again in a moment."
+    "loadError": "We couldn't load your bag right now. Please try again in a moment."
   },
   "checkout": {
     "pickupMessage": "Your order will be ready for pickup at the market on {date}.",

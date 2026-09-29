@@ -12,7 +12,7 @@ export async function CatalogGrid({ designs, locale }: { designs: DesignCard[]; 
   const sorted = sortForCatalog(designs);
 
   if (sorted.length === 0) {
-    return <p className="text-sm text-muted">{tCatalog("empty")}</p>;
+    return <p className="rounded-[20px] bg-white px-6 py-10 text-center text-muted">{tCatalog("empty")}</p>;
   }
 
   return (

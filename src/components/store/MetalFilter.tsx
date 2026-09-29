@@ -6,17 +6,20 @@ import { METALS, type Metal, type Sort } from "@/lib/catalog";
 // Metal filter pills for the catalog pages (`?metal=stainless_steel|
 // sterling_silver`, DECISIONS.md "Structured metal on designs"). Links are
 // plain server-rendered <Link>s so the filter works without JS and keeps the
-// current `sort`. `basePath` is the locale-less page path ("/" or "/c/ring").
+// current `sort`. `basePath` is the locale-less page path ("/" or "/c/ring");
+// `hash` (e.g. "catalog") keeps the home page scrolled to its listing.
 export async function MetalFilter({
   locale,
   basePath,
   active,
   sort,
+  hash,
 }: {
   locale: Locale;
   basePath: string;
   active?: Metal;
   sort: Sort;
+  hash?: string;
 }) {
   const t = await getTranslations("catalog.metal");
 
@@ -25,16 +28,16 @@ export async function MetalFilter({
     if (metal) params.set("metal", metal);
     if (sort !== "newest") params.set("sort", sort);
     const query = params.toString();
-    return query ? `${basePath}?${query}` : basePath;
+    return `${query ? `${basePath}?${query}` : basePath}${hash ? `#${hash}` : ""}`;
   };
 
   const pill = (isActive: boolean) =>
     `inline-flex min-h-11 shrink-0 items-center rounded-full px-4 text-sm font-medium transition-colors ${
-      isActive ? "bg-accent text-white" : "bg-mist text-ink hover:bg-well"
+      isActive ? "bg-accent text-white" : "bg-mist text-ink hover:bg-ink/10"
     }`;
 
   return (
-    <nav aria-label={t("label")} className="mb-4 flex flex-wrap gap-2" data-testid="metal-filter">
+    <nav aria-label={t("label")} className="flex flex-wrap gap-2" data-testid="metal-filter">
       <Link href={href()} locale={locale} aria-current={!active ? "page" : undefined} className={pill(!active)}>
         {t("all")}
       </Link>

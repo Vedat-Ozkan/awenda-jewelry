@@ -564,9 +564,10 @@ is filterable and cannot drift like free text.
 15. ~~When to create the hosted Supabase project~~ **Resolved 2026-09-16** — created at Phase 3 (see Locked).
 16. ~~Matching margin on the gray tray~~ **Superseded 2026-09-16** — photo matching dropped; booth integration deferred.
 17. **Physical tag / label choice** — deferred with Phases 7–8 (only needed when stock is merged).
-18. **Cloudflare Web Analytics site token** — owner creates the site in the Cloudflare dashboard
-    (Analytics & Logs → Web Analytics → Add site, hostname `awendajewelry.com` + the workers.dev
-    URL) and provides the token for `NEXT_PUBLIC_CF_BEACON_TOKEN`. Needed at Phase 7 step 1.
+18. ~~Cloudflare Web Analytics site token~~ **Resolved 2026-09-29** — token provided and set as
+    `NEXT_PUBLIC_CF_BEACON_TOKEN` in `wrangler.jsonc` (and read by `scripts/deploy.sh`); the site
+    is `awenda-jewelry.awenda.workers.dev`. Add `awendajewelry.com` to the same Web Analytics
+    site at Phase 9 (domain cutover).
 19. ~~Product spec fields~~ **Resolved 2026-09-16** — material EN/FR + dimensions, optional (see Locked).
 20. **Restock on refund after delivery** — `refundOrder` always restores stock via a `refund`
     movement, including for `shipped` / `picked_up` orders (right for a return, wrong for

@@ -40,7 +40,7 @@ export default async function CategoryPage({
   const query = await searchParams;
   const sort = parseSort(query.sort);
   const metal = parseMetal(query.metal);
-  const tErrors = await getTranslations("errors");
+  const [tErrors, tNav] = await Promise.all([getTranslations("errors"), getTranslations("nav")]);
 
   let designs: DesignCard[] = [];
   let settings: Settings | null = null;
@@ -52,16 +52,26 @@ export default async function CategoryPage({
   }
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-8 md:px-8">
+    <main className="mx-auto w-full max-w-[1360px] px-3 pb-10 pt-6 md:px-10 lg:pb-20 lg:pt-10">
+      <h1 className="mb-4 px-1 font-serif text-[40px] leading-[1.05] font-normal tracking-[-0.02em] lg:mb-6 lg:px-0 lg:text-[64px]">
+        {tNav(category)}
+      </h1>
+
       {dbError ? (
-        <p className="mb-6 text-sm text-ink/70">{tErrors("dbUnreachable")}</p>
+        <p className="mb-5 rounded-2xl bg-mist px-4 py-3 text-sm">{tErrors("dbUnreachable")}</p>
       ) : (
-        settings && <PickupStrip locale={locale} settings={settings} />
+        settings && (
+          <div className="mb-5 px-1 lg:mb-7 lg:px-0">
+            <PickupStrip locale={locale} settings={settings} />
+          </div>
+        )
       )}
 
       <CategoryTabs locale={locale} active={category} sort={sort} metal={metal} />
-      <MetalFilter locale={locale} basePath={`/c/${category}`} active={metal} sort={sort} />
-      <SortControl sort={sort} />
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 lg:mb-7">
+        <MetalFilter locale={locale} basePath={`/c/${category}`} active={metal} sort={sort} />
+        <SortControl sort={sort} />
+      </div>
       <CatalogGrid designs={designs} locale={locale} />
     </main>
   );

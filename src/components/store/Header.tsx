@@ -2,42 +2,47 @@ import { getTranslations } from "next-intl/server";
 import { CartBadge } from "@/components/store/CartBadge";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
-import { CATEGORIES } from "@/lib/catalog";
+import { CATEGORIES, METALS } from "@/lib/catalog";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { MobileMenu } from "./MobileMenu";
 
-// Desktop nav shows a short list of categories (the rest are reachable from
-// the home page tiles and the phone menu). Earring/bracelet drop off below xl
-// so the pill never crowds at 1024px.
-const DESKTOP_CATEGORIES = ["necklace", "ring", "earring", "bracelet"] as const;
-const WIDE_ONLY = new Set<string>(["earring", "bracelet"]);
+// Desktop nav priority (so the pill never crowds at 1024px): shop all, new in
+// and the two metals always show; necklaces/rings join from xl (1280);
+// earrings/bracelets from 2xl. Every category is still reachable from the
+// home page tiles and the phone menu.
+const DESKTOP_CATEGORIES = [
+  { category: "necklace", show: "hidden xl:flex" },
+  { category: "ring", show: "hidden xl:flex" },
+  { category: "earring", show: "hidden 2xl:flex" },
+  { category: "bracelet", show: "hidden 2xl:flex" },
+] as const;
 
 // Storefront header (Phase 5 step 3, cart wiring in step 6; Silver Mist
 // redesign): a floating white pill — wordmark, links, language switch, Bag
 // pill on desktop; wordmark, menu button, Bag pill below lg. Header itself
 // stays an async server component for its translations; CartBadge and
-// MobileMenu are the client bits. There is no material filter in the data
-// model (material is free text), so no "Stainless steel"/"Sterling silver"
-// nav links.
+// MobileMenu are the client bits. "Stainless steel" / "Sterling silver" link
+// to the home listing filtered by metal (DECISIONS.md "Structured metal").
 export async function Header({ locale }: { locale: Locale }) {
-  const [t, tHeader] = await Promise.all([getTranslations("nav"), getTranslations("header")]);
+  const [t, tHeader, tMetal] = await Promise.all([
+    getTranslations("nav"),
+    getTranslations("header"),
+    getTranslations("catalog.metal"),
+  ]);
 
+  const always = "flex";
+  const primary = [
+    { href: "/#catalog", label: t("shopAll"), show: always },
+    { href: "/?sort=newest#catalog", label: t("newIn"), show: always },
+    ...METALS.map((metal) => ({ href: `/?metal=${metal}#catalog`, label: tMetal(metal), show: always })),
+  ];
   const links = [
-    { href: "/#catalog", label: t("shopAll") },
-    { href: "/?sort=newest#catalog", label: t("newIn") },
-    ...CATEGORIES.map((category) => ({
-      href: `/c/${category}`,
-      label: t(category),
-    })),
+    ...primary.map(({ href, label }) => ({ href, label })),
+    ...CATEGORIES.map((category) => ({ href: `/c/${category}`, label: t(category) })),
   ];
   const desktopLinks = [
-    links[0],
-    links[1],
-    ...DESKTOP_CATEGORIES.map((category) => ({
-      href: `/c/${category}`,
-      label: t(category),
-      wide: WIDE_ONLY.has(category),
-    })),
+    ...primary,
+    ...DESKTOP_CATEGORIES.map(({ category, show }) => ({ href: `/c/${category}`, label: t(category), show })),
   ];
 
   return (
@@ -55,7 +60,7 @@ export async function Header({ locale }: { locale: Locale }) {
               key={link.href}
               href={link.href}
               locale={locale}
-              className={`h-11 items-center hover:text-accent ${"wide" in link && link.wide ? "hidden xl:flex" : "flex"}`}
+              className={`h-11 items-center whitespace-nowrap hover:text-accent ${link.show}`}
             >
               {link.label}
             </Link>

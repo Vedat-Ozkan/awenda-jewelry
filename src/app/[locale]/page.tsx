@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { buttonClasses } from "@/components/store/Button";
 import { CatalogGrid } from "@/components/store/CatalogGrid";
 import { CategoryTabs } from "@/components/store/CategoryTabs";
+import { MetalFilter } from "@/components/store/MetalFilter";
 import { PickupStrip } from "@/components/store/PickupStrip";
 import { ProductCard } from "@/components/store/ProductCard";
 import { SortControl } from "@/components/store/SortControl";
@@ -14,7 +15,9 @@ import {
   getDesignBySlug,
   getDesigns,
   getSettings,
+  isMetal,
   type DesignCard,
+  type Metal,
   type Settings,
   type Sort,
 } from "@/lib/catalog";
@@ -23,6 +26,10 @@ import { resolvePhotoUrl } from "@/lib/supabase/storage";
 
 function parseSort(value: string | string[] | undefined): Sort {
   return value === "price_asc" || value === "price_desc" ? value : "newest";
+}
+
+function parseMetal(value: string | string[] | undefined): Metal | undefined {
+  return isMetal(value) ? value : undefined;
 }
 
 // Category tile backgrounds from the Silver Mist canvas, shown until a
@@ -47,10 +54,12 @@ export default async function HomePage({
   searchParams,
 }: {
   params: Promise<{ locale: Locale }>;
-  searchParams: Promise<{ sort?: string | string[] }>;
+  searchParams: Promise<{ sort?: string | string[]; metal?: string | string[] }>;
 }) {
   const { locale } = await params;
-  const sort = parseSort((await searchParams).sort);
+  const query = await searchParams;
+  const sort = parseSort(query.sort);
+  const metal = parseMetal(query.metal);
 
   const [tNav, tHome, tErrors, tBadges] = await Promise.all([
     getTranslations("nav"),
@@ -66,7 +75,7 @@ export default async function HomePage({
   try {
     [newest, designs, settings] = await Promise.all([
       getDesigns({ sort: "newest" }, locale),
-      sort === "newest" ? getDesigns({ sort: "newest" }, locale) : getDesigns({ sort }, locale),
+      getDesigns({ sort, metal }, locale),
       getSettings(),
     ]);
   } catch {
@@ -127,10 +136,10 @@ export default async function HomePage({
       </section>
 
       {dbError ? (
-        <p className="mt-8 text-sm text-muted">{tErrors("dbUnreachable")}</p>
+        <p className="mt-8 rounded-2xl bg-mist px-4 py-3 text-sm">{tErrors("dbUnreachable")}</p>
       ) : (
         settings && (
-          <div className="px-1 pt-4 lg:pt-6 [&>p]:mb-0">
+          <div className="px-1 pt-4 lg:pt-6">
             <PickupStrip locale={locale} settings={settings} />
           </div>
         )
@@ -194,8 +203,11 @@ export default async function HomePage({
         <h2 className="mb-4 px-1 font-serif text-[32px] font-normal tracking-[-0.01em] lg:mb-7 lg:px-0 lg:text-[52px]">
           {tHome("allDesigns")}
         </h2>
-        <CategoryTabs locale={locale} sort={sort} />
-        <SortControl sort={sort} />
+        <CategoryTabs locale={locale} sort={sort} metal={metal} />
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 lg:mb-7">
+          <MetalFilter locale={locale} basePath="/" active={metal} sort={sort} hash="catalog" />
+          <SortControl sort={sort} />
+        </div>
         <CatalogGrid designs={designs} locale={locale} />
       </section>
 

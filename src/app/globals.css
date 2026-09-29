@@ -28,13 +28,6 @@
   --color-muted: var(--muted);
   --color-accent: var(--accent);
   --color-accent-deep: var(--accent-deep);
-  /* Legacy ivory/gold names, aliased to the new palette so pages that
-     haven't been restyled yet (product, cart, admin chart) keep working.
-     Later redesign chunks remove their usages; then delete these. */
-  --color-ivory: var(--page);
-  --color-gold: var(--accent);
-  --color-gold-muted: var(--mist);
-  --color-gold-deep: var(--accent-deep);
   --font-sans: var(--font-figtree, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif);
   --font-serif: var(--font-newsreader, ui-serif, Georgia, serif);
 }
