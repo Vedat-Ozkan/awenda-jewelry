@@ -113,6 +113,24 @@ curl -H "x-cron-secret: $CRON_SECRET" localhost:3000/api/keepalive
 curl -H "x-cron-secret: $CRON_SECRET" localhost:3000/api/cron/pickup-reminders
 ```
 
+## AI product photos (owner setup)
+
+A manual batch, run a few times a week in Claude Code with `/ai-photos` (add `prod` for the
+live shop, e.g. `/ai-photos prod 5`). For every design with real photos and no AI photos yet,
+Codex CLI generates a studio shot (becomes the main image) and a model shot; Claude checks them
+against the real photos, you approve in the session, and the approved ones are uploaded. The
+original photos are kept in the gallery after the two new ones. Plan: `docs/plan/10-ai-photos.md`.
+
+One-time setup:
+
+1. Codex CLI installed and logged in with ChatGPT: `codex login status`.
+2. For production runs, create `.env.production.local` (git-ignored) with
+   `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `VOYAGE_API_KEY` and
+   `EMBEDDINGS_PROVIDER=voyage`. Local runs use `.env.local`.
+
+Scripts (`ai-photos/batches/` is git-ignored): `pnpm ai-photos:fetch [--limit N]` and
+`pnpm ai-photos:upload [<batch dir>]`, each with a `:prod` variant.
+
 ## Commands
 
 | Command | What it does |
@@ -125,6 +143,7 @@ curl -H "x-cron-secret: $CRON_SECRET" localhost:3000/api/cron/pickup-reminders
 | `pnpm db:reset` | Re-apply migrations to the local Supabase database |
 | `pnpm db:types` | Regenerate `src/lib/supabase/database.types.ts` from the local database |
 | `pnpm seed:admins` | Upsert `ADMIN_EMAILS` into `admin_emails` |
+| `pnpm ai-photos:fetch` / `:upload` | AI product photo batch (see above; `:prod` variants target production) |
 
 `pnpm db:reset` re-seeds from `supabase/seed.sql`, which does not include `admin_emails` — run
 `pnpm seed:admins` again after every reset.

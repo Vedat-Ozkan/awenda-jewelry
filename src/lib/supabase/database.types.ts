@@ -216,6 +216,7 @@ export type Database = {
       }
       designs: {
         Row: {
+          ai_photos_at: string | null
           category: Database["public"]["Enums"]["category"]
           created_at: string
           description_en: string | null
@@ -238,6 +239,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          ai_photos_at?: string | null
           category: Database["public"]["Enums"]["category"]
           created_at?: string
           description_en?: string | null
@@ -260,6 +262,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          ai_photos_at?: string | null
           category?: Database["public"]["Enums"]["category"]
           created_at?: string
           description_en?: string | null
