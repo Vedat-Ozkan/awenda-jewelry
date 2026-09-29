@@ -1,0 +1,31 @@
+name: Keepalive
+
+# Backup for the Cloudflare cron (wrangler.jsonc): keeps the Supabase Free
+# project from idle-pausing after 7 days, and fails loudly — GitHub emails the
+# repo owner when a scheduled run fails. Needs repo secret CRON_SECRET (same
+# value as the Worker secret). GitHub disables scheduled workflows after 60
+# days without repo activity; it emails a warning first.
+on:
+  schedule:
+    - cron: "0 18 * * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Ping Supabase directly
+        run: |
+          url=$(grep -o '"NEXT_PUBLIC_SUPABASE_URL": "[^"]*' wrangler.jsonc | cut -d'"' -f4)
+          key=$(grep -o '"NEXT_PUBLIC_SUPABASE_ANON_KEY": "[^"]*' wrangler.jsonc | cut -d'"' -f4)
+          curl -fsS --max-time 30 "$url/rest/v1/public_settings?select=*&limit=1" \
+            -H "apikey: $key" -H "Authorization: Bearer $key"
+
+      - name: Ping the site keepalive route
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          site=$(grep -o '"NEXT_PUBLIC_SITE_URL": "[^"]*' wrangler.jsonc | cut -d'"' -f4)
+          curl -fsS --max-time 30 "$site/api/keepalive" -H "x-cron-secret: $CRON_SECRET"

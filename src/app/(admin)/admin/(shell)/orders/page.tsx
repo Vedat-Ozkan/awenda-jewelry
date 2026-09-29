@@ -1,3 +1,4 @@
+import { h1Class } from "@/components/admin/ui";
 import { createClient } from "@/lib/supabase/server";
 import { OrdersList } from "./orders-list";
 
@@ -31,8 +32,8 @@ export default async function AdminOrdersPage() {
   const rows = orders.map((o) => ({ ...o, itemCount: itemCountByOrder.get(o.id) ?? 0 }));
 
   return (
-    <div className="p-4">
-      <h1 className="text-lg font-semibold">Orders</h1>
+    <div>
+      <h1 className={h1Class}>Orders</h1>
       <OrdersList orders={rows} />
     </div>
   );

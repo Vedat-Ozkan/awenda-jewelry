@@ -40,10 +40,14 @@ export default async function OrderConfirmationPage({
   const { locale, sessionId } = await params;
   const [t, result] = await Promise.all([getTranslations("order"), loadOrder(sessionId)]);
 
+  const shell = "mx-auto w-full max-w-3xl px-3 pb-10 pt-6 md:px-10 lg:pb-20 lg:pt-10";
+
   if (!result) {
     return (
-      <main className="mx-auto max-w-2xl px-4 py-16 text-center md:px-8">
-        <ConfirmingPoll />
+      <main className={shell}>
+        <div className="rounded-3xl bg-white px-6 py-14 text-center">
+          <ConfirmingPoll />
+        </div>
       </main>
     );
   }
@@ -55,60 +59,66 @@ export default async function OrderConfirmationPage({
     : null;
 
   return (
-    <main className="mx-auto max-w-2xl px-4 py-8 md:px-8">
-      <h1 className="font-serif text-3xl text-ink">{t("title")}</h1>
+    <main className={shell}>
+      <h1 className="mb-5 px-1 font-serif text-[40px] leading-[1.05] font-normal tracking-[-0.02em] lg:mb-8 lg:px-0 lg:text-[56px]">
+        {t("title")}
+      </h1>
 
-      <ul className="mt-6 divide-y divide-ink/10">
-        {items.map((item) => (
-          <li key={item.id} className="flex items-center justify-between gap-4 py-4">
-            <div>
-              <p className="text-ink">{item.name_snapshot}</p>
-              <p className="text-sm text-ink/60">
-                {item.variant_label_snapshot} × {item.qty}
-              </p>
-              {!item.fulfilled && <p className="text-sm text-red-700">{t("soldOutRefunded")}</p>}
+      <div className="flex flex-col gap-3 lg:gap-4">
+        <section className="rounded-3xl bg-white p-5 lg:rounded-[28px] lg:p-8">
+          <ul className="divide-y divide-ink/10">
+            {items.map((item) => (
+              <li key={item.id} className="flex items-center justify-between gap-4 py-3 first:pt-0">
+                <div>
+                  <p className="font-medium">{item.name_snapshot}</p>
+                  <p className="text-sm text-muted">
+                    {item.variant_label_snapshot} × {item.qty}
+                  </p>
+                  {!item.fulfilled && <p className="text-sm text-red-700">{t("soldOutRefunded")}</p>}
+                </div>
+                <p className="shrink-0 font-medium">{formatPrice(item.unit_price_cents, locale)}</p>
+              </li>
+            ))}
+          </ul>
+
+          <div className="mt-2 flex flex-col gap-2 border-t border-ink/10 pt-5">
+            <div className="flex justify-between text-muted">
+              <span>{t("subtotal")}</span>
+              <span>{formatPrice(order.subtotal_cents, locale)}</span>
             </div>
-            <p className="text-ink">{formatPrice(item.unit_price_cents, locale)}</p>
-          </li>
-        ))}
-      </ul>
+            <div className="flex justify-between text-muted">
+              <span>{t("shipping")}</span>
+              <span>{formatPrice(order.shipping_cents, locale)}</span>
+            </div>
+            <div className="flex justify-between text-muted">
+              <span>{t("tax")}</span>
+              <span>{formatPrice(order.tax_cents, locale)}</span>
+            </div>
+            <div className="flex justify-between text-lg font-semibold">
+              <span>{t("total")}</span>
+              <span>{formatPrice(order.total_cents, locale)}</span>
+            </div>
+          </div>
+        </section>
 
-      <div className="mt-6 space-y-1 text-ink">
-        <div className="flex justify-between">
-          <span>{t("subtotal")}</span>
-          <span>{formatPrice(order.subtotal_cents, locale)}</span>
-        </div>
-        <div className="flex justify-between">
-          <span>{t("shipping")}</span>
-          <span>{formatPrice(order.shipping_cents, locale)}</span>
-        </div>
-        <div className="flex justify-between">
-          <span>{t("tax")}</span>
-          <span>{formatPrice(order.tax_cents, locale)}</span>
-        </div>
-        <div className="flex justify-between text-lg font-medium">
-          <span>{t("total")}</span>
-          <span>{formatPrice(order.total_cents, locale)}</span>
-        </div>
+        {order.fulfillment === "pickup" ? (
+          <section className="rounded-3xl bg-mist p-5 lg:rounded-[28px] lg:p-8">
+            <h2 className="mb-3 font-serif text-[28px] font-normal tracking-[-0.01em]">{t("pickup.title")}</h2>
+            {settings?.marketName && <p className="font-medium">{settings.marketName}</p>}
+            {settings?.marketAddress && <p className="text-muted">{settings.marketAddress}</p>}
+            {settings?.nextMarketDate ? (
+              <p className="mt-2">{t("pickup.nextDate", { date: formatMarketDate(settings.nextMarketDate, locale) })}</p>
+            ) : (
+              <p className="mt-2">{t("pickup.fallback")}</p>
+            )}
+            {pickupInstructions && <p className="mt-4 text-muted">{pickupInstructions}</p>}
+          </section>
+        ) : (
+          <p className="rounded-3xl bg-mist p-5 lg:rounded-[28px] lg:p-8">{t("ship.trackingEmail")}</p>
+        )}
       </div>
 
-      {order.fulfillment === "pickup" ? (
-        <section className="mt-8">
-          <h2 className="font-serif text-xl text-ink">{t("pickup.title")}</h2>
-          {settings?.marketName && <p className="mt-2 text-ink">{settings.marketName}</p>}
-          {settings?.marketAddress && <p className="text-ink/70">{settings.marketAddress}</p>}
-          {settings?.nextMarketDate ? (
-            <p className="mt-2 text-ink/70">{t("pickup.nextDate", { date: formatMarketDate(settings.nextMarketDate, locale) })}</p>
-          ) : (
-            <p className="mt-2 text-ink/70">{t("pickup.fallback")}</p>
-          )}
-          {pickupInstructions && <p className="mt-4 text-ink/80">{pickupInstructions}</p>}
-        </section>
-      ) : (
-        <p className="mt-8 text-ink/80">{t("ship.trackingEmail")}</p>
-      )}
-
-      <p className="mt-8 text-sm text-ink/60">{t("customerEmail", { email: order.customer_email })}</p>
+      <p className="mt-6 px-1 text-sm text-muted lg:px-0">{t("customerEmail", { email: order.customer_email })}</p>
     </main>
   );
 }

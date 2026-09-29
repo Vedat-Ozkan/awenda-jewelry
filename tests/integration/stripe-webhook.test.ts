@@ -24,6 +24,7 @@ vi.stubEnv("STRIPE_WEBHOOK_SECRET", WEBHOOK_SECRET);
 // Forces sendEmail() (src/lib/email/send.ts) onto the tmp/emails capture
 // path regardless of what a developer's shell happens to export.
 vi.stubEnv("RESEND_API_KEY", "");
+vi.stubEnv("EMAIL_CAPTURE_SUBDIR", "emails-stripe-webhook");
 
 // `@/lib/supabase/admin` imports `server-only` (throws outside a Next.js
 // server bundle) — swapped for the real local-Supabase service client, same

@@ -60,6 +60,7 @@ describe("catalog edit-design actions", () => {
 
   const baseFields = {
     category: "ring" as const,
+    metal: "stainless_steel" as const,
     nameEn: "Updated Name",
     priceCents: 2500,
     status: "active" as const,

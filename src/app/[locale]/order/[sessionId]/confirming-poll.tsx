@@ -30,5 +30,5 @@ export function ConfirmingPoll() {
     return () => clearInterval(interval);
   }, [router]);
 
-  return <p className="text-ink/70">{timedOut ? t("confirmingTimeout") : t("confirming")}</p>;
+  return <p className="text-muted">{timedOut ? t("confirmingTimeout") : t("confirming")}</p>;
 }

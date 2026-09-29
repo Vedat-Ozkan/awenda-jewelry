@@ -24,7 +24,7 @@ FR; nothing personal is stored except the emails people type in; e2e covers the 
 - Add the beacon `<script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "…"}'>` to the storefront root layout only (not `/admin`), only when the token is set. Use `next/script` with `strategy="afterInteractive"`.
 - **Verify:** on the preview build the request to `cloudflareinsights.com` returns 2xx; dashboard shows a visit within a few minutes of deploy.
 
-### 2. Events table (migration `0005_analytics.sql`)
+### 2. Events table (migration `0012_analytics.sql`; aggregates in `0013_analytics_functions.sql`)
 ```sql
 create type analytics_event as enum ('page_view','design_view','add_to_cart','begin_checkout');
 create table analytics_events (
@@ -68,7 +68,9 @@ create table newsletter_subscribers (
 
 ### 3. Tracking route and client hook
 - `POST /api/track`: JSON `{ event, sessionId, locale, path?, designId?, variantId? }`. Validate
-  with zod (enum, uuid, path ≤ 200 chars); derive `referrer_host` from the `Referer` header and
+  with zod (enum, uuid, path ≤ 200 chars); derive `referrer_host` from an optional `referrer`
+  body field (the client's `document.referrer`, first `page_view` of a session only — a beacon's
+  `Referer` header is always our own page; own host dropped) and
   `device` from `Sec-CH-UA-Mobile` / UA; drop everything else. Insert with the service client.
   Rate-limit trivially: reject bodies > 1 KB and unknown events. Always respond 204.
 - `src/lib/analytics/client.ts`: `track(event, props)` using `navigator.sendBeacon`; session id
@@ -83,7 +85,8 @@ create table newsletter_subscribers (
   email form → `POST /api/leads/notify` → upsert `stock_notifications`. Success copy translated.
 - Footer newsletter field on every storefront page → `POST /api/leads/newsletter`.
 - Both routes: zod email validation, service client, honeypot field, 1 KB body cap, 204 on
-  duplicate. `GET /api/leads/unsubscribe?token=…` sets `unsubscribed_at` and renders a plain
+  success/duplicate/honeypot (400 bad body or unknown design, 500 unexpected DB error). A
+  repeat submit re-arms the row. Sold-out variants stay selectable and show this form. `GET /api/leads/unsubscribe?token=…` sets `unsubscribed_at` and renders a plain
   confirmation page in the user's locale.
 - Sending the actual "it's back" email is a Phase 6 email template + a check in the restock
   bulk action (Phase 4 step 8): after a restock, queue one `back-in-stock` email per

@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import { deleteTestAdmin, loginAsAdmin } from "./helpers/admin";
 
 // Phase 4 step 2.

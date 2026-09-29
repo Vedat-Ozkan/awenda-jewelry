@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getSupabaseEnv } from "../../../tests/helpers/local-supabase";
+import { getSupabaseEnv } from "../helpers/local-supabase";
 
 // Integration smoke test: proves the local Supabase stack (`pnpm supabase start`)
 // is reachable.

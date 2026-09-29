@@ -58,6 +58,7 @@ describe("catalog new-design actions", () => {
       id,
       {
         category: "necklace",
+        metal: "stainless_steel",
         nameEn: uniqueName,
         priceCents: 4500,
         variants: [
@@ -113,6 +114,7 @@ describe("catalog new-design actions", () => {
         id,
         {
           category: "ring",
+          metal: "stainless_steel",
           nameEn: "Untitled",
           priceCents: 1800,
           variants: [{ label: "7", qty: 1 }],
@@ -131,6 +133,7 @@ describe("catalog new-design actions", () => {
         id,
         {
           category: "ring",
+          metal: "stainless_steel",
           nameEn: "Test Ring",
           priceCents: 100,
           variants: [{ label: "7", qty: 1 }],
@@ -149,6 +152,7 @@ describe("catalog new-design actions", () => {
         id,
         {
           category: "ring",
+          metal: "stainless_steel",
           nameEn: "Test Ring",
           priceCents: 1800,
           variants: [],
@@ -162,7 +166,7 @@ describe("catalog new-design actions", () => {
     const { id } = await createDraftDesign();
     createdDesignIds.push(id);
 
-    await saveDesignDetails(id, { category: "ring", nameEn: "Untitled", priceCents: 100, variants: [] }, { publish: false });
+    await saveDesignDetails(id, { category: "ring", metal: "stainless_steel", nameEn: "Untitled", priceCents: 100, variants: [] }, { publish: false });
 
     const { data: design } = await supabase.from("designs").select("status").eq("id", id).single();
     expect(design?.status).toBe("draft");

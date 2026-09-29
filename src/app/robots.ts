@@ -8,6 +8,12 @@ export const dynamic = "force-dynamic";
 export default function robots(): MetadataRoute.Robots {
   const base = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
+  // Closed alpha (DECISIONS 2026-09-29): keep crawlers off the temporary
+  // workers.dev URL. Lifts itself at the Phase 9 domain cutover.
+  if (new URL(base).hostname.endsWith(".workers.dev")) {
+    return { rules: { userAgent: "*", disallow: "/" } };
+  }
+
   return {
     rules: { userAgent: "*", allow: "/", disallow: ["/admin", "/api", "/auth"] },
     sitemap: `${base}/sitemap.xml`,

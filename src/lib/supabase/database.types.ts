@@ -49,6 +49,67 @@ export type Database = {
         }
         Relationships: []
       }
+      analytics_events: {
+        Row: {
+          design_id: string | null
+          device: string | null
+          event: Database["public"]["Enums"]["analytics_event"]
+          id: number
+          locale: string
+          occurred_at: string
+          path: string | null
+          referrer_host: string | null
+          session_id: string
+          variant_id: string | null
+        }
+        Insert: {
+          design_id?: string | null
+          device?: string | null
+          event: Database["public"]["Enums"]["analytics_event"]
+          id?: never
+          locale: string
+          occurred_at?: string
+          path?: string | null
+          referrer_host?: string | null
+          session_id: string
+          variant_id?: string | null
+        }
+        Update: {
+          design_id?: string | null
+          device?: string | null
+          event?: Database["public"]["Enums"]["analytics_event"]
+          id?: never
+          locale?: string
+          occurred_at?: string
+          path?: string | null
+          referrer_host?: string | null
+          session_id?: string
+          variant_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analytics_events_design_id_fkey"
+            columns: ["design_id"]
+            isOneToOne: false
+            referencedRelation: "designs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "analytics_events_design_id_fkey"
+            columns: ["design_id"]
+            isOneToOne: false
+            referencedRelation: "public_designs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "analytics_events_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "variants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       booth_sales: {
         Row: {
           candidates: Json | null
@@ -155,6 +216,7 @@ export type Database = {
       }
       designs: {
         Row: {
+          ai_photos_at: string | null
           category: Database["public"]["Enums"]["category"]
           created_at: string
           description_en: string | null
@@ -166,6 +228,7 @@ export type Database = {
           main_image_path: string | null
           material_en: string | null
           material_fr: string | null
+          metal: Database["public"]["Enums"]["metal"]
           name_en: string
           name_fr: string | null
           previous_slugs: string[]
@@ -176,6 +239,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          ai_photos_at?: string | null
           category: Database["public"]["Enums"]["category"]
           created_at?: string
           description_en?: string | null
@@ -187,6 +251,7 @@ export type Database = {
           main_image_path?: string | null
           material_en?: string | null
           material_fr?: string | null
+          metal?: Database["public"]["Enums"]["metal"]
           name_en: string
           name_fr?: string | null
           previous_slugs?: string[]
@@ -197,6 +262,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          ai_photos_at?: string | null
           category?: Database["public"]["Enums"]["category"]
           created_at?: string
           description_en?: string | null
@@ -208,6 +274,7 @@ export type Database = {
           main_image_path?: string | null
           material_en?: string | null
           material_fr?: string | null
+          metal?: Database["public"]["Enums"]["metal"]
           name_en?: string
           name_fr?: string | null
           previous_slugs?: string[]
@@ -256,6 +323,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      newsletter_subscribers: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          locale: string
+          unsubscribe_token: string
+          unsubscribed_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          locale?: string
+          unsubscribe_token?: string
+          unsubscribed_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          locale?: string
+          unsubscribe_token?: string
+          unsubscribed_at?: string | null
+        }
+        Relationships: []
       }
       order_items: {
         Row: {
@@ -460,6 +554,64 @@ export type Database = {
         }
         Relationships: []
       }
+      stock_notifications: {
+        Row: {
+          created_at: string
+          design_id: string
+          email: string
+          id: string
+          locale: string
+          notified_at: string | null
+          unsubscribe_token: string
+          unsubscribed_at: string | null
+          variant_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          design_id: string
+          email: string
+          id?: string
+          locale?: string
+          notified_at?: string | null
+          unsubscribe_token?: string
+          unsubscribed_at?: string | null
+          variant_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          design_id?: string
+          email?: string
+          id?: string
+          locale?: string
+          notified_at?: string | null
+          unsubscribe_token?: string
+          unsubscribed_at?: string | null
+          variant_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_notifications_design_id_fkey"
+            columns: ["design_id"]
+            isOneToOne: false
+            referencedRelation: "designs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_notifications_design_id_fkey"
+            columns: ["design_id"]
+            isOneToOne: false
+            referencedRelation: "public_designs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_notifications_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "variants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       variants: {
         Row: {
           design_id: string
@@ -512,6 +664,7 @@ export type Database = {
           main_image_path: string | null
           material_en: string | null
           material_fr: string | null
+          metal: Database["public"]["Enums"]["metal"] | null
           name_en: string | null
           name_fr: string | null
           price_cents: number | null
@@ -593,6 +746,10 @@ export type Database = {
         }
         Returns: number
       }
+      analytics_summary: {
+        Args: { p_from: string; p_to: string }
+        Returns: Json
+      }
       bulk_restock: {
         Args: { p_design_ids: string[]; p_note?: string; p_qty: number }
         Returns: number
@@ -651,6 +808,11 @@ export type Database = {
       }
     }
     Enums: {
+      analytics_event:
+        | "page_view"
+        | "design_view"
+        | "add_to_cart"
+        | "begin_checkout"
       booth_sale_status: "pending" | "matched" | "unmatched" | "oversold"
       category:
         | "necklace"
@@ -663,6 +825,7 @@ export type Database = {
         | "pendant"
       design_status: "draft" | "active" | "archived"
       fulfillment_type: "ship" | "pickup"
+      metal: "stainless_steel" | "sterling_silver"
       movement_reason:
         | "catalog"
         | "restock"
@@ -809,6 +972,12 @@ export const Constants = {
   },
   public: {
     Enums: {
+      analytics_event: [
+        "page_view",
+        "design_view",
+        "add_to_cart",
+        "begin_checkout",
+      ],
       booth_sale_status: ["pending", "matched", "unmatched", "oversold"],
       category: [
         "necklace",
@@ -822,6 +991,7 @@ export const Constants = {
       ],
       design_status: ["draft", "active", "archived"],
       fulfillment_type: ["ship", "pickup"],
+      metal: ["stainless_steel", "sterling_silver"],
       movement_reason: [
         "catalog",
         "restock",

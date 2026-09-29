@@ -4,6 +4,22 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { ChangeEvent } from "react";
 import { resizeImage } from "@/lib/images/resize";
+import {
+  bareInputClass,
+  cardClass,
+  dangerButton,
+  errorClass,
+  h1Class,
+  h2Class,
+  hintClass,
+  inputClass,
+  labelClass,
+  mutedClass,
+  outlineButton,
+  primaryButton,
+  softButton,
+  textareaClass,
+} from "@/components/admin/ui";
 import { publicPhotoUrl } from "@/lib/supabase/storage";
 import type { Database } from "@/lib/supabase/database.types";
 import {
@@ -19,6 +35,12 @@ import {
 
 type Category = Database["public"]["Enums"]["category"];
 type DesignStatus = Database["public"]["Enums"]["design_status"];
+type Metal = Database["public"]["Enums"]["metal"];
+
+const METALS: { value: Metal; label: string }[] = [
+  { value: "stainless_steel", label: "Stainless steel" },
+  { value: "sterling_silver", label: "Sterling silver" },
+];
 
 const CATEGORIES: Category[] = [
   "necklace",
@@ -39,6 +61,7 @@ interface Design {
   slug: string;
   previous_slugs: string[];
   category: Category;
+  metal: Metal;
   name_en: string;
   name_fr: string | null;
   description_en: string | null;
@@ -82,9 +105,11 @@ function photoSrc(path: string | null): string | null {
   return path.startsWith("seed/") ? `/${path}` : publicPhotoUrl(path);
 }
 
-const inputClass = "mt-1 block w-full rounded border border-black/[.15] px-3 py-2 text-sm dark:border-white/[.2]";
-const labelClass = "mt-4 block text-sm font-medium";
 const frHint = "Optional — falls back to English on the storefront";
+// Photo actions are pill-shaped <label>s around a visually hidden file input.
+const photoPickClass = `${outlineButton} cursor-pointer focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-accent`;
+const miniButton =
+  "inline-flex h-11 flex-1 items-center justify-center rounded-full bg-mist text-sm font-medium text-ink transition-colors hover:bg-ink/10 disabled:opacity-40";
 
 export function EditDesignClient({
   design,
@@ -101,6 +126,7 @@ export function EditDesignClient({
   const [form, setForm] = useState({
     slug: design.slug,
     category: design.category,
+    metal: design.metal,
     nameEn: design.name_en,
     nameFr: design.name_fr ?? "",
     descriptionEn: design.description_en ?? "",
@@ -127,6 +153,7 @@ export function EditDesignClient({
       await updateDesign(design.id, {
         slug: form.slug,
         category: form.category,
+        metal: form.metal,
         nameEn: form.nameEn,
         nameFr: form.nameFr,
         descriptionEn: form.descriptionEn,
@@ -265,35 +292,36 @@ export function EditDesignClient({
   const mainSrc = photoSrc(design.main_image_path);
 
   return (
-    <div className="p-4 pb-16">
-      <h1 className="text-lg font-semibold">Edit design</h1>
+    <div className="mx-auto max-w-2xl">
+      <h1 className={h1Class}>Edit design</h1>
+      <p className={`${mutedClass} mt-1`}>{design.name_en}</p>
 
-      <div className="mt-4">
-        <span className="block text-sm font-medium">Main photo</span>
-        {/* eslint-disable-next-line @next/next/no-img-element -- admin photo, not worth next/image config */}
-        {mainSrc && <img src={mainSrc} alt="" className="mt-1 h-32 w-32 rounded object-cover" />}
-        <label className="mt-2 inline-block text-sm underline">
-          Replace photo
-          <input type="file" accept="image/*" onChange={handleReplacePhoto} disabled={photoBusy} className="hidden" />
-        </label>
-      </div>
+      <section className={`${cardClass} mt-6`}>
+        <h2 className={h2Class}>Main photo</h2>
+        <div className="mt-3 flex items-end gap-4">
+          {/* eslint-disable-next-line @next/next/no-img-element -- admin photo, not worth next/image config */}
+          {mainSrc ? <img src={mainSrc} alt="" className="h-32 w-32 rounded-3xl bg-well object-cover" /> : <div className="h-32 w-32 rounded-3xl bg-well" />}
+          <label className={photoPickClass}>
+            Replace photo
+            <input type="file" accept="image/*" onChange={handleReplacePhoto} disabled={photoBusy} className="sr-only" />
+          </label>
+        </div>
 
-      <div className="mt-4">
-        <span className="block text-sm font-medium">Extra photos</span>
-        <ul className="mt-1 flex flex-wrap gap-2">
+        <h2 className={`${h2Class} mt-6`}>Extra photos</h2>
+        <ul className="mt-3 flex flex-wrap gap-3">
           {images.map((img, i) => {
             const src = photoSrc(img.thumb_image_path);
             return (
-              <li key={img.id} className="flex flex-col items-center gap-1">
+              <li key={img.id} className="flex w-36 flex-col items-center gap-1.5">
                 {/* eslint-disable-next-line @next/next/no-img-element -- admin thumb, not worth next/image config */}
-                {src && <img src={src} alt="" className="h-16 w-16 rounded object-cover" />}
-                <div className="flex gap-1 text-xs">
+                {src ? <img src={src} alt="" className="h-24 w-24 rounded-2xl bg-well object-cover" /> : <div className="h-24 w-24 rounded-2xl bg-well" />}
+                <div className="flex w-full gap-1">
                   <button
                     type="button"
                     disabled={photoBusy || i === 0}
                     onClick={() => handleReorderExtraPhoto(img.id, "up")}
                     aria-label={`Move photo ${i + 1} up`}
-                    className="rounded border border-black/[.15] px-1 disabled:opacity-40 dark:border-white/[.2]"
+                    className={miniButton}
                   >
                     ↑
                   </button>
@@ -302,7 +330,7 @@ export function EditDesignClient({
                     disabled={photoBusy || i === images.length - 1}
                     onClick={() => handleReorderExtraPhoto(img.id, "down")}
                     aria-label={`Move photo ${i + 1} down`}
-                    className="rounded border border-black/[.15] px-1 disabled:opacity-40 dark:border-white/[.2]"
+                    className={miniButton}
                   >
                     ↓
                   </button>
@@ -311,7 +339,7 @@ export function EditDesignClient({
                     disabled={photoBusy}
                     onClick={() => handleRemoveExtraPhoto(img.id)}
                     aria-label={`Remove photo ${i + 1}`}
-                    className="rounded border border-black/[.15] px-1 text-red-600 dark:border-white/[.2]"
+                    className={`${miniButton} text-red-700`}
                   >
                     ×
                   </button>
@@ -320,166 +348,174 @@ export function EditDesignClient({
             );
           })}
         </ul>
-        <label className="mt-2 inline-block text-sm underline">
+        <label className={`${photoPickClass} mt-3`}>
           Add photo
+          <input type="file" accept="image/*" onChange={handleAddExtraPhoto} disabled={photoBusy} className="sr-only" />
+        </label>
+        {photoError && <p className={errorClass}>{photoError}</p>}
+      </section>
+
+      <section className={`${cardClass} mt-4`}>
+        <label className="block text-sm font-medium">
+          Name (EN)
           <input
-            type="file"
-            accept="image/*"
-            onChange={handleAddExtraPhoto}
-            disabled={photoBusy}
-            className="hidden"
+            type="text"
+            value={form.nameEn}
+            onChange={(e) => setForm((f) => ({ ...f, nameEn: e.target.value }))}
+            className={inputClass}
           />
         </label>
-        {photoError && <p className="mt-1 text-sm text-red-600">{photoError}</p>}
-      </div>
+        <label className={labelClass}>
+          Name (FR)
+          <span className={hintClass}>{frHint}</span>
+          <input
+            type="text"
+            value={form.nameFr}
+            onChange={(e) => setForm((f) => ({ ...f, nameFr: e.target.value }))}
+            className={inputClass}
+          />
+        </label>
 
-      <label className={labelClass}>
-        Name (EN)
-        <input
-          type="text"
-          value={form.nameEn}
-          onChange={(e) => setForm((f) => ({ ...f, nameEn: e.target.value }))}
-          className={inputClass}
-        />
-      </label>
-      <label className={labelClass}>
-        Name (FR)
-        <span className="ml-1 text-xs text-zinc-500">{frHint}</span>
-        <input
-          type="text"
-          value={form.nameFr}
-          onChange={(e) => setForm((f) => ({ ...f, nameFr: e.target.value }))}
-          className={inputClass}
-        />
-      </label>
+        <label className={labelClass}>
+          Description (EN)
+          <textarea
+            value={form.descriptionEn}
+            onChange={(e) => setForm((f) => ({ ...f, descriptionEn: e.target.value }))}
+            className={textareaClass}
+          />
+        </label>
+        <label className={labelClass}>
+          Description (FR)
+          <span className={hintClass}>{frHint}</span>
+          <textarea
+            value={form.descriptionFr}
+            onChange={(e) => setForm((f) => ({ ...f, descriptionFr: e.target.value }))}
+            className={textareaClass}
+          />
+        </label>
 
-      <label className={labelClass}>
-        Description (EN)
-        <textarea
-          value={form.descriptionEn}
-          onChange={(e) => setForm((f) => ({ ...f, descriptionEn: e.target.value }))}
-          className={inputClass}
-        />
-      </label>
-      <label className={labelClass}>
-        Description (FR)
-        <span className="ml-1 text-xs text-zinc-500">{frHint}</span>
-        <textarea
-          value={form.descriptionFr}
-          onChange={(e) => setForm((f) => ({ ...f, descriptionFr: e.target.value }))}
-          className={inputClass}
-        />
-      </label>
+        <label className={labelClass}>
+          Material (EN)
+          <input
+            type="text"
+            value={form.materialEn}
+            onChange={(e) => setForm((f) => ({ ...f, materialEn: e.target.value }))}
+            className={inputClass}
+          />
+        </label>
+        <label className={labelClass}>
+          Material (FR)
+          <span className={hintClass}>{frHint}</span>
+          <input
+            type="text"
+            value={form.materialFr}
+            onChange={(e) => setForm((f) => ({ ...f, materialFr: e.target.value }))}
+            className={inputClass}
+          />
+        </label>
 
-      <label className={labelClass}>
-        Material (EN)
-        <input
-          type="text"
-          value={form.materialEn}
-          onChange={(e) => setForm((f) => ({ ...f, materialEn: e.target.value }))}
-          className={inputClass}
-        />
-      </label>
-      <label className={labelClass}>
-        Material (FR)
-        <span className="ml-1 text-xs text-zinc-500">{frHint}</span>
-        <input
-          type="text"
-          value={form.materialFr}
-          onChange={(e) => setForm((f) => ({ ...f, materialFr: e.target.value }))}
-          className={inputClass}
-        />
-      </label>
+        <label className={labelClass}>
+          Dimensions
+          <input
+            type="text"
+            value={form.dimensions}
+            onChange={(e) => setForm((f) => ({ ...f, dimensions: e.target.value }))}
+            className={inputClass}
+          />
+        </label>
 
-      <label className={labelClass}>
-        Dimensions
-        <input
-          type="text"
-          value={form.dimensions}
-          onChange={(e) => setForm((f) => ({ ...f, dimensions: e.target.value }))}
-          className={inputClass}
-        />
-      </label>
+        <div className="md:grid md:grid-cols-2 md:gap-x-4">
+          <label className={labelClass}>
+            Category
+            <select
+              value={form.category}
+              onChange={(e) => setForm((f) => ({ ...f, category: e.target.value as Category }))}
+              className={inputClass}
+            >
+              {CATEGORIES.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+          </label>
 
-      <label className={labelClass}>
-        Category
-        <select
-          value={form.category}
-          onChange={(e) => setForm((f) => ({ ...f, category: e.target.value as Category }))}
-          className={inputClass}
-        >
-          {CATEGORIES.map((c) => (
-            <option key={c} value={c}>
-              {c}
-            </option>
-          ))}
-        </select>
-      </label>
+          <label className={labelClass}>
+            Metal
+            <select
+              value={form.metal}
+              onChange={(e) => setForm((f) => ({ ...f, metal: e.target.value as Metal }))}
+              className={inputClass}
+            >
+              {METALS.map((m) => (
+                <option key={m.value} value={m.value}>
+                  {m.label}
+                </option>
+              ))}
+            </select>
+          </label>
 
-      <label className={labelClass}>
-        Price (CAD)
-        <input
-          type="text"
-          inputMode="decimal"
-          value={form.priceInput}
-          onChange={(e) => setForm((f) => ({ ...f, priceInput: e.target.value }))}
-          className={inputClass}
-        />
-      </label>
+          <label className={labelClass}>
+            Price (CAD)
+            <input
+              type="text"
+              inputMode="decimal"
+              value={form.priceInput}
+              onChange={(e) => setForm((f) => ({ ...f, priceInput: e.target.value }))}
+              className={inputClass}
+            />
+          </label>
 
-      <label className={labelClass}>
-        Status
-        <select
-          value={form.status}
-          onChange={(e) => setForm((f) => ({ ...f, status: e.target.value as DesignStatus }))}
-          className={inputClass}
-        >
-          {STATUSES.map((s) => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
-        </select>
-      </label>
+          <label className={labelClass}>
+            Status
+            <select
+              value={form.status}
+              onChange={(e) => setForm((f) => ({ ...f, status: e.target.value as DesignStatus }))}
+              className={inputClass}
+            >
+              {STATUSES.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
 
-      <label className={labelClass}>
-        Slug
-        <input
-          type="text"
-          value={form.slug}
-          onChange={(e) => setForm((f) => ({ ...f, slug: e.target.value }))}
-          className={inputClass}
-        />
-      </label>
+        <label className={labelClass}>
+          Slug
+          <input
+            type="text"
+            value={form.slug}
+            onChange={(e) => setForm((f) => ({ ...f, slug: e.target.value }))}
+            className={inputClass}
+          />
+        </label>
 
-      {saveError && <p className="mt-2 text-sm text-red-600">{saveError}</p>}
-      <button
-        type="button"
-        disabled={saving}
-        onClick={handleSave}
-        className="mt-4 rounded bg-black px-4 py-2 text-sm text-white disabled:opacity-40 dark:bg-white dark:text-black"
-      >
-        Save
-      </button>
+        {saveError && <p className={errorClass}>{saveError}</p>}
+        <button type="button" disabled={saving} onClick={handleSave} className={`${primaryButton} mt-6 h-12 w-full md:w-auto`}>
+          Save
+        </button>
+      </section>
 
-      <div className="mt-8">
-        <h2 className="text-sm font-semibold">Variants</h2>
-        <ul className="mt-2 flex flex-col gap-2">
+      <section className={`${cardClass} mt-4`}>
+        <h2 className={h2Class}>Variants</h2>
+        <ul className="mt-3 flex flex-col gap-2">
           {variants.map((v) => (
-            <li key={v.id} className="rounded border border-black/[.08] p-2 dark:border-white/[.145]">
+            <li key={v.id} className="rounded-2xl bg-page p-3">
               <div className="flex items-center justify-between gap-2">
-                <span className="text-sm font-medium">
+                <span className="text-sm font-semibold">
                   {v.label} — qty {v.qty_on_hand}
                 </span>
                 <button
                   type="button"
                   onClick={() => handleRemoveVariant(v.id)}
-                  className="text-xs text-red-600 underline"
+                  className="inline-flex h-11 items-center px-2 text-sm font-medium text-red-700 underline underline-offset-4"
                 >
                   Remove
                 </button>
               </div>
-              <div className="mt-1 flex flex-wrap items-center gap-1">
+              <div className="mt-1 flex flex-wrap items-center gap-2">
                 <input
                   type="number"
                   min={1}
@@ -487,7 +523,7 @@ export function EditDesignClient({
                   aria-label={`Quantity for ${v.label}`}
                   value={qtyInputs[v.id] ?? ""}
                   onChange={(e) => setQtyInputs((prev) => ({ ...prev, [v.id]: e.target.value }))}
-                  className="w-16 rounded border border-black/[.15] px-1 py-1 text-sm dark:border-white/[.2]"
+                  className={`${bareInputClass} w-20 px-3 text-center`}
                 />
                 <input
                   type="text"
@@ -495,85 +531,71 @@ export function EditDesignClient({
                   aria-label={`Note for ${v.label}`}
                   value={noteInputs[v.id] ?? ""}
                   onChange={(e) => setNoteInputs((prev) => ({ ...prev, [v.id]: e.target.value }))}
-                  className="rounded border border-black/[.15] px-1 py-1 text-sm dark:border-white/[.2]"
+                  className={`${bareInputClass} min-w-0 flex-1 basis-40`}
                 />
-                <button
-                  type="button"
-                  onClick={() => handleAdjust(v.id, "restock")}
-                  className="rounded border border-black/[.15] px-2 py-1 text-xs dark:border-white/[.2]"
-                >
+                <button type="button" onClick={() => handleAdjust(v.id, "restock")} className={primaryButton}>
                   +N restock
                 </button>
-                <button
-                  type="button"
-                  onClick={() => handleAdjust(v.id, "adjustment")}
-                  className="rounded border border-black/[.15] px-2 py-1 text-xs dark:border-white/[.2]"
-                >
+                <button type="button" onClick={() => handleAdjust(v.id, "adjustment")} className={softButton}>
                   −N adjustment
                 </button>
               </div>
             </li>
           ))}
         </ul>
-        <div className="mt-2 flex gap-2">
+        <div className="mt-3 flex gap-2">
           <input
             type="text"
             placeholder="New variant label"
+            aria-label="New variant label"
             value={newVariantLabel}
             onChange={(e) => setNewVariantLabel(e.target.value)}
-            className="rounded border border-black/[.15] px-2 py-1 text-sm dark:border-white/[.2]"
+            className={`${bareInputClass} min-w-0 flex-1`}
           />
-          <button
-            type="button"
-            onClick={handleAddVariant}
-            className="rounded border border-black/[.15] px-2 py-1 text-sm dark:border-white/[.2]"
-          >
+          <button type="button" onClick={handleAddVariant} className={outlineButton}>
             Add variant
           </button>
         </div>
-        {variantError && <p className="mt-1 text-sm text-red-600">{variantError}</p>}
-      </div>
+        {variantError && <p className={errorClass}>{variantError}</p>}
+      </section>
 
-      <div className="mt-8">
-        <h2 className="text-sm font-semibold">Recent stock movements</h2>
-        <table className="mt-2 w-full text-xs">
-          <thead>
-            <tr className="text-left text-zinc-600 dark:text-zinc-400">
-              <th className="p-1">When</th>
-              <th className="p-1">Variant</th>
-              <th className="p-1">Delta</th>
-              <th className="p-1">Reason</th>
-              <th className="p-1">Note</th>
-            </tr>
-          </thead>
-          <tbody>
-            {ledger.map((row) => (
-              <tr key={row.id} className="border-t border-black/[.08] dark:border-white/[.145]">
-                <td className="p-1">{dateTime.format(new Date(row.created_at))}</td>
-                <td className="p-1">{row.variant_label}</td>
-                <td className="p-1">{row.delta > 0 ? `+${row.delta}` : row.delta}</td>
-                <td className="p-1">{row.reason}</td>
-                <td className="p-1">{row.note ?? ""}</td>
+      <section className={`${cardClass} mt-4`}>
+        <h2 className={h2Class}>Recent stock movements</h2>
+        <div className="mt-3 overflow-x-auto">
+          <table className="w-full min-w-[420px] text-xs">
+            <thead>
+              <tr className="text-left font-medium text-muted">
+                <th className="p-1.5">When</th>
+                <th className="p-1.5">Variant</th>
+                <th className="p-1.5">Delta</th>
+                <th className="p-1.5">Reason</th>
+                <th className="p-1.5">Note</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {ledger.map((row) => (
+                <tr key={row.id} className="border-t border-ink/10">
+                  <td className="p-1.5 whitespace-nowrap">{dateTime.format(new Date(row.created_at))}</td>
+                  <td className="p-1.5">{row.variant_label}</td>
+                  <td className="p-1.5 tabular-nums">{row.delta > 0 ? `+${row.delta}` : row.delta}</td>
+                  <td className="p-1.5">{row.reason}</td>
+                  <td className="p-1.5">{row.note ?? ""}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
 
-      <div className="mt-8 rounded border border-red-600/40 p-3">
-        <h2 className="text-sm font-semibold text-red-600">Danger zone</h2>
-        <p className="mt-1 text-xs text-zinc-600 dark:text-zinc-400">
+      <section className="mt-4 rounded-3xl border border-red-700/30 bg-red-50/60 p-4 md:p-6">
+        <h2 className="text-base font-semibold text-red-800">Danger zone</h2>
+        <p className={`${mutedClass} mt-1`}>
           Archiving hides this design from the storefront. It is never hard-deleted.
         </p>
-        <button
-          type="button"
-          disabled={design.status === "archived"}
-          onClick={handleArchive}
-          className="mt-2 rounded border border-red-600 px-3 py-1.5 text-sm text-red-600 disabled:opacity-40"
-        >
+        <button type="button" disabled={design.status === "archived"} onClick={handleArchive} className={`${dangerButton} mt-3`}>
           Archive
         </button>
-      </div>
+      </section>
     </div>
   );
 }

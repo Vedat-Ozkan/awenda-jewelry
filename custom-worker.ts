@@ -12,7 +12,7 @@ export default {
   async scheduled(event, env, ctx) {
     const { CRON_SECRET } = env as EnvWithCronSecret;
     // Two cron expressions share this handler (wrangler.jsonc `triggers.crons`):
-    // "0 6 */3 * *" -> keepalive, "0 14 * * *" -> pickup-reminders.
+    // "0 6 * * *" -> keepalive, "0 14 * * *" -> pickup-reminders.
     const path = event.cron === "0 14 * * *" ? "/api/cron/pickup-reminders" : "/api/keepalive";
     ctx.waitUntil(
       handler

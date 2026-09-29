@@ -87,7 +87,7 @@ export async function loginAsAdmin(page: Page, email: string): Promise<void> {
 
   await page.goto("/admin/login");
   await page.getByLabel("Email").fill(normalized);
-  await page.getByRole("button", { name: "Send link" }).click();
+  await page.getByRole("button", { name: "Email me a sign-in link instead" }).click();
   await page.getByText(/sign-in link has been sent/i).waitFor();
 
   const message = await waitForMessageTo(normalized);

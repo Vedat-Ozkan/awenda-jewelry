@@ -67,6 +67,34 @@ manually once a key exists — see `docs/manual-tests.md`.
 The orders admin's refund action also needs a real payment to refund against, so its e2e spec
 sets `STRIPE_FAKE_REFUNDS=1` (dev/test only, ignored in production) to skip the Stripe call.
 
+## Analytics and leads
+
+No cookies and no consent banner; the numbers come from two places (DECISIONS.md "Analytics
+and lead capture").
+
+- **Traffic** (visitors, referrers, countries, top pages, Web Vitals): Cloudflare Web
+  Analytics. The beacon is rendered by the storefront layout only (never `/admin`), and only
+  when `NEXT_PUBLIC_CF_BEACON_TOKEN` is set (it is in `wrangler.jsonc`; `pnpm run deploy`
+  exports it for the build). The Web Analytics site is `awenda-jewelry.awenda.workers.dev`;
+  add `awendajewelry.com` to it at the Phase 9 cutover.
+- **Funnel** (sessions, design views, add-to-carts, checkouts started): first-party events sent
+  by `src/lib/analytics/client.ts` to `POST /api/track` and stored in `analytics_events`. The
+  only identifier is a random per-tab session id in `sessionStorage`; no IP, cookie or email is
+  stored. Events older than 13 months are deleted by the keepalive cron.
+- **Orders, revenue, AOV, ship vs pickup** come from the `orders` table.
+- **Leads**: "Notify me when it's back" (`stock_notifications`) and the footer newsletter
+  (`newsletter_subscribers`); every email carries an unsubscribe link
+  (`/api/leads/unsubscribe`).
+
+`/admin/analytics` shows all of it for a 7 / 30 / 90-day or custom range (dates are read in the
+market timezone from `/admin/settings`): tiles, sessions and orders by day, revenue by week,
+top viewed designs, **most viewed sold-out designs** (demand you're missing), referrers, locale
+and device split, and the two lead lists with **Export CSV**
+(`/api/admin/stock-notifications.csv`, `/api/admin/newsletter.csv`). The aggregates come from
+one SQL function, `analytics_summary(from, to)` (`supabase/migrations/0013_analytics_functions.sql`),
+which runs as the signed-in admin so the `is_admin()` RLS policies apply. The privacy wording
+is on `/en/policies` and `/fr/policies`.
+
 ## Cron jobs
 
 Two Cloudflare Cron Triggers (`wrangler.jsonc` `triggers.crons`) share the `scheduled()` handler
@@ -75,7 +103,7 @@ in `custom-worker.ts`, which branches on `event.cron` and pings the matching rou
 
 | Cron expression | Route | What it does |
 |---|---|---|
-| `0 6 */3 * *` | `/api/keepalive` | Pings Supabase every 3 days so the free-tier project doesn't idle-pause. |
+| `0 6 * * *` | `/api/keepalive` | Pings Supabase daily so the free-tier project doesn't idle-pause (backed up by the GitHub `keepalive.yml` workflow, which emails on failure). |
 | `0 14 * * *` | `/api/cron/pickup-reminders` | Emails the day-before-market reminder to `awaiting_pickup` orders due tomorrow. |
 
 Both routes require `x-cron-secret: $CRON_SECRET` and can be triggered manually in dev:
@@ -84,6 +112,24 @@ Both routes require `x-cron-secret: $CRON_SECRET` and can be triggered manually 
 curl -H "x-cron-secret: $CRON_SECRET" localhost:3000/api/keepalive
 curl -H "x-cron-secret: $CRON_SECRET" localhost:3000/api/cron/pickup-reminders
 ```
+
+## AI product photos (owner setup)
+
+A manual batch, run a few times a week in Claude Code with `/ai-photos` (add `prod` for the
+live shop, e.g. `/ai-photos prod 5`). For every design with real photos and no AI photos yet,
+Codex CLI generates a studio shot (becomes the main image) and a model shot; Claude checks them
+against the real photos, you approve in the session, and the approved ones are uploaded. The
+original photos are kept in the gallery after the two new ones. Plan: `docs/plan/10-ai-photos.md`.
+
+One-time setup:
+
+1. Codex CLI installed and logged in with ChatGPT: `codex login status`.
+2. For production runs, create `.env.production.local` (git-ignored) with
+   `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `VOYAGE_API_KEY` and
+   `EMBEDDINGS_PROVIDER=voyage`. Local runs use `.env.local`.
+
+Scripts (`ai-photos/batches/` is git-ignored): `pnpm ai-photos:fetch [--limit N]` and
+`pnpm ai-photos:upload [<batch dir>]`, each with a `:prod` variant.
 
 ## Commands
 
@@ -97,6 +143,7 @@ curl -H "x-cron-secret: $CRON_SECRET" localhost:3000/api/cron/pickup-reminders
 | `pnpm db:reset` | Re-apply migrations to the local Supabase database |
 | `pnpm db:types` | Regenerate `src/lib/supabase/database.types.ts` from the local database |
 | `pnpm seed:admins` | Upsert `ADMIN_EMAILS` into `admin_emails` |
+| `pnpm ai-photos:fetch` / `:upload` | AI product photo batch (see above; `:prod` variants target production) |
 
 `pnpm db:reset` re-seeds from `supabase/seed.sql`, which does not include `admin_emails` — run
 `pnpm seed:admins` again after every reset.
@@ -114,6 +161,9 @@ curl -H "x-cron-secret: $CRON_SECRET" localhost:3000/api/cron/pickup-reminders
 - In CI, `.github/workflows/deploy.yml` runs `pnpm run deploy` after `ci.yml` succeeds on
   `main`, using the repo secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` (the owner
   adds these in GitHub repo settings; agents cannot).
+- After `supabase db push` applies migration 0014, every existing hosted design is
+  `stainless_steel`. The owner must reclassify sterling-silver designs in /admin (edit page,
+  metal select).
 
 ## Status
 

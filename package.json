@@ -12,13 +12,17 @@
     "test": "vitest run",
     "e2e": "playwright test",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
-    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+    "deploy": "sh scripts/deploy.sh",
     "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
     "db:reset": "supabase db reset",
     "db:types": "supabase gen types typescript --local > src/lib/supabase/database.types.ts",
     "seed:admins": "tsx --env-file=.env.local scripts/seed-admins.ts",
     "embed:check": "tsx --env-file=.env.local scripts/embed-check.ts",
-    "stripe:check": "tsx --env-file=.env.local scripts/stripe-check.ts"
+    "stripe:check": "tsx --env-file=.env.local scripts/stripe-check.ts",
+    "ai-photos:fetch": "tsx --env-file=.env.local scripts/ai-photos/fetch.ts",
+    "ai-photos:upload": "tsx --env-file=.env.local scripts/ai-photos/upload.ts",
+    "ai-photos:fetch:prod": "tsx --env-file=.env.production.local scripts/ai-photos/fetch.ts",
+    "ai-photos:upload:prod": "tsx --env-file=.env.production.local scripts/ai-photos/upload.ts"
   },
   "dependencies": {
     "@react-email/components": "^1.0.12",
@@ -47,6 +51,7 @@
     "jpeg-js": "^0.4.4",
     "piexifjs": "^1.0.6",
     "prettier": "^3",
+    "sharp": "^0.35.5",
     "supabase": "^2.117.0",
     "tailwindcss": "^4",
     "tsx": "^4.23.13",

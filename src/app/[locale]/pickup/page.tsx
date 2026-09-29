@@ -14,33 +14,41 @@ export default async function PickupPage({ params }: { params: Promise<{ locale:
   const instructions = (locale === "fr" ? settings.pickupInstructionsFr : null) ?? settings.pickupInstructionsEn;
 
   return (
-    <main className="mx-auto max-w-2xl px-4 py-8 md:px-8">
-      <h1 className="font-serif text-3xl text-ink">{t("title")}</h1>
+    <main className="mx-auto w-full max-w-3xl px-3 pb-10 pt-6 md:px-10 lg:pb-20 lg:pt-10">
+      <h1 className="mb-5 px-1 font-serif text-[40px] leading-[1.05] font-normal tracking-[-0.02em] lg:mb-8 lg:px-0 lg:text-[56px]">
+        {t("title")}
+      </h1>
 
-      {settings.marketName && <p className="mt-4 text-ink">{settings.marketName}</p>}
-      {settings.marketAddress && <p className="text-ink/70">{settings.marketAddress}</p>}
+      <div className="flex flex-col gap-3 lg:gap-4">
+        <section className="flex flex-col gap-2 rounded-3xl bg-white p-6 lg:rounded-[28px] lg:p-8">
+          {settings.marketName && <p className="text-xl font-medium">{settings.marketName}</p>}
+          {settings.marketAddress && <p className="text-muted">{settings.marketAddress}</p>}
 
-      {settings.marketWeekday != null && (
-        <p className="mt-2 text-ink/70">
-          {t("weekday", { weekday: t(`weekdays.${settings.marketWeekday}`) })}
-          {settings.marketOpenTime && settings.marketCloseTime && (
-            <>
-              {" "}
-              ·{" "}
-              {t("hours", {
-                open: formatMarketTime(settings.marketOpenTime, locale),
-                close: formatMarketTime(settings.marketCloseTime, locale),
-              })}
-            </>
+          {settings.marketWeekday != null && (
+            <p className="text-muted">
+              {t("weekday", { weekday: t(`weekdays.${settings.marketWeekday}`) })}
+              {settings.marketOpenTime && settings.marketCloseTime && (
+                <>
+                  {" "}
+                  ·{" "}
+                  {t("hours", {
+                    open: formatMarketTime(settings.marketOpenTime, locale),
+                    close: formatMarketTime(settings.marketCloseTime, locale),
+                  })}
+                </>
+              )}
+            </p>
           )}
-        </p>
-      )}
+        </section>
 
-      {settings.nextMarketDate && (
-        <p className="mt-2 text-ink/70">{t("nextDate", { date: formatMarketDate(settings.nextMarketDate, locale) })}</p>
-      )}
+        {settings.nextMarketDate && (
+          <p className="rounded-3xl bg-mist p-6 font-medium lg:rounded-[28px] lg:p-8">
+            {t("nextDate", { date: formatMarketDate(settings.nextMarketDate, locale) })}
+          </p>
+        )}
 
-      {instructions && <p className="mt-6 text-ink/80">{instructions}</p>}
+        {instructions && <p className="rounded-3xl bg-white p-6 text-muted lg:rounded-[28px] lg:p-8">{instructions}</p>}
+      </div>
     </main>
   );
 }
