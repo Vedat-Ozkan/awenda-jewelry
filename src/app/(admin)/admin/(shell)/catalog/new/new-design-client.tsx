@@ -202,7 +202,7 @@ export function NewDesignClient({ variantPresets }: { variantPresets: Partial<Re
     return (
       <div className="p-4" data-testid="new-design">
         <h1 className="text-lg font-semibold">New design — Photos</h1>
-        <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">Gray tray, item centered, no hands.</p>
+        <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">Ivory backdrop, top-down, item centered with room around it, no hands.</p>
 
         <input type="file" accept="image/*" capture="environment" multiple onChange={handleFiles} className="mt-4" />
 

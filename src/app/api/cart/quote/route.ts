@@ -1,17 +1,9 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { isLocale, type Locale } from "@/i18n/routing";
-import { createAnonClient } from "@/lib/catalog/client";
 import { localize } from "@/lib/catalog/localize";
+import { loadPricingData, type PublicDesignRow, type VariantJson } from "@/lib/cart/pricing";
 import type { QuoteLine, QuoteResponse } from "@/lib/cart/types";
-import type { Database } from "@/lib/supabase/database.types";
-
-type PublicDesignRow = Database["public"]["Views"]["public_designs"]["Row"];
-interface VariantJson {
-  id: string;
-  label: string;
-  qty_on_hand: number;
-}
 
 const quoteSchema = z.object({
   lines: z
@@ -79,24 +71,7 @@ export async function POST(request: Request) {
   }
   const { lines: requestedLines, fulfillment } = parsed.data;
 
-  const supabase = createAnonClient();
-  const [{ data: designs, error: designsError }, { data: settingsRow, error: settingsError }] = await Promise.all([
-    supabase.from("public_designs").select("*"),
-    supabase
-      .from("public_settings")
-      .select("shipping_enabled, shipping_flat_cents, free_shipping_threshold_cents")
-      .maybeSingle(),
-  ]);
-  if (designsError) throw designsError;
-  if (settingsError) throw settingsError;
-
-  const byVariant = new Map<string, { design: PublicDesignRow; variant: VariantJson }>();
-  for (const design of designs ?? []) {
-    const variants = (design.variants as unknown as VariantJson[]) ?? [];
-    for (const variant of variants) {
-      byVariant.set(variant.id, { design, variant });
-    }
-  }
+  const { byVariant, settings: settingsRow } = await loadPricingData();
 
   const lines = requestedLines.map((requested) => buildQuoteLine(requested, byVariant.get(requested.variantId), locale));
 

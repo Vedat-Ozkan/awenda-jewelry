@@ -41,8 +41,8 @@ for anonymous and non-allowlisted users.
 
 ### 4. New design flow (`/admin/catalog/new`) — optimised for speed
 1. **Photo** first: camera input, `multiple` allowed (select many from a folder → one draft
-   design per file, then step through details for each); show reminder "Gray tray, item
-   centered, no hands". Preview immediately from the resized `main` blob.
+   design per file, then step through details for each); show reminder "Ivory backdrop,
+   top-down, item centered with room around it, no hands". Preview immediately from the resized `main` blob.
 2. **Category** (8 big buttons) → **Variants**: presets for the category appear as toggle chips
    with a stepper each (default 1 when toggled on); "+ custom" adds a free-text label.
 3. **Name (EN)**, **Price** (numeric keypad, CAD), optional **Description (EN)**, optional

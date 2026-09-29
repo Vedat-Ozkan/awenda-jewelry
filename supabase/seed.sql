@@ -15,7 +15,7 @@ insert into settings (
   1, 'Weekly Market', 'TBD', 6,
   '09:00', '14:00',
   'TBD', 'À déterminer',
-  false, 500, 5000,
+  false, 1200, 10000,
   false,
   '{
     "ring": ["5","6","7","8","9","10"],

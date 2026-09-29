@@ -91,8 +91,8 @@ owned by the seller, not Etsy. RDAP on 2026-09-15: registrar Tucows Domains Inc.
 (`dns1–4.p01.nsone.net`, Etsy's DNS) with no A record, i.e. registered but serving nothing.
 **Affects:** Phase 9 steps 1–2, Open #1 (resolved), Open #11.
 
-### Inventory decrement timing for online orders                        (2026-09-15, agent-with-owner-approval pending)
-**Decision (proposed, see Open #7):** Decrement on `checkout.session.completed`, not at
+### Inventory decrement timing for online orders                        (2026-09-15, proposed; confirmed by owner 2026-09-19)
+**Decision:** Decrement on `checkout.session.completed`, not at
 cart or session creation. If stock is insufficient at that moment, auto-refund and email the
 customer. No soft-hold table.
 **Why:** Simplest correct behaviour; two customers buying the same last unit within one
@@ -353,22 +353,96 @@ row on the hosted DB (migration 0007 fixed it). Same rule applies to Phase 6/7 c
 
 ---
 
+### Stripe Tax off; no GST/HST collected at launch                      (2026-09-19, owner)
+**Decision:** `settings.stripe_tax_enabled` stays **false**. Checkout shows no tax line.
+**Why:** Expected online volume is a couple of hundred CAD a month — far below the CAD 30k
+small-supplier threshold, so the business does not register for or collect GST/HST. Stripe Tax's
+0.5%/txn fee would be pure cost. Flip the flag (and enable Stripe Tax in the dashboard) if the
+business registers later.
+**Affects:** Phase 6 step 2. Resolves Open #2.
+
+### Shipping: CAD 12 flat, free over CAD 100, tracked Expedited Parcel  (2026-09-19, owner)
+**Decision:** One flat rate of **CAD 12.00** within Canada, **free when subtotal ≥ CAD 100**.
+Method: Canada Post **Expedited Parcel** via the free Solutions for Small Business account —
+tracked, with CAD 100 loss coverage. The `shipped` email carries the tracking link.
+**Why:** Owner wants both sides to see the parcel in transit; Oversize Lettermail (CAD 2.61–4.29,
+untracked, no claim on loss) was rejected for that reason. Real postage is ~CAD 10–13, so the
+flat rate is roughly break-even; free-shipping orders absorb ~CAD 12 against a ≥ 100 basket.
+Rates are `settings.shipping_flat_cents` / `settings.free_shipping_threshold_cents` — adjust
+without code.
+**Affects:** Phase 6 steps 2, 6 (carrier select defaults to Canada Post), 9. Resolves Open #3.
+
+### Payment processor stays Stripe (Square considered)                  (2026-09-19, owner)
+**Decision:** Stripe Checkout as locked; the family's existing Square account stays booth-only.
+**Why:** Canadian online fees are near-identical (Square 2.8% + 0.30 vs Stripe 2.9% + 0.30 CAD).
+Square's Node SDK is not Workers-safe and its Payment Link / `payment.updated` model would mean
+rewriting Phase 6 steps 1–3 and 6 for cents per month. Booth and online can be reconciled by
+CSV export if ever needed.
+**Affects:** Phase 6 unchanged.
+
+### Photo backdrop: matte ivory/off-white, not the gray tray             (2026-09-20, owner)
+**Decision:** Product photos are shot on a matte ivory/off-white backdrop. Shooting guide:
+phone rear camera in 1:1 mode at 1x/2x (no ultrawide, no Portrait mode, no filters); top-down
+flat lay, item centred with ~15% margin (storefront crops to a square); daylight by a window,
+flash off, white foam-board bounce; one clean **main** per item (feeds embedding, OG image,
+thumbs) plus 1–3 extras (angle, clasp/stone detail, scale on hand/neck); shoot mains in a batch
+(New Design makes one draft per file), test 3–5 items on `/en` before shooting the rest.
+**Why:** Storefront cards are ivory (PR #8) and crop `object-cover` to a square, so an ivory
+backdrop blends into the card while a gray square reads as a cutout. Booth photo-matching is
+deferred, so the gray-tray contrast argument no longer applies. Consistency matters more than
+the colour for "similar styles" embeddings.
+**Affects:** Phase 4 step 3 reminder copy (`new-design-client.tsx`); Phase 3 notes; overview
+§1 table. Deferred `07-booth-logging.md` inherits this backdrop if revived.
+
+### Phase 6 plan drift                                                  (2026-09-20, agent)
+**Decision:**
+- Webhook fulfils an order only when `session.payment_status === "paid"` (covers delayed
+  payment methods: `checkout.session.completed` may arrive unpaid; `async_payment_succeeded`
+  completes it later). `async_payment_failed` is log-only. Unexpected DB/RPC errors return 500
+  so Stripe retries; the phase file's "always 200" applies to the named business cases
+  (insufficient stock, email/refund failures).
+- Stripe SDK v22: the shipping address lives at `session.collected_information.shipping_details`.
+  Item price snapshots come from the session's expanded `line_items` (what was actually paid),
+  not from the design's current price; name/label snapshots from a fresh DB lookup.
+- Insufficient-stock auto-refund: `orders.status` becomes `refunded` only when the Stripe refund
+  call succeeded; on failure the order stays `awaiting_*` with the lines `fulfilled = false`, no
+  customer email, and the admin refunds manually (which sends the notice).
+- `checkout_drafts` was not built; carts whose metadata JSON exceeds 500 chars get 400
+  `too_many_lines` (≈ 8+ distinct lines). Revisit only if it ever triggers.
+- `scripts/stripe-check.ts` reads `balance.retrieve()` to confirm test mode (the Account object
+  has no `livemode`).
+- Checkout copy (pickup message, shipping option labels) is resolved in the route via
+  `getTranslations({ locale, namespace: 'checkout' })` and passed into the pure session builder.
+  Under Vitest `next-intl/server` is mocked with a translator that reads the real
+  `messages/*.json` (the `react-server` export condition cannot be set globally without
+  breaking react-email rendering); the real wiring is covered by e2e.
+- `cart.checkoutError` copy replaced the Phase 5 stub wording.
+- Pickup reminder cron: second Cloudflare cron `0 14 * * *` (09:00 America/New_York in EDT,
+  10:00 in EST — accepted; adjust the hour in `wrangler.jsonc` if it matters).
+  `pickup_reminder_candidates(p_today date default null)` does the "next market date is
+  tomorrow" selection in SQL.
+- Step 4 e2e seeds orders directly with the service client (webhook itself is covered by the
+  signed-event integration tests). Step 7 e2e intercepts `/api/checkout` and
+  `checkout.stripe.com` with Playwright routes so CI never needs a Stripe key.
+- Admin refund path: `STRIPE_FAKE_REFUNDS=1` (dev/e2e only, gated on `NODE_ENV !== 'production'`)
+  skips the Stripe call so the refund e2e runs without a key. Carrier tracking URLs for Canada
+  Post, UPS, Purolator, FedEx; "other" stores the number only.
+**Affects:** Phase 6 file (steps 2, 3, 4, 7, 8 wording); Phase 7 (`begin_checkout` event hooks
+into `handleCheckout`); Phase 9 (set `STRIPE_WEBHOOK_SECRET`, `RESEND_API_KEY`, `EMAIL_FROM`
+as Worker secrets; register the webhook endpoint in the Stripe dashboard).
+
 ## Open — ask the owner before the referenced step
 
 1. ~~Exact domain to buy~~ **Resolved:** `awendajewelry.com` already owned (see Locked). Still
    needed from the owner before Phase 9 step 1: (a) who has login to the Etsy account that
    holds the Pattern shop, (b) the domain's expiry date and whether auto-renew is on at
    Hover/Tucows, (c) keep registration at Hover or transfer to Cloudflare Registrar.
-2. **Stripe Tax on or off (GST/HST/PST), and whether the business is GST-registered** (Phase 6).
-   Stripe Tax adds 0.5%/txn and only calculates — it does not file. Under CAD 30k/yr a
-   "small supplier" need not register or collect. Owner/parents confirm with their accountant;
-   plan defaults to **off** with a `settings.stripe_tax_enabled` flag.
-3. **Flat shipping rate and free-shipping threshold, in CAD** (Phase 6). Proposed default:
-   CAD 6.00 flat (lettermail-size padded mailer), free over CAD 75. Canada-only — confirm.
+2. ~~Stripe Tax on or off~~ **Resolved 2026-09-19** — off (see Locked).
+3. ~~Flat shipping rate and free-shipping threshold~~ **Resolved 2026-09-19** — CAD 12 / free over 100, tracked (see Locked).
 4. **Return / exchange policy text** (Phase 9). Needs owner-written EN text; agent translates to FR for review.
 5. ~~French product names~~ **Resolved 2026-09-16** — optional FR, EN fallback (see Locked).
 6. ~~Category list final?~~ **Resolved 2026-09-16** — see Locked "Categories and default variant presets".
-7. **Confirm inventory decrement timing** (Locked-proposed above). Ask before Phase 6.
+7. ~~Confirm inventory decrement timing~~ **Resolved 2026-09-19** — confirmed by owner (see Locked).
 8. **Email sender**: transactional email needs a verified domain in Resend, which needs the
    domain from #1. Until then use Resend's onboarding sender for tests only. Ask at Phase 9.
 9. ~~Admin login emails~~ **Resolved 2026-09-16** — owner only (see Locked).
@@ -387,3 +461,7 @@ row on the hosted DB (migration 0007 fixed it). Same rule applies to Phase 6/7 c
     (Analytics & Logs → Web Analytics → Add site, hostname `awendajewelry.com` + the workers.dev
     URL) and provides the token for `NEXT_PUBLIC_CF_BEACON_TOKEN`. Needed at Phase 7 step 1.
 19. ~~Product spec fields~~ **Resolved 2026-09-16** — material EN/FR + dimensions, optional (see Locked).
+20. **Restock on refund after delivery** — `refundOrder` always restores stock via a `refund`
+    movement, including for `shipped` / `picked_up` orders (right for a return, wrong for
+    lost/damaged goods). Options: always restock (current), never after delivery, or a
+    "restock" checkbox on the refund form. Ask before Phase 9 launch.

@@ -59,6 +59,56 @@ test("a variant set to 0 stock marks its cart line unavailable and disables chec
   }
 });
 
+test("checkout redirects to Stripe with the cart's lines, fulfillment, and locale", async ({ page }) => {
+  // Owner has no Stripe test key yet (06-checkout-orders.md "resolved STOP
+  // answers") — intercept /api/checkout and stub the Stripe URL it returns
+  // rather than driving Stripe's hosted page.
+  let capturedBody: unknown;
+  await page.route("**/api/checkout", async (route) => {
+    capturedBody = route.request().postDataJSON();
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ url: "https://checkout.stripe.com/c/pay/cs_test_fake" }),
+    });
+  });
+  await page.route("https://checkout.stripe.com/**", (route) =>
+    route.fulfill({ status: 200, contentType: "text/html", body: "<html><body>Stripe stub</body></html>" }),
+  );
+
+  await page.goto("/en/p/hoop-earring-os");
+  await page.getByTestId("add-to-cart").click();
+  await page.goto("/en/cart");
+  await expect(page.getByTestId("cart-total")).toBeVisible();
+
+  await page.getByTestId("checkout").click();
+  await page.waitForURL("https://checkout.stripe.com/**");
+  expect(page.url()).toContain("checkout.stripe.com");
+
+  expect(capturedBody).toMatchObject({ fulfillment: "pickup", locale: "en" });
+  expect((capturedBody as { lines: unknown[] }).lines).toHaveLength(1);
+});
+
+test("a 400 unavailable response from /api/checkout marks that line and the button stops loading", async ({ page }) => {
+  const variantId = "b0000000-0000-4000-8000-000000000018"; // hoop-earring-os, One size
+  await page.route("**/api/checkout", (route) =>
+    route.fulfill({
+      status: 400,
+      contentType: "application/json",
+      body: JSON.stringify({ error: "unavailable", lines: [{ variantId, available: 0 }] }),
+    }),
+  );
+
+  await page.goto("/en/p/hoop-earring-os");
+  await page.getByTestId("add-to-cart").click();
+  await page.goto("/en/cart");
+  await expect(page.getByTestId("cart-total")).toBeVisible();
+
+  await page.getByTestId("checkout").click();
+  await expect(page.getByText("No longer available — remove")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Checkout" })).toBeVisible();
+});
+
 test("switching fulfillment to Ship changes the total by the flat shipping rate", async ({ page }) => {
   const supabase = createServiceClient();
   const { error: enableError } = await supabase.from("settings").update({ shipping_enabled: true }).eq("id", 1);
@@ -71,9 +121,9 @@ test("switching fulfillment to Ship changes the total by the flat shipping rate"
 
     await expect(page.getByTestId("cart-total")).toHaveText("$29.00");
     await page.getByLabel(/Ship/).click();
-    // shipping_flat_cents = 500 in the seed; $29.00 subtotal is below the
-    // $50.00 free-shipping threshold, so the full flat rate applies.
-    await expect(page.getByTestId("cart-total")).toHaveText("$34.00");
+    // shipping_flat_cents = 1200 in the seed; $29.00 subtotal is below the
+    // $100.00 free-shipping threshold, so the full flat rate applies.
+    await expect(page.getByTestId("cart-total")).toHaveText("$41.00");
   } finally {
     const { error: restoreError } = await supabase.from("settings").update({ shipping_enabled: false }).eq("id", 1);
     if (restoreError) throw restoreError;

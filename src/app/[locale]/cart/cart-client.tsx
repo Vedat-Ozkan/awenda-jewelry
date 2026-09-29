@@ -19,7 +19,9 @@ export function CartClient({ locale }: { locale: Locale }) {
   const cart = useCart();
   const [fulfillment, setFulfillment] = useState<Fulfillment>("pickup");
   const [quote, setQuote] = useState<QuoteResponse | null>(null);
-  const [checkoutError, setCheckoutError] = useState(false);
+  const [checkoutError, setCheckoutError] = useState<"unavailable" | "shipping_disabled" | "generic" | null>(null);
+  const [checkoutUnavailableIds, setCheckoutUnavailableIds] = useState<Set<string>>(new Set());
+  const [checkingOut, setCheckingOut] = useState(false);
   const [quoteError, setQuoteError] = useState(false);
 
   useEffect(() => {
@@ -40,6 +42,10 @@ export function CartClient({ locale }: { locale: Locale }) {
         if (!cancelled) {
           setQuoteError(false);
           setQuote(data);
+          // A fresh quote reflects current server truth — drop any
+          // unavailable marker a previous failed checkout attempt left on
+          // lines that no longer exist in this quote (or since resolved).
+          setCheckoutUnavailableIds(new Set());
         }
       })
       .catch(() => {
@@ -51,9 +57,38 @@ export function CartClient({ locale }: { locale: Locale }) {
   }, [cart.lines, fulfillment, locale]);
 
   async function handleCheckout() {
-    setCheckoutError(false);
-    const res = await fetch("/api/checkout", { method: "POST" });
-    if (!res.ok) setCheckoutError(true);
+    setCheckoutError(null);
+    setCheckingOut(true);
+    try {
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          lines: cart.lines.map(({ variantId, qty }) => ({ variantId, qty })),
+          fulfillment,
+          locale,
+        }),
+      });
+      if (res.ok) {
+        const data = (await res.json()) as { url: string };
+        window.location.assign(data.url);
+        return; // keep the button disabled through the redirect
+      }
+      const body = (await res.json().catch(() => null)) as { error?: string; lines?: { variantId: string }[] } | null;
+      if (body?.error === "unavailable" && Array.isArray(body.lines)) {
+        setCheckoutUnavailableIds(new Set(body.lines.map((line) => line.variantId)));
+        setCheckoutError("unavailable");
+      } else if (body?.error === "shipping_disabled") {
+        setFulfillment("pickup");
+        setCheckoutError("shipping_disabled");
+      } else {
+        setCheckoutError("generic");
+      }
+    } catch {
+      setCheckoutError("generic");
+    } finally {
+      setCheckingOut(false);
+    }
   }
 
   if (cart.lines.length === 0) {
@@ -75,7 +110,7 @@ export function CartClient({ locale }: { locale: Locale }) {
     );
   }
 
-  const hasUnavailable = quote.lines.some((line) => !line.available);
+  const hasUnavailable = quote.lines.some((line) => !line.available || checkoutUnavailableIds.has(line.variantId));
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-8 md:px-8">
@@ -84,21 +119,22 @@ export function CartClient({ locale }: { locale: Locale }) {
       <ul className="divide-y divide-ink/10">
         {quote.lines.map((line) => {
           const src = resolvePhotoUrl(line.thumb);
+          const unavailable = !line.available || checkoutUnavailableIds.has(line.variantId);
           return (
             <li key={line.variantId} className="flex items-center gap-4 py-4">
               <div className="h-16 w-16 shrink-0 overflow-hidden rounded bg-ivory">
                 {src && <Image src={src} alt="" width={64} height={64} className="h-full w-full object-cover" />}
               </div>
               <div className="flex-1">
-                {line.available ? (
+                {unavailable ? (
+                  <p className="text-ink/50">{line.name || t("unavailableItem")}</p>
+                ) : (
                   <Link href={`/p/${line.designSlug}`} locale={locale} className="text-ink hover:underline">
                     {line.name}
                   </Link>
-                ) : (
-                  <p className="text-ink/50">{line.name || t("unavailableItem")}</p>
                 )}
                 {line.variantLabel && <p className="text-sm text-ink/60">{line.variantLabel}</p>}
-                {!line.available && <p className="text-sm text-red-700">{t("unavailable")}</p>}
+                {unavailable && <p className="text-sm text-red-700">{t("unavailable")}</p>}
               </div>
               <p className="w-20 text-right text-sm text-ink">{formatPrice(line.unitPriceCents, locale)}</p>
               <input
@@ -107,7 +143,7 @@ export function CartClient({ locale }: { locale: Locale }) {
                 min={1}
                 max={Math.max(line.maxQty, 1)}
                 value={line.qty}
-                disabled={!line.available}
+                disabled={unavailable}
                 onChange={(e) => {
                   const value = Number(e.target.value) || 1;
                   cart.setQty(line.variantId, value, line.maxQty);
@@ -167,16 +203,17 @@ export function CartClient({ locale }: { locale: Locale }) {
       </div>
 
       {hasUnavailable && <p className="mt-2 text-sm text-red-700">{t("blockedByUnavailable")}</p>}
-      {checkoutError && <p className="mt-2 text-sm text-red-700">{t("checkoutError")}</p>}
+      {checkoutError === "shipping_disabled" && <p className="mt-2 text-sm text-red-700">{t("shippingDisabled")}</p>}
+      {checkoutError === "generic" && <p className="mt-2 text-sm text-red-700">{t("checkoutError")}</p>}
 
       <Button
         type="button"
         data-testid="checkout"
-        disabled={hasUnavailable || quote.lines.length === 0}
+        disabled={hasUnavailable || quote.lines.length === 0 || checkingOut}
         onClick={handleCheckout}
         className="mt-4"
       >
-        {t("checkout")}
+        {checkingOut ? t("checkingOut") : t("checkout")}
       </Button>
     </main>
   );

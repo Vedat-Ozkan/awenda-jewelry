@@ -17,16 +17,21 @@
     "db:reset": "supabase db reset",
     "db:types": "supabase gen types typescript --local > src/lib/supabase/database.types.ts",
     "seed:admins": "tsx --env-file=.env.local scripts/seed-admins.ts",
-    "embed:check": "tsx --env-file=.env.local scripts/embed-check.ts"
+    "embed:check": "tsx --env-file=.env.local scripts/embed-check.ts",
+    "stripe:check": "tsx --env-file=.env.local scripts/stripe-check.ts"
   },
   "dependencies": {
+    "@react-email/components": "^1.0.12",
+    "@react-email/render": "^2.1.0",
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.116.0",
     "next": "16.3.5",
     "next-intl": "^4.14.5",
     "react": "19.2.8",
     "react-dom": "19.2.8",
+    "resend": "^6.28.1",
     "server-only": "^0.0.1",
+    "stripe": "^22.6.2",
     "zod": "^4.6.5"
   },
   "devDependencies": {

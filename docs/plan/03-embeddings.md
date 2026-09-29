@@ -62,7 +62,7 @@ export const DIMS = 1024;
 - Includes a dev-only email/password sign-in (no login UI until Phase 4): create the user in Supabase Studio (`localhost:54323`) with an `ADMIN_EMAILS` address and run `pnpm seed:admins`.
 - Upload a photo as "catalog", upload another as "booth", show top-5 with distances.
 - **Verify (manual, owner or agent with a real key):** photograph one real item twice on the
-  gray tray; rank 1 is correct. Record the distance in `DECISIONS.md` as a baseline.
+  ivory backdrop; rank 1 is correct. Record the distance in `DECISIONS.md` as a baseline.
 
 ### 6. Storage URL helper
 - `publicPhotoUrl(path)` → Supabase public URL; used by storefront and admin.
@@ -71,7 +71,7 @@ export const DIMS = 1024;
 ---
 
 ## Notes for agents
-- Photos must be taken on the matte light-gray tray; the UI copy in Phase 4/7 reminds the user.
+- Photos must be taken on the matte ivory backdrop; the UI copy in Phase 4/7 reminds the user.
 - Never send the `thumb` to Voyage; always `main`.
 - Keep Voyage calls server-side only (`VOYAGE_API_KEY` is secret).
 - The fake provider must make e2e tests fully offline.

@@ -33,8 +33,8 @@ auto-refund path; admin can mark shipped/picked up/refund.
 - Build session:
   - `mode: 'payment'`, `line_items` with `price_data` (`currency: 'cad'`, `unit_amount`, `product_data.name` =
     localized name + variant label, `images: [main url]`), `quantity`.
-  - `metadata`: `fulfillment`, `locale`, and a compact JSON of `[{variantId, qty}]` (≤ 500 chars; if
-    larger, store a `checkout_drafts` row and put its id in metadata — implement only if needed).
+  - `metadata`: `fulfillment`, `locale`, and a compact JSON of `[{variantId, qty}]` (≤ 500 chars;
+    larger carts get 400 `too_many_lines` — no `checkout_drafts` table was needed).
   - `locale` → Stripe's `fr` / `en`.
   - **pickup**: no address collection; `custom_text.submit` = pickup message with next market date.
   - **ship**: `shipping_address_collection.allowed_countries: ['CA']`, one `shipping_options`
@@ -43,29 +43,37 @@ auto-refund path; admin can mark shipped/picked up/refund.
   - `automatic_tax.enabled` = `settings.stripe_tax_enabled`.
   - `phone_number_collection.enabled: true` (useful for pickups).
   - `success_url` `/[locale]/order/{CHECKOUT_SESSION_ID}`; `cancel_url` back to cart.
-  - `expires_at` = now + 30 min (Stripe minimum).
+  - `expires_at` = now + 30 min (Stripe minimum) + 60 s clock-skew slack.
+  - Pickup/shipping copy comes from `messages/*.json` `checkout.*` via `getTranslations` in the
+    route; `buildCheckoutSessionParams` stays pure and receives the resolved strings.
 - Return `{ url }`; client redirects.
 - **Verify:** unit tests for the session-builder (pure function producing the params) covering
   pickup vs ship, free-shipping threshold, tax flag, locale; integration test hits Stripe test API and asserts the session's line items.
 
 ### 3. Webhook (`POST /api/stripe/webhook`)
-- Verify signature; handle `checkout.session.completed` (and `checkout.session.async_payment_succeeded` for delayed methods; `…_failed` → no-op log).
+- Verify signature; handle `checkout.session.completed` and `checkout.session.async_payment_succeeded`
+  — fulfil only when `payment_status === 'paid'` (delayed methods send `completed` unpaid);
+  `…_failed` → no-op log.
 - Idempotent: `orders.stripe_checkout_session_id` unique; on conflict return 200.
 - In one Postgres transaction (via a `create_order_from_checkout(jsonb)` SQL function to keep it atomic):
   1. Insert `orders` (status `awaiting_pickup` or `awaiting_shipment`), `order_items` with snapshots.
   2. For each item call `adjust_inventory(variant, -qty, 'online_order', order.id)`.
   3. If any raises `insufficient_stock`: mark that `order_items.fulfilled = false`, continue others.
 - After commit: if any item unfulfilled → create a **partial refund** via Stripe for those lines
-  (and shipping if nothing fulfilled), set status `refunded` when nothing fulfilled, and send the
-  "item sold out — refunded" email; else send confirmation email.
-- Always respond 200 within 10 s; email/refund failures are logged and retried by an admin "resend" button, never block the webhook.
+  (and shipping if nothing fulfilled), set status `refunded` when nothing fulfilled **and the
+  refund call succeeded** (otherwise leave `awaiting_*`, log, no email — admin refunds manually),
+  and send the "item sold out — refunded" email; else send confirmation email.
+- Respond 200 within 10 s for every business outcome (insufficient stock, email/refund failures
+  are logged and retried by an admin "resend" button); an unexpected DB/RPC error returns 500 so
+  Stripe retries.
 - **Verify:** integration tests posting events signed with `stripe.webhooks.generateTestHeaderString`:
   normal order; duplicate delivery (one order); one line out of stock (partial refund called — Stripe client mocked at the boundary); concurrent webhooks for the last unit (exactly one fulfilled).
 
 ### 4. Order confirmation page (`/[locale]/order/[sessionId]`)
 - Reads the order by session id (public but unguessable id; show no address, only last-4 of nothing — keep it to items, totals, fulfillment instructions). Polls briefly if the webhook has not landed yet ("Confirming your payment…").
 - Pickup: shows market name, address, next date, `pickup_instructions`. Ship: "You'll get a tracking email."
-- **Verify:** e2e after simulated webhook shows items and instructions in FR and EN.
+- **Verify:** e2e seeds an order directly (webhook covered by integration tests) and checks items
+  and instructions in FR and EN, plus the "Confirming…" state for an unknown session.
 
 ### 5. Emails (Resend, `src/lib/email/`)
 - React Email templates, EN/FR: `order-confirmation`, `pickup-reminder` (sent the day before the market — cron, step 8), `shipped` (with tracking), `refund-notice`.
@@ -75,16 +83,20 @@ auto-refund path; admin can mark shipped/picked up/refund.
 ### 6. Orders admin (`/admin/orders`)
 - List with status filters; badges for pickup vs ship; search by email/name. A **Pickups** filter/tab with a one-tap **Picked up** action (this replaces the deferred booth tab; the owner is the one at the market with the order).
 - Detail: items, customer, address, Stripe links (`https://dashboard.stripe.com/test/payments/<pi>`), movement ledger entries.
-- Actions: **Mark shipped** (tracking number + carrier select → builds `tracking_url`; sends `shipped` email), **Mark picked up**, **Refund** (full or per line; calls Stripe, `adjust_inventory(+qty,'refund')` for refunded lines, sends `refund-notice`), **Resend email**.
+- Actions: **Mark shipped** (tracking number + carrier select → builds `tracking_url`; sends `shipped` email), **Mark picked up**, **Refund** (full or per line; calls Stripe, then `refund_order_items()` SQL restores stock via `adjust_inventory(+qty,'refund')` and flips `fulfilled`; sends `refund-notice`), **Resend email**. `STRIPE_FAKE_REFUNDS=1` (dev only) skips Stripe for e2e.
 - **Verify:** e2e: mark shipped sends email with tracking; refund restores qty and writes a `refund` movement.
 
 ### 7. Cart → Checkout wiring
 - Replace the Phase 5 stub; handle validation errors by marking lines.
-- **Verify:** e2e clicks Checkout and asserts a redirect to `checkout.stripe.com` (do not drive Stripe's hosted page in CI; a separate manual test script `docs/manual-tests.md` covers the 4242 card path end-to-end in test mode).
+- **Verify:** e2e intercepts `/api/checkout` and `checkout.stripe.com` with Playwright routes and
+  asserts the redirect + request body (CI never needs a Stripe key); `docs/manual-tests.md` covers
+  the 4242 card path end-to-end in test mode.
 
 ### 8. Pickup reminder cron
-- Cloudflare cron daily 09:00 local: for `awaiting_pickup` orders, if tomorrow is the next market date and no reminder sent, send `pickup-reminder`; store `reminder_sent_at`. Reuses the keepalive scheduled handler pattern with a second cron expression.
-- **Verify:** integration test of the selection query; manual trigger route in dev.
+- Cloudflare cron `0 14 * * *` (09:00 America/New_York in EDT): `GET /api/cron/pickup-reminders`
+  (secret header, same as keepalive) sends `pickup-reminder` for `awaiting_pickup` orders whose
+  next market date is tomorrow (`pickup_reminder_candidates()` SQL) and stores `reminder_sent_at`.
+- **Verify:** integration test of the selection; manual trigger = curl the route with the secret.
 
 ### 9. Settings integration
 - `shipping_enabled` off → Ship option absent from cart and rejected by `/api/checkout`.

@@ -77,7 +77,9 @@
     "total": "Total",
     "blockedByUnavailable": "Remove unavailable items before checking out.",
     "checkout": "Checkout",
-    "checkoutError": "Checkout isn't available yet — please check back soon.",
+    "checkingOut": "Checking out…",
+    "checkoutError": "Something went wrong at checkout — please try again.",
+    "shippingDisabled": "Shipping was turned off — switched you to pickup.",
     "fulfillment": {
       "label": "Fulfillment",
       "pickup": "Pick up at market (free)",
@@ -88,6 +90,31 @@
       "unlocked": "Free shipping unlocked"
     },
     "loadError": "We couldn't load your cart right now. Please try again in a moment."
+  },
+  "checkout": {
+    "pickupMessage": "Your order will be ready for pickup at the market on {date}.",
+    "pickupMessageNoDate": "We'll email you once your order is ready for pickup.",
+    "shippingFlat": "Shipping",
+    "shippingFree": "Free shipping"
+  },
+  "order": {
+    "title": "Order confirmed",
+    "confirming": "Confirming your payment…",
+    "confirmingTimeout": "This is taking longer than expected — check your email for a confirmation.",
+    "subtotal": "Subtotal",
+    "shipping": "Shipping",
+    "tax": "Tax",
+    "total": "Total",
+    "soldOutRefunded": "Sold out — refunded",
+    "customerEmail": "A receipt was sent to {email}.",
+    "pickup": {
+      "title": "Pickup at the market",
+      "nextDate": "Ready for pickup: {date}",
+      "fallback": "We'll email you once your order is ready for pickup."
+    },
+    "ship": {
+      "trackingEmail": "You'll get a tracking email once your order ships."
+    }
   },
   "pages": {
     "about": {
