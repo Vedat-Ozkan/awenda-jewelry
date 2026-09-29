@@ -15,6 +15,8 @@ The main session orchestrates and is the only thing that talks to the owner. Cod
 | Pre-PR review of a phase branch | `reviewer` agent | Opus |
 | Record a decision | `/decide …` | — |
 
+Testing: **no unit tests** (owner, 2026-09-29). New or changed behaviour is covered by Playwright e2e — write the spec if none exists. Vitest remains only for integration tests against local Supabase (`tests/integration/`, RLS/DB rules).
+
 Rules of thumb: switch the main session to Fable (`/model fable`) only at phase kick-off or when several STOP questions need judgment, then back to Opus. Never spawn the architect for something the phase file already answers. Never let raw test logs into the main context — that is the runner's job. Secrets files (`.env*`, `.dev.vars`) are blocked for all agents by hook; only `.env.example` is editable.
 
 Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-specific instructions as needed.

@@ -495,6 +495,38 @@ project), not a Worker secret.
 **Affects:** Phase 1 (cron), Phase 9 (domain cutover lifts noindex; purge alpha rows from
 `analytics_events` before the analytics week).
 
+### Visual redesign: "Silver Mist" for storefront and admin             (2026-09-29, owner)
+**Decision:** Replace the ivory/gold look with the "R3·3 Silver Mist" direction chosen on the
+design canvas (https://claude.ai/artifact/V19pjei1NY4XRH1k26AWaa, boards `R3-3-Desktop` and
+`R3-3-Mobile`), for **both** the storefront and `/admin`.
+- Palette: page `#F7F8F8`, surface white `#FFFFFF`, mist `#E9E8EE` (tiles, chips, announcement
+  bar), photo well `#EEEFF1`, ink `#1E1F24`, muted text `#585A63`, accent `#5C5A6E` (Bag button,
+  eyebrow labels, icons). No gold.
+- Type: Newsreader (400/500) for whole headings and the wordmark only; Figtree (400/500/600) for
+  everything else. **Never switch typeface mid-sentence**, no italics for emphasis.
+- Shape: floating white pill navbar (desktop: logo · links · EN/FR · search · Bag pill; phone:
+  logo · menu · Bag pill); pill buttons (≥44 px targets); 20–28 px card radii; white product
+  cards with a steel/silver material label.
+- Layout: hero photo with a floating white card; category tiles (rounded squares); best sellers;
+  4 trust tiles; white rounded newsletter footer. Phone-first: every screen must work at 390 px,
+  laptop 1280 and large desktop (content capped and centred).
+- Materials: mostly stainless steel, some sterling silver — nav and filters say so. No durability
+  claims (waterproof, tarnish-free) until the owner confirms them.
+**Why:** The previous visual pass read as bland; the owner iterated three rounds on the canvas and
+chose R3·3. The admin PWA is used daily on a phone and should share the look.
+**Affects:** Phase 5 storefront components, admin shell and pages; supersedes the ivory/gold
+palette and Cormorant/Geist fonts from the "Storefront: warm, gold-accented visual pass" work.
+
+### Testing: e2e only, no unit tests                                    (2026-09-29, owner)
+**Decision:** No unit tests. Behaviour is covered by Playwright e2e (write the spec when missing);
+Vitest stays only for integration tests against local Supabase in `tests/integration/` (RLS,
+views, DB functions, webhook/inventory rules). The 20 unit-test files under `src/` and the email
+snapshots were deleted; `src/lib/supabase/local.test.ts` moved to
+`tests/integration/local-supabase.test.ts`. Phase files that ask for unit tests mean e2e now.
+**Why:** Owner's call — e2e tests exercise what customers and the admin actually do; unit tests
+of mocked internals were slowing changes down.
+**Affects:** CLAUDE.md, 00-overview.md (Testing row, rule 8), every phase file's verify steps.
+
 ## Open — ask the owner before the referenced step
 
 1. ~~Exact domain to buy~~ **Resolved:** `awendajewelry.com` already owned (see Locked). Still
