@@ -5,9 +5,11 @@ import path from "node:path";
 // sendEmail() (./send.ts) writes here instead of calling Resend whenever
 // RESEND_API_KEY is unset. `to`/`subject` are stashed as HTML comments so a
 // captured file doubles as a readable preview (open it in a browser) and
-// round-trips through readCapturedEmails() for tests. EMAIL_CAPTURE_DIR lets a
-// test file use its own directory so parallel files don't clear each other's.
-const captureDir = () => process.env.EMAIL_CAPTURE_DIR ?? path.join(process.cwd(), "tmp", "emails");
+// round-trips through readCapturedEmails() for tests. EMAIL_CAPTURE_SUBDIR lets
+// a test file use its own tmp/ subfolder so parallel files don't clear each
+// other's. next.config.ts excludes tmp/ from output file tracing.
+const captureDir = () =>
+  path.join(process.cwd(), "tmp", process.env.EMAIL_CAPTURE_SUBDIR ?? "emails");
 
 export interface CapturedEmail {
   file: string;

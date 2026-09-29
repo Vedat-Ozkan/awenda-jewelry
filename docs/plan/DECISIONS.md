@@ -484,7 +484,10 @@ every `main` merge auto-deploys). Stripe stays in **test mode** for the alpha �
 cutover lifts it. Keepalive: the Cloudflare cron moves from every 3 days to **daily**
 (`0 6 * * *`), and `.github/workflows/keepalive.yml` pings Supabase REST (`public_settings`,
 anon key) and `/api/keepalive` (repo secret `CRON_SECRET`) daily at 18:00 UTC — a failed run
-emails the owner.
+emails the owner. `pnpm run deploy` runs `scripts/deploy.sh`, which exports the `NEXT_PUBLIC_*`
+values from `wrangler.jsonc` before building — they are inlined at build time, and a local build
+otherwise takes them from `.env.local` (the first alpha deploy shipped `127.0.0.1` photo URLs and
+a `localhost` sitemap); `next.config.ts` excludes `tmp/` (captured dev emails) from file tracing.
 **Why:** The hosted project idle-paused despite the 3-day cron, and nothing reported it. Daily +
 an independent pinger that fails loudly means a broken ping is noticed days before the 7-day
 limit. Admin sign-in is gated by the `admin_emails` table (`pnpm seed:admins` against the hosted

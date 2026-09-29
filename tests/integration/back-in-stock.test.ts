@@ -13,7 +13,7 @@ vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", API_URL);
 vi.stubEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY", ANON_KEY);
 vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "test-service-role-key");
 vi.stubEnv("RESEND_API_KEY", "");
-vi.stubEnv("EMAIL_CAPTURE_DIR", "tmp/emails-back-in-stock");
+vi.stubEnv("EMAIL_CAPTURE_SUBDIR", "emails-back-in-stock");
 
 vi.mock("@/lib/supabase/admin", () => ({
   createAdminClient: () => createServiceClient(),

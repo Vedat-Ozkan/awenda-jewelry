@@ -18,6 +18,9 @@ const nextConfig: NextConfig = {
   // thumb/main, so serve them as-is and keep next/image only for lazy
   // loading and layout stability.
   images: { unoptimized: true },
+  // src/lib/email/capture.ts writes dev/test emails under tmp/; keep them out
+  // of the deployed server bundle.
+  outputFileTracingExcludes: { "*": ["tmp/**"] },
 };
 
 initOpenNextCloudflareForDev();
